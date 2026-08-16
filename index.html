@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b6b57">
 <title>الشفاء | منصة الرعاية الصحية</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الشفاء">
 <style>
 *{box-sizing:border-box}body{margin:0;background:#dfe9ec;color:#18352e;font-family:Tahoma,Arial,sans-serif}
 button,input,select{font:inherit}button{border:0;cursor:pointer}.app{max-width:520px;margin:auto;min-height:100vh;background:#eef4f6;box-shadow:0 0 30px #0002}
@@ -810,6 +816,15 @@ const pharmacyFeeInputEl=document.getElementById("pharmacyFeeInput");
 if(pharmacyFeeInputEl) pharmacyFeeInputEl.value=getMonthlyFee("pharmacy");
 const wholesaleFeeInputEl=document.getElementById("wholesaleFeeInput");
 if(wholesaleFeeInputEl) wholesaleFeeInputEl.value=getMonthlyFee("wholesale");
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
