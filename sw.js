@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alshifa-cache-v2';
+const CACHE_NAME = 'alshifa-cache-v3';
 const URLS_TO_CACHE = [
   './index.html',
   './manifest.json',
