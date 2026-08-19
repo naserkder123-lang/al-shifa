@@ -1,0 +1,2282 @@
+<!-- نسخة الشفاء2 - آخر تحديث: 19 أغسطس 2026 - نظام صلاحيات الملف الصحي (accessGrants) -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b6b57">
+<title>الشفاء | منصة الرعاية الصحية</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الشفاء">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#dfe9ec;color:#18352e;font-family:Tahoma,Arial,sans-serif}
+button,input,select{font:inherit}button{border:0;cursor:pointer}.app{max-width:520px;margin:auto;min-height:100vh;background:#eef4f6;box-shadow:0 0 30px #0002}
+header{background:#0b6b57;color:#fff;padding:18px 18px 22px;border-radius:0 0 24px 24px}.top{display:flex;align-items:center}.brand{font-size:27px;font-weight:800}.sub{font-size:12px;opacity:.85;margin-top:4px}.icon{background:#ffffff22;color:#fff;border-radius:12px;padding:9px}
+.headerBtns{display:flex;gap:8px;width:112px;justify-content:center}
+.tagline{flex-shrink:0;width:112px;font-size:9.5px;opacity:.85;line-height:1.3;text-align:center}
+main{padding:16px 16px 90px}.hero{background:linear-gradient(135deg,#0b6b57,#159174);color:white;padding:18px;border-radius:20px;margin-bottom:16px;text-align:center}.hero h2{margin:0 0 7px;font-size:21px}.hero p{margin:0;font-size:13px;line-height:1.7}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.grid3 .card{padding:10px 6px;min-height:100px;text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important}
+.grid3 .emoji{font-size:26px;text-align:center!important;width:100%}
+.grid3 .title{font-size:14px;margin:7px 0 3px!important;text-align:center!important;line-height:1.3;width:100%}
+.grid3 .small{font-size:11px;line-height:1.4;text-align:center!important;width:100%}
+.grid-center2 .card{text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-height:105px}
+.grid-center2 .emoji{text-align:center!important;width:100%}
+.grid-center2 .title{font-size:15px;text-align:center!important;width:100%}
+.grid-center2 .small{text-align:center!important;width:100%}
+@media(max-width:360px){.grid3{grid-template-columns:1fr 1fr 1fr;gap:6px}.grid3 .card{padding:8px 4px;min-height:94px}.grid3 .title{font-size:13px}.grid3 .small{font-size:10px}}.card{background:#f6fafb;border:1px solid #dbe6e9;border-radius:17px;padding:15px;box-shadow:0 5px 15px #0b6b5710}.action{min-height:105px;text-align:right}.emoji{font-size:29px}.title{font-weight:800;margin:8px 0 4px}.small{font-size:12px;color:#71837e;line-height:1.6}
+.section{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 10px}.section h3{margin:0;font-size:17px}.link{color:#0b6b57;background:none;font-size:12px}
+.list{display:flex;flex-direction:column;gap:10px}.row{background:#f6fafb;border:1px solid #dbe6e9;border-radius:15px;padding:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:11px;padding:5px 8px;border-radius:20px;background:#e8f6f1;color:#087257;white-space:nowrap}.warning{background:#fff5df;color:#a66b00}.danger{background:#ffe9e7;color:#b43b32}.blue{background:#eaf2ff;color:#3568aa}
+.btn{padding:10px 14px;border-radius:11px;background:#0b6b57;color:#fff;font-weight:700}.btn.alt{background:#e8f3f0;color:#0b6b57}.btn.danger{background:#c94b43;color:#fff}.full{width:100%;margin-top:10px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:#fff;border-top:1px solid #dce9e5;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:10}.nav button{background:none;color:#71837e;font-size:11px}.nav button.active{color:#0b6b57;font-weight:800}.nav b{display:block;font-size:19px;margin-bottom:3px}
+.view{display:none}.view.active{display:block}
+.form{background:#f6fafb;padding:16px;border-radius:17px;border:1px solid #dbe6e9}.field{margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field input,.field select{width:100%;padding:12px;border:1px solid #cddadd;border-radius:11px;outline:none;background:#eaf2f4}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;z-index:20}.modal.show{display:flex}.sheet{background:#eef4f6;width:min(520px,100%);margin:auto 0 0;border-radius:24px 24px 0 0;padding:20px;max-height:90vh;overflow:auto}.close{float:left;background:#e9f0ee;border-radius:10px;padding:5px 10px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#f6fafb;border:1px solid #dbe6e9;border-radius:15px;padding:14px}.stat strong{font-size:21px;display:block;margin-top:5px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:15px;overflow:hidden;font-size:11px}td,th{padding:10px;border-bottom:1px solid #edf2f0;text-align:right}th{background:#edf7f4}
+.notice{padding:11px 13px;background:#fff9e9;border:1px solid #f0dfad;border-radius:13px;font-size:12px;line-height:1.7}
+.role{display:flex;gap:7px;overflow:auto;padding-bottom:5px}.role button{white-space:nowrap;padding:9px 12px;border-radius:20px;background:#e7f0ed;color:#38645a}.role button.sel{background:#0b6b57;color:#fff}
+
+/* تحسينات الإصدار الجديد */
+.trial{display:inline-block;background:#fff4cf;color:#8a5b00;border:1px solid #f0d78b;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:800}
+.contact{display:flex;flex-wrap:wrap;margin-top:9px}
+.contact .btn{padding:7px 9px;font-size:11px}
+.mini-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mini-role{background:#fff;border:1px solid #dfece8;border-radius:12px;padding:10px;min-height:78px;box-shadow:0 3px 10px #0b6b5708}
+.mini-role b{font-size:12px;display:block}.mini-role .small{font-size:10px}
+.relationships{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.relationship{background:#f8fbfa;border:1px solid #e1ece8;border-radius:11px;padding:9px;font-size:11px}
+.relationship strong{display:block;margin-bottom:4px;color:#0b6b57}
+.city-row{display:flex;gap:7px}.city-row input{flex:1}
+.city-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.city-chip{background:#e9f5f1;color:#0b6b57;border-radius:18px;padding:5px 9px;font-size:11px;cursor:pointer}
+@media(max-width:360px){.mini-role-grid,.relationships{grid-template-columns:1fr}}
+
+/* هيكل الأدوار الجديد: مستطيلات صغيرة — الطبيب والمريض يمينًا فوق بعض */
+.structure-grid{display:grid;direction:rtl;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;grid-template-areas:"doctor admin" "patient pos" "lab wholesale";gap:8px;margin-top:12px}
+.structure-grid .mini-role{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;min-height:74px;text-align:right}
+.structure-grid .mini-role .ico{font-size:22px}
+.structure-grid .mini-role b{font-size:12px}
+.structure-grid .mini-role .small{font-size:10px}
+.role-doctor{grid-area:doctor}
+.role-admin{grid-area:admin;background:#eef2f6;border-color:#d7e0e8;cursor:pointer}
+.role-patient{grid-area:patient}
+.role-pos{grid-area:pos}
+.role-wholesale{grid-area:wholesale}
+.role-lab{grid-area:lab}
+.mini-trial{font-size:9px;color:#8a5b00;background:#fff4cf;border-radius:10px;padding:2px 6px;display:inline-block}
+
+/* تصفح المدن */
+.city-chips-scroll{display:flex;gap:7px;overflow:auto;padding-bottom:6px;margin-top:8px}
+.city-chip-btn{white-space:nowrap;padding:8px 13px;border-radius:20px;background:#e7f0ed;color:#38645a;font-size:12px}
+.city-chip-btn.sel{background:#0b6b57;color:#fff}
+.spec-chip{background:#191c1f;color:#fff;border:1px solid #2b2f33}
+.spec-chip.sel{background:#0b6b57;color:#fff;border-color:#0b6b57}
+
+
+/* ===== عناوين بارزة ثلاثية الأبعاد (مقاسات وألوان حسب الأهمية والدور) ===== */
+.tbar{display:inline-block;background:#fff;font-weight:800;line-height:1.35}
+h2.tbar-xl{font-size:19px;padding:12px 20px;border-radius:18px;box-shadow:0 5px 0 var(--tbd),0 10px 18px #00000026;margin:0 0 9px}
+h3.tbar-lg{font-size:14.5px;padding:9px 15px;border-radius:13px;box-shadow:0 4px 0 var(--tbd),0 7px 13px #00000022}
+h3.tbar-md{font-size:11.5px;padding:6px 11px;border-radius:10px;box-shadow:0 3px 0 var(--tbd),0 5px 10px #0000001e}
+h3.tbar-sm{font-size:13px;padding:7px 13px;border-radius:11px;box-shadow:0 3px 0 var(--tbd),0 6px 11px #0000001e;margin:0 0 4px}
+.tbar-teal{color:#0b6b57;--tbd:#0a5647}
+.tbar-blue{color:#2451c9;--tbd:#1c3f9e}
+.tbar-amber{color:#a66b00;--tbd:#8a5b00}
+.tbar-gold{color:#8a6d1f;--tbd:#6b5316}
+.tbar-slate{color:#3f4d59;--tbd:#2d3840}
+.tbar-indigo{color:#6b46c1;--tbd:#54359a}
+.tbar-red{color:#c22f1a;--tbd:#8a1f0a}
+
+/* مربعات إجراءات ملوّنة بنفس أسلوب الصندوق ثلاثي الأبعاد */
+.action.c3d{border:0;color:#fff}
+.action.c3d .title{color:#fff}
+.action.c3d .small{color:#ffffffcc}
+.action.c3d-teal{background:linear-gradient(135deg,#12a382,#0b6b57);box-shadow:0 5px 0 #074a3c,0 10px 18px #00000026}
+.action.c3d-blue{background:linear-gradient(135deg,#4f7fee,#2f5bd1);box-shadow:0 5px 0 #1c3f9e,0 10px 18px #00000026}
+.action.c3d-amber{background:linear-gradient(135deg,#e2a53a,#c98a1a);box-shadow:0 5px 0 #8a5b00,0 10px 18px #00000026}
+.action.c3d-slate{background:linear-gradient(135deg,#5b6b7a,#3f4d59);box-shadow:0 5px 0 #2d3840,0 10px 18px #00000026}
+.action.c3d-red{background:linear-gradient(135deg,#e2503a,#c22f1a);box-shadow:0 5px 0 #8a1f0a,0 10px 18px #00000026}
+.action.c3d-indigo{background:linear-gradient(135deg,#8b6ad6,#6b46c1);box-shadow:0 5px 0 #54359a,0 10px 18px #00000026}
+.emergency-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.emergency-box{background:linear-gradient(135deg,#e2503a,#c22f1a);color:#fff;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 4px 0 #8a1f0a,0 8px 14px #00000026}
+.emergency-box b{display:block;font-size:15px;color:#ffe17a;margin-bottom:8px;line-height:1.4;text-shadow:0 1px 2px #00000040}
+.emergency-box a{display:inline-block;background:#ffffff26;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;text-decoration:none;font-weight:800}
+body.dark .emergency-box{box-shadow:0 4px 0 #5c1509,0 8px 14px #00000044}
+.emergency-cta-title{font-size:19px!important;color:#ffe17a!important;font-weight:900!important;text-shadow:0 1px 2px #00000040}
+.loginBtn3d{display:block;width:100%;margin:12px 0 4px;background:linear-gradient(135deg,#ec6fa9,#c93f80);color:#fff;font-weight:800;font-size:15px;text-align:center;border-radius:16px;padding:14px;box-shadow:0 5px 0 #8a2a57,0 10px 18px #00000026}
+body.dark .loginBtn3d{box-shadow:0 5px 0 #5c1c39,0 10px 18px #00000044}
+
+/* ===== وضع ليلي/نهاري ===== */
+body.dark{background:#0f1613;color:#e6f2ee}
+body.dark .app{background:#141c19;box-shadow:none}
+body.dark header{background:#08352b}
+body.dark .card{background:#1b2622;border-color:#25332e}
+body.dark .row{background:#1b2622;border-color:#25332e;color:#e6f2ee}
+body.dark .list .row .small,body.dark .small{color:#9db3ac}
+body.dark .form{background:#1b2622;border-color:#25332e}
+body.dark .field label{color:#cfe4dd}
+body.dark .field input,body.dark .field select{background:#141c19;border-color:#2a3a34;color:#e6f2ee}
+body.dark .notice{background:#2a2410;border-color:#4a3f16;color:#e8d488}
+body.dark .nav{background:#141c19;border-color:#25332e}
+body.dark .nav button{color:#9db3ac}
+body.dark .modal .sheet{background:#141c19}
+body.dark .close{background:#25332e;color:#dfeee9}
+body.dark table{background:#1b2622}
+body.dark td,body.dark th{border-color:#25332e;color:#dfeee9}
+body.dark th{background:#20302a}
+body.dark .role button{background:#1b2622;color:#9db3ac}
+body.dark .city-chip-btn,body.dark .city-chip{background:#1b2622;color:#9db3ac}
+body.dark .mini-role{background:#1b2622;border-color:#25332e}
+body.dark .role-admin{background:#20302a}
+body.dark .relationship{background:#1b2622;border-color:#25332e}
+body.dark .stat{background:#1b2622;border-color:#25332e}
+body.dark .badge{background:#20302a;color:#7fd9b6}
+body.dark .badge.warning{background:#3a2e0d;color:#f0c96b}
+body.dark .badge.danger{background:#3a1614;color:#f39187}
+body.dark .badge.blue{background:#132540;color:#8fb8f5}
+
+/* ===== أزرار الرأس (ليلي/نهاري + مشاركة) ===== */
+
+/* ===== أزرار الاتصال والواتساب — أيقونات دائرية بدل الأبيض الناصع ===== */
+.contact{gap:26px}
+.contact .btn{width:44px;height:44px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(135deg,#4aa3f5,#2f7fd6);color:#fff;box-shadow:0 4px 10px #2f7fd64d}
+.contact .btn.alt{background:linear-gradient(135deg,#3fd07a,#1fae5c);color:#fff;box-shadow:0 4px 10px #1fae5c4d}
+.contact .btn.location{background:linear-gradient(135deg,#ff8a65,#e5533d);color:#fff;box-shadow:0 4px 10px #e5533d4d}
+body.dark .contact .btn{box-shadow:0 4px 10px #00000055}
+
+/* ===== عداد الزوار ===== */
+.visitorTag{opacity:.9}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="top">
+  <div class="tagline">منصة الرعاية الصحية الذكية</div>
+  <div style="flex:1;text-align:center"><div class="brand">الشفاء</div><div class="sub">👁 <span id="visitorCount">0</span> زيارة</div></div>
+  <div class="headerBtns">
+   <button class="icon" id="themeToggleBtn" onclick="toggleTheme()" title="الوضع الليلي/النهاري">🌙</button>
+   <button class="icon" onclick="shareApp()" title="مشاركة">📤</button>
+   <button class="icon" onclick="notify()">🔔</button>
+  </div>
+ </div>
+</header>
+
+<main>
+<div id="patient" class="view active">
+ <div class="hero"><h2 class="tbar tbar-xl tbar-teal">أهلاً بك في الشفاء 👋</h2><p>احجز طبيبك، اطلب دواءك، واحتفظ بملفك الصحي في مكان واحد.</p><div style="margin-top:10px"><span class="trial" id="trialPatient">الشهر الأول مجانًا من أول تسجيل 🎁</span></div></div>
+ <button class="loginBtn3d full" onclick="openLogin()">🔐 تسجيل الدخول</button>
+ <div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-teal">اشتراكي</h3></div>
+ <div class="notice">🎁 <b>الشهر الأول مجانًا تلقائيًا</b> من لحظة أول تسجيل — بدون أي دفع. بعد ما ينتهي: اضغط زر "تجديد الاشتراك" بالأسفل، اختر عدد الأشهر، حوّل المبلغ للحساب/الرقم الظاهر، اكتب رقم العملية وأرسله — يتفعّل اشتراكك بعد مراجعة الإدارة (عادة خلال ساعات). <b>الطوارئ مجانية 100% دائمًا</b> حتى لو انتهى الاشتراك.</div>
+ <div id="patientSubscriptionBox"></div>
+ <button class="card action c3d c3d-red full" style="width:100%;min-height:70px;flex-direction:row;justify-content:center;align-items:center;gap:10px;text-align:center" onclick="openEmergency()"><div class="emoji" style="margin:0">🚨</div><div><div class="title emergency-cta-title" style="margin:0">أرقام الطوارئ</div><div class="small">اشتباه بمرض وبائي · حادث سير · بنك الدم · أخرى</div></div></button>
+ <div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-teal">ابدأ من هنا</h3></div>
+ <div class="grid3">
+  <button class="card action c3d c3d-blue" onclick="show('doctorsList');renderDoctorsList()"><div class="emoji">🔎</div><div class="title">اختيار طبيب</div><div class="small">حسب المدينة أو التخصص</div></button>
+  <button class="card action c3d c3d-indigo" onclick="show('labsList');renderLabsList()"><div class="emoji">🔬</div><div class="title">اختيار معمل</div><div class="small">حسب نوع الفحص والمدينة</div></button>
+  <button class="card action c3d c3d-amber" onclick="show('pharmaciesList');renderPharmaciesList()"><div class="emoji">📍</div><div class="title">اختيار نقطة بيع</div><div class="small">حسب المدينة والاسم</div></button>
+ </div>
+ <div class="grid3" style="margin-top:10px">
+  <button class="card action c3d c3d-blue" onclick="openDoctor()"><div class="emoji">👨‍⚕️</div><div class="title">حجز طبيب</div><div class="small">التخصص والموعد المناسب</div></button>
+  <button class="card action c3d c3d-indigo" onclick="openLabOrder()"><div class="emoji">🔬</div><div class="title">حجز معمل</div><div class="small">طلب تحاليل أو أشعة</div></button>
+  <button class="card action c3d c3d-amber" onclick="openOrder()"><div class="emoji">💊</div><div class="title">حجز نقطة دواء (صيدلية)</div><div class="small">ابحث أو ارفع وصفة طبية</div></button>
+ </div>
+ <div class="grid grid-center2" style="margin-top:12px">
+  <button class="card action c3d c3d-teal" onclick="show('health');renderAccessGrants()"><div class="emoji">🩺</div><div class="title">ملفي الصحي</div><div class="small">معلوماتك الطبية وصلاحيات الوصول</div></button>
+  <button class="card action c3d c3d-slate" onclick="show('payments')"><div class="emoji">💳</div><div class="title">مدفوعاتي</div><div class="small">الحجوزات والطلبات والإيصالات</div></button>
+ </div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">مواعيدك القادمة</h3><button class="link" onclick="show('appointments')">عرض الكل</button></div>
+ <div class="list" id="patientAppointments"></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">آخر الطلبات</h3><button class="link" onclick="show('orders')">عرض الكل</button></div>
+ <div class="list" id="patientOrders"></div>
+</div>
+
+<div id="appointments" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">مواعيدي</h3><button class="btn" onclick="openDoctor()">+ حجز</button></div>
+ <div class="list" id="allAppointments"></div>
+</div>
+
+<div id="orders" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">طلبات الأدوية</h3><button class="btn" onclick="openOrder()">+ طلب جديد</button></div>
+ <div class="list" id="allOrders"></div>
+</div>
+
+<div id="health" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">ملفي الصحي الذكي</h3><span class="badge">خاص</span></div>
+ <div class="card">
+  <div class="row"><span>الاسم</span><strong>محمد أحمد</strong></div>
+  <div class="row"><span>فصيلة الدم</span><strong>O+</strong></div>
+  <div class="row"><span>الحساسية</span><strong>لا توجد مسجلة</strong></div>
+  <div class="row"><span>الأدوية الحالية</span><strong>لا توجد</strong></div>
+ </div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">معلومات إضافية</h3></div>
+ <div class="notice">لو طبيبك طلب منك معلومة صحية غير موجودة بالحقول الجاهزة أعلاه (تاريخ عملية سابقة، حالة مزمنة، تحليل معيّن...)، اكتبها هنا وهتظهر ضمن ملفك عند مشاركته مع الطبيب. تُحفظ داخل حسابك ولا تُخزّن في localStorage.</div>
+ <textarea id="healthExtraInfo" rows="3" placeholder="مثال: عملية زائدة دودية 2022 — سكري النوع الثاني منذ 2019" style="width:100%;resize:vertical;font-family:inherit;font-size:inherit;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff"></textarea>
+ <button class="btn full" onclick="saveHealthExtraInfo()" style="margin-top:8px">💾 حفظ</button>
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">🔒 من يرى ملفي الصحي؟</h3></div>
+ <div class="notice">يمكنك منح الطبيب صلاحية رؤية ملفك الصحي، ويمكنك إلغاء الصلاحية في أي وقت. فقط الأطباء المذكورين هنا يقدروا يشوفوا ملفك.</div>
+ <div class="list" id="accessGrantsList"><div class="notice">سجّل الدخول لعرض الأطباء المصرّح لهم.</div></div>
+ <div class="section" style="margin-top:10px"><h3 class="tbar tbar-lg tbar-teal">منح إذن لطبيب جديد</h3></div>
+ <input type="text" id="grantDoctorSearch" placeholder="ابحث بالاسم أو المدينة أو التخصص" style="width:100%;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff;font-family:inherit;font-size:inherit" oninput="searchDoctorForGrant()">
+ <div class="list" id="grantDoctorResults" style="margin-top:8px"></div>
+</div>
+
+<div id="payments" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">المدفوعات</h3></div>
+ <div class="list" id="paymentList"></div>
+ <div class="notice" style="margin-top:12px">في النسخة الإنتاجية يتم التحقق من الدفع في الخادم، ولا يمكن للواجهة وحدها تغيير حالة العملية إلى «مدفوعة».</div>
+</div>
+
+<div id="doctorPanel" class="view">
+ <div class="hero"><h2 class="tbar tbar-xl tbar-blue">لوحة الطبيب</h2><p>إدارة المواعيد والمرضى والوصفات والمدفوعات.</p></div>
+ <div class="stats"><div class="stat">حجوزات اليوم<strong>12</strong></div><div class="stat">المرضى<strong>38</strong></div><div class="stat">الإيرادات<strong>240,000</strong></div><div class="stat">انتظار الدفع<strong>3</strong></div></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-blue">حجوزات اليوم</h3></div><div class="list">
+  <div class="row"><div><b>10:00 — محمد أحمد</b><div class="small">استشارة عامة</div></div><span class="badge">مؤكد</span></div>
+  <div class="row"><div><b>11:00 — أحمد علي</b><div class="small">باطنية</div></div><span class="badge warning">انتظار</span></div>
+  <div class="row"><div><b>12:00 — سارة محمد</b><div class="small">متابعة</div></div><span class="badge">مؤكد</span></div>
+ </div>
+ <div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <div class="notice" style="margin-top:10px" id="trialDoctor">🎁 الشهر الأول مجانًا من تاريخ تسجيل الطبيب الأول.</div>
+    <div id="activateDoctor"></div>
+    <div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-blue">اشتراكي</h3></div>
+    <div id="doctorSubscriptionBox"></div>
+    <button class="btn full" onclick="openSchedule()">إدارة الجدول</button>
+</div>
+
+<div id="pharmacyPanel" class="view">
+ <div class="hero"><h2 class="tbar tbar-xl tbar-amber">نقطة بيع الصيدلية</h2><p>إدارة الطلبات والوصفات والمخزون والمدفوعات.</p></div>
+ <div class="stats"><div class="stat">طلبات جديدة<strong>8</strong></div><div class="stat">قيد التجهيز<strong>4</strong></div><div class="stat">مدفوعات اليوم<strong>15</strong></div><div class="stat">المبيعات<strong>350,000</strong></div></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-amber">استقبال طلب جديد</h3></div>
+ <div class="grid">
+  <button class="card action" style="min-height:80px" onclick="alert('تم فتح استقبال طلب مريض بوصفة طبية')"><div class="emoji">🧾</div><div class="title" style="font-size:13px">مريض بوصفة طبية</div></button>
+  <button class="card action" style="min-height:80px" onclick="alert('تم فتح استقبال طلب عميل جملة أدوية')"><div class="emoji">📦</div><div class="title" style="font-size:13px">عميل جملة أدوية</div></button>
+ </div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-amber">طلبات حديثة</h3></div>
+ <div class="list"><div class="row"><div><b>طلب #1001</b><div class="small">محمد أحمد · 3 أصناف</div></div><span class="badge warning">جديد</span></div>
+ <div class="row"><div><b>طلب #1000</b><div class="small">سارة محمد · وصفة مرفقة</div></div><span class="badge">قيد التجهيز</span></div></div>
+ <div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <div class="notice" style="margin-top:10px" id="trialPharmacy">🎁 الشهر الأول مجانًا من تاريخ تسجيل نقطة البيع الأولى.</div>
+    <div id="activatePharmacy"></div>
+    <div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-amber">اشتراكي</h3></div>
+    <div id="pharmacySubscriptionBox"></div>
+    <button class="btn full" onclick="alert('تم فتح إدارة المخزون')">إدارة المخزون</button>
+</div>
+
+
+<div id="wholesalePanel" class="view">
+  <div class="hero"><h2 class="tbar tbar-xl tbar-gold">لوحة عميل البيع بالجملة</h2><p>طلبات الجملة، الأسعار، التوريد والتواصل مع نقاط البيع.</p><span class="trial" id="trialWholesale">الشهر الأول مجانًا</span></div>
+  <div class="stats"><div class="stat">طلبات الجملة<strong id="wholesaleOrderCount">0</strong></div><div class="stat">قيد التوريد<strong id="wholesaleOrderPending">0</strong></div></div>
+  <div id="activateWholesale"></div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-gold">اشتراكي</h3></div>
+  <div id="wholesaleSubscriptionBox"></div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-gold">طلب جملة جديد</h3><button class="btn" onclick="openWholesaleOrder()">+ طلب جديد</button></div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-gold">طلباتي</h3></div>
+  <div class="list" id="wholesaleOrderList"><div class="notice">لا توجد طلبات جملة بعد.</div></div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-gold">التواصل</h3></div>
+  <div class="contact">
+    <a class="btn" href="tel:+249900000000" title="اتصال">📞</a>
+    <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+  </div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-gold">نقاط البيع المرتبطة</h3></div>
+  <div class="list">
+    <div class="row"><div><b>نقطة بيع الشفاء</b><div class="small">ود مدني · 12 صنف</div></div><span class="badge">نشطة</span></div>
+  </div>
+</div>
+
+<div id="labPanel" class="view">
+ <div class="hero"><h2 class="tbar tbar-xl tbar-indigo">لوحة المعمل</h2><p>إدارة طلبات الفحوصات والنتائج والمدفوعات.</p></div>
+ <div class="stats"><div class="stat">طلبات جديدة<strong>5</strong></div><div class="stat">قيد التحليل<strong>2</strong></div><div class="stat">نتائج جاهزة<strong>9</strong></div><div class="stat">الإيرادات<strong>180,000</strong></div></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-indigo">طلبات حديثة</h3></div>
+ <div class="list"><div class="row"><div><b>طلب #2001</b><div class="small">محمد أحمد · تحليل دم شامل</div></div><span class="badge warning">جديد</span></div>
+ <div class="row"><div><b>طلب #2000</b><div class="small">سارة محمد · سونار</div></div><span class="badge">قيد التحليل</span></div></div>
+ <div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <div class="notice" style="margin-top:10px" id="trialLab">🎁 أول شهرين مجانًا من تاريخ تسجيل المعمل الأول.</div>
+    <div id="activateLab"></div>
+    <div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-indigo">اشتراكي</h3></div>
+    <div id="labSubscriptionBox"></div>
+    <button class="btn full" onclick="alert('تم فتح إدارة نتائج الفحوصات')">إدارة النتائج</button>
+</div>
+
+<div id="labsList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-indigo">قائمة المعامل</h3><span class="badge" id="labsCountBadge">0 معمل</span></div>
+ <div class="notice">تصفح حسب نوع الفحص أو المدينة، وتواصل مباشرة بواتساب أو مكالمة.</div>
+ <div class="section" style="margin:14px 2px 4px"><h3 class="tbar tbar-md tbar-indigo">حسب نوع الفحص</h3></div>
+ <div class="city-chips-scroll" id="labServiceChipsScroll"></div>
+ <div class="section" style="margin:14px 2px 4px"><h3 class="tbar tbar-md tbar-indigo">حسب المدينة</h3></div>
+ <div class="city-chips-scroll" id="labCityChipsScroll"></div>
+ <div id="labsListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="epidemicList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-red">🦠 اشتباه بمرض وبائي</h3><span class="badge" id="epidemicCountBadge">0 رقم</span></div>
+ <div class="notice">اختر مدينتك للاتصال المباشر برقم الطوارئ الخاص بالمرض الوبائي في مدينتك.</div>
+ <div class="city-chips-scroll" id="epidemicCityChipsScroll"></div>
+ <div id="epidemicListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="accidentList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-red">🚑 حادث سير</h3><span class="badge" id="accidentCountBadge">0 رقم</span></div>
+ <div class="notice">اختر مدينتك للاتصال المباشر برقم طوارئ حوادث السير في مدينتك.</div>
+ <div class="city-chips-scroll" id="accidentCityChipsScroll"></div>
+ <div id="accidentListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="bloodBanksList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-red">🩸 بنوك الدم</h3><span class="badge" id="bloodBanksCountBadge">0 بنك دم</span></div>
+ <div class="notice">اختر مدينتك للاتصال المباشر بأقرب بنك دم مسجّل.</div>
+ <div class="city-chips-scroll" id="bloodBankCityChipsScroll"></div>
+ <div id="bloodBanksListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="otherEmergencyList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-red">☎️ أخرى</h3><span class="badge" id="otherEmergencyCountBadge">0 رقم</span></div>
+ <div class="notice">قائمة طوارئ مستقلة حسب المدينة — منفصلة تمامًا عن بنك الدم. اختر مدينتك للاتصال المباشر.</div>
+ <div class="city-chips-scroll" id="otherEmergencyCityChipsScroll"></div>
+ <div id="otherEmergencyListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div class="modal" id="wholesaleOrderModal"><div class="sheet"><button class="close" onclick="closeModal('wholesaleOrderModal')">×</button><h3 class="tbar tbar-sm tbar-gold">طلب جملة جديد</h3>
+<div class="field"><label>الأصناف (كل صنف بسطر: الاسم × الكمية × السعر للوحدة)</label><textarea id="wholesaleItems" rows="4" placeholder="مثال:&#10;باراسيتامول × 100 × 500&#10;فيتامين سي × 50 × 800" style="width:100%;resize:vertical;font-family:inherit;font-size:inherit;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff"></textarea><div id="wholesaleItemsSuggest" class="city-list"></div></div>
+<div class="field"><label>📎 إرسال صورة الروشتة (اختياري)</label><input type="file" id="wholesalePrescriptionFile" accept="image/*,.pdf"></div>
+<div class="field"><label>نقطة البيع المورّدة</label><select id="wholesaleOrderPharmacy"><option>صيدلية الشفاء</option><option>صيدلية الأمل</option></select></div>
+<div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال بنقطة البيع">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <button class="btn full" onclick="createWholesaleOrder()">إرسال طلب الجملة</button></div></div>
+
+<div id="adminPanel" class="view">
+ <div class="section" style="margin-top:0"><button class="link" onclick="show('structurePreview')">→ رجوع لمعاينة الهيكل</button></div>
+ <div class="hero"><h2 class="tbar tbar-xl tbar-slate">لوحة المدير</h2><p>مراقبة المستخدمين والحجوزات والطلبات والمدفوعات والعمولات.</p></div>
+ <div class="stats"><div class="stat">المرضى<strong>12,450</strong></div><div class="stat">الأطباء<strong>327</strong></div><div class="stat">الصيدليات<strong>184</strong></div><div class="stat">الحجوزات<strong>286</strong></div><div class="stat">المدفوعات<strong>4.85M</strong></div><div class="stat">العمولات<strong>485K</strong></div></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-slate">آخر المدفوعات</h3></div>
+ <table><tr><th>العملية</th><th>المبلغ</th><th>الحالة</th></tr><tr><td>محمد ← طبيب</td><td>20,000</td><td>✓</td></tr><tr><td>أحمد ← صيدلية</td><td>35,000</td><td>✓</td></tr><tr><td>سارة ← طبيب</td><td>25,000</td><td>انتظار</td></tr></table>
+
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">طلبات استعادة الحساب</h3><span class="badge">فحص تلقائي + مراجعتك</span></div>
+  <div class="notice">كل طلب استعادة يصلك أيضًا برسالة واتساب مباشرة، مع نتيجة فحص تلقائي إن كان الرقم مسجلاً في سجلاتنا أم لا — لمساعدتك على تمييز الاحتيال.</div>
+  <div id="recoveryList" class="list" style="margin-top:10px"></div>
+
+    <div class="section"><h3 class="tbar tbar-lg tbar-slate">أسعار الاشتراك متعددة الأشهر (1 / 3 / 6 / 12 شهر)</h3></div>
+  <div class="notice">حدد سعر كل مدة اشتراك لكل دور. هذه الأسعار تُحفظ مركزيًا وتظهر لكل المستخدمين — تُطبَّق فعليًا (مع تحكم آمن من الإدارة) على المريض حاليًا فقط لأنه الدور الوحيد بحساب دخول حقيقي؛ باقي الأدوار ستُفعَّل بعد ربطها بنظام تسجيل دخول حقيقي.</div>
+  <div id="subConfigEditor"></div>
+
+  <div class="section" style="margin-top:16px"><h3 class="tbar tbar-lg tbar-slate">طلبات تفعيل/تجديد الاشتراك</h3><button class="link" onclick="renderAdminPendingActivations()">تحديث</button></div>
+  <div id="adminPendingActivations" class="list"></div>
+
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">🚨 أرقام الطوارئ (يديرها المدير فقط — مجانية دائمًا)</h3></div>
+  <div class="notice">كل قسم من أقسام الطوارئ الآن قائمة مستقلة حسب المدينة (زي بنك الدم بالظبط) — لكل مدينة رقمها الخاص. أضف رقمًا لكل مدينة، وكل رقم له حالة اعتماد مستقلة. علّم "معتمد" فقط بعد التأكد من الجهة المسؤولة — إن لم تعلّمه، سيظهر الرقم مع ملاحظة "لحين الموافقة من الجهات المسؤولة".</div>
+  <div class="field"><label>🦠 اشتباه بمرض وبائي — المدينة</label><select id="epCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="epPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin:0 0 8px"><input type="checkbox" id="epApproved" checked style="width:auto"> ✅ معتمد من الجهات المسؤولة</label>
+  <button class="btn full" id="epSubmitBtn" onclick="addEpidemicNumber()">➕ إضافة رقم لمدينة</button>
+  <div id="epidemicAdminList" class="list" style="margin-top:10px"></div>
+
+  <div class="field" style="margin-top:14px"><label>🚑 حادث سير — المدينة</label><select id="acCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="acPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin:0 0 8px"><input type="checkbox" id="acApproved" checked style="width:auto"> ✅ معتمد من الجهات المسؤولة</label>
+  <button class="btn full" id="acSubmitBtn" onclick="addAccidentNumber()">➕ إضافة رقم لمدينة</button>
+  <div id="accidentAdminList" class="list" style="margin-top:10px"></div>
+
+  <div class="section" style="margin-top:10px"><h3 class="tbar tbar-md tbar-slate">🩸 بنوك الدم حسب المدينة</h3></div>
+  <div class="notice">أضف بنك دم واحد أو أكثر لكل مدينة — المريض يختار مدينته ويتصل مباشرة. عدّل أو احذف أي بنك دم بأزرار "تعديل"/"حذف".</div>
+  <div class="field"><label>اسم بنك الدم</label><input id="bbName" placeholder="بنك دم أم القرى الجزيرة"></div>
+  <div class="field"><label>المدينة</label><select id="bbCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="bbPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <button class="btn full" id="bbSubmitBtn" onclick="addBloodBank()">➕ إضافة بنك دم</button>
+  <div id="bloodBankAdminList" class="list" style="margin-top:10px"></div>
+  <div class="field" style="margin-top:10px"><label>☎️ أخرى — قائمة مستقلة حسب المدينة</label></div>
+  <div class="notice">"أخرى" قائمة مستقلة قائمة بذاتها (زي بنك الدم بالظبط) — تضيف أكثر من رقم حسب المدينة، وكل رقم له حالة اعتماد مستقلة زي "اشتباه بمرض وبائي" و"حادث سير".</div>
+  <div class="field"><label>اسم/وصف الرقم</label><input id="oeName" placeholder="مثال: الدفاع المدني — أم القرى"></div>
+  <div class="field"><label>المدينة</label><select id="oeCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="oePhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin:0 0 8px"><input type="checkbox" id="oeApproved" checked style="width:auto"> ✅ معتمد من الجهات المسؤولة</label>
+  <button class="btn full" onclick="addOtherEmergency()">➕ إضافة رقم لقائمة "أخرى"</button>
+  <div id="otherEmergencyAdminList" class="list" style="margin-top:10px"></div>
+  <button class="btn full" onclick="saveEmergencyNumbers()" style="margin-top:12px">💾 حفظ أرقام الطوارئ</button>
+
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">معلومات الدفع (تظهر لكل المستخدمين عند التفعيل)</h3></div>
+  <div class="notice">🔒 الأمان: التطبيق لا يخزّن أبدًا كلمة سر البنك أو رمز OTP أو أي بيانات دخول بنكية — فقط رقم حساب/هاتف التحويل الظاهر هنا. رقم هاتف المريض الخاص لا يُعرض علنًا لأي طرف آخر؛ فقط الأرقام التجارية (طبيب/صيدلية/معمل) تظهر في الأدلة العامة لأنها أرقام تواصل عمل. حالة كل عملية دفع تبقى "قيد المراجعة" حتى تراجعها وتفعّلها يدويًا — رفع صورة الإيصال وحده لا يُفعّل الاشتراك تلقائيًا.</div>
+  <div class="field"><label>📱 رقمك للتحويل/كاش</label><input id="adminPhoneInput" placeholder="0969695656"></div>
+  <div class="field"><label>🏦 اسم البنك</label><input id="bankNameInput" placeholder="بنك الخرطوم"></div>
+  <div class="field"><label>🏦 رقم الحساب</label><input id="bankAccountInput" placeholder="2215732"></div>
+  <button class="btn full" onclick="saveContactInfo()">💾 حفظ معلومات الدفع</button>
+
+  <button class="btn full" onclick="alert('Audit Log: كل عملية حساسة يجب تسجيلها في النسخة الإنتاجية')">عرض سجل التدقيق</button>
+</div>
+
+<div id="structurePreview" class="view">
+ <div class="hero"><h2 class="tbar tbar-xl tbar-indigo">هيكل المنصة</h2><p>الإدارة تراقب من هنا — نظرة سريعة على الأدوار الأربعة وعلاقاتها، ثم ادخل للوحة الكاملة.</p></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-indigo">الأدوار</h3><span class="badge">عرض سريع</span></div>
+ <div class="structure-grid">
+   <div class="mini-role role-doctor"><span class="ico">👨‍⚕️</span><b>الطبيب</b><span class="small">مواعيد · مرضى · وصفات</span><span class="mini-trial">أول شهر مجانًا</span></div>
+   <div class="mini-role role-admin" onclick="show('adminPanel')"><span class="ico">🛡️</span><b>الإدارة</b><span class="small">مراقبة وتحكم كامل</span></div>
+   <div class="mini-role role-patient"><span class="ico">🧑‍🤝‍🧑</span><b>المريض</b><span class="small">حجز · ملف صحي · طلبات</span><span class="mini-trial">أول شهر مجانًا</span></div>
+   <div class="mini-role role-pos"><span class="ico">💊</span><b>نقطة البيع</b><span class="small">طلبات · مخزون · عملاء</span><span class="mini-trial">أول شهر مجانًا</span></div>
+   <div class="mini-role role-wholesale"><span class="ico">📦</span><b>عميل الجملة</b><span class="small">طلبات جملة · توريد</span><span class="mini-trial">أول شهر مجانًا</span></div>
+   <div class="mini-role role-lab"><span class="ico">🔬</span><b>المعمل</b><span class="small">فحوصات · نتائج</span><span class="mini-trial">أول شهرين مجانًا</span></div>
+ </div>
+  <div class="section"><h3 class="tbar tbar-lg tbar-indigo">العلاقات الأساسية</h3></div>
+  <div class="relationships">
+    <div class="relationship"><strong>يمينًا فوق بعض</strong>👨‍⚕️ الطبيب ↕ 🧑‍🤝‍🧑 المريض</div>
+    <div class="relationship"><strong>الخدمة الدوائية</strong>💊 نقطة البيع ↔ 🧑‍🤝‍🧑 المريض</div>
+    <div class="relationship"><strong>الفحوصات</strong>🔬 المعمل ↔ 🧑‍🤝‍🧑 المريض</div>
+    <div class="relationship"><strong>التوريد</strong>📦 عميل الجملة ↔ 💊 نقطة البيع</div>
+    <div class="relationship"><strong>الإدارة</strong>🛡️ تراقب الجميع بصلاحيات منفصلة</div>
+  </div>
+  <button class="btn full" onclick="show('adminPanel')">🛡️ فتح لوحة الإدارة الكاملة</button>
+</div>
+
+<div id="doctorsList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">قائمة الأطباء</h3><span class="badge" id="doctorsCountBadge">0 طبيب</span></div>
+ <div class="notice">تصفح حسب التخصص أو المدينة، وتواصل مباشرة بواتساب أو مكالمة.</div>
+ <div class="section" style="margin:14px 2px 4px"><h3 class="tbar tbar-md tbar-teal">حسب التخصص</h3></div>
+ <div class="city-chips-scroll" id="specialtyChipsScroll"></div>
+ <div class="section" style="margin:14px 2px 4px"><h3 class="tbar tbar-md tbar-teal">حسب المدينة</h3></div>
+ <div class="city-chips-scroll" id="doctorCityChipsScroll"></div>
+ <div id="doctorsListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="pharmaciesList" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">نقاط البيع (الصيدليات)</h3><span class="badge" id="pharmaciesCountBadge">0 نقطة بيع</span></div>
+ <div class="notice">ابحث بالاسم أو تصفح حسب المدينة، وتواصل مباشرة بواتساب أو مكالمة.</div>
+ <div class="field" style="margin-top:10px"><input id="pharmacySearchInput" placeholder="ابحث باسم نقطة البيع..." oninput="renderPharmaciesList()"></div>
+ <div class="section" style="margin:14px 2px 4px"><h3 class="tbar tbar-md tbar-teal">حسب المدينة</h3></div>
+ <div class="city-chips-scroll" id="pharmacyCityChipsScroll"></div>
+ <div id="pharmaciesListResults" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="citiesBrowse" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-teal">تصفح المدن</h3><span class="badge" id="citiesCountBadge">0 مدينة</span></div>
+ <div class="notice">تصفح الأطباء ونقاط البيع في كل مدينة، وتواصل مباشرة بواتساب أو مكالمة.</div>
+ <div class="city-chips-scroll" id="cityChipsScroll"></div>
+ <div id="citiesBrowseList" class="list" style="margin-top:12px"></div>
+</div>
+
+<div id="profile" class="view">
+ <div class="section"><h3 class="tbar tbar-lg tbar-slate">الحساب</h3></div>
+ <div class="card"><div class="row"><span>الحساب الحالي</span><strong id="currentRole">مريض</strong></div><div class="row"><span>رقم الهاتف</span><strong>09XXXXXXXX</strong></div></div>
+ <div class="section"><h3 class="tbar tbar-lg tbar-slate">تجربة الأدوار</h3></div>
+ <div class="role"><button class="sel" onclick="setRole('patient',this)">مريض</button><button onclick="setRole('doctor',this)">طبيب</button><button onclick="setRole('pharmacy',this)">نقطة بيع</button><button onclick="setRole('lab',this)">معمل</button><button onclick="setRole('wholesale',this)">عميل جملة</button><button onclick="setRole('admin',this)">مدير</button></div>
+ <button class="btn full" onclick="openLogin()">تسجيل الدخول برقم الهاتف 📱</button>
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">شارك واحصل على شهر إضافي مجانًا</h3></div>
+  <div class="notice">شارك رابط التطبيق في 5 مجموعات واتساب أو فيسبوك مختلفة، واضغط "سجّلت المشاركة" بعد كل مرة. بعد 5 مرات يُضاف شهر مجاني تلقائيًا لحساب المريض (نظام قائم على ثقتك — الإدارة تقدر تراجعه لاحقًا).</div>
+  <div class="card"><div class="row"><span>عدد المشاركات المسجلة</span><strong id="referralCount">0 / 5</strong></div></div>
+  <button class="btn full" onclick="shareApp()">📤 مشاركة الرابط الآن</button>
+  <button class="btn alt full" onclick="registerReferralShare()">✅ سجّلت المشاركة في مجموعة</button>
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">التسجيل والانضمام</h3></div>
+  <button class="btn alt full" onclick="openDoctorRegister()">➕ تسجيل طبيب (تُضاف مدينته تلقائيًا)</button>
+  <button class="btn alt full" onclick="openPharmacyRegister()">💊 تسجيل نقطة بيع</button>
+  <button class="btn alt full" onclick="openLabRegister()">🔬 تسجيل معمل تحاليل (أول شهرين مجانًا)</button>
+  <button class="btn alt full" onclick="openWholesale()">📦 تسجيل عميل بيع بالجملة</button>
+  <div class="section"><h3 class="tbar tbar-lg tbar-slate">الاستكشاف</h3></div>
+  <button class="btn alt full" onclick="show('doctorsList');renderDoctorsList()">📋 قائمة الأطباء (حسب التخصص)</button>
+  <button class="btn alt full" onclick="show('pharmaciesList');renderPharmaciesList()">💊 نقاط البيع (حسب الاسم والمدينة)</button>
+  <button class="btn alt full" onclick="show('labsList');renderLabsList()">🔬 قائمة المعامل (حسب نوع الفحص والمدينة)</button>
+  <button class="btn alt full" onclick="show('citiesBrowse')">🏙️ تصفح المدن</button>
+  <button class="btn alt full" onclick="show('structurePreview')">🧭 معاينة هيكل المنصة</button>
+</div>
+</main>
+
+<nav class="nav">
+ <button class="active" onclick="show('patient',this)"><b>⌂</b>الرئيسية</button>
+ <button onclick="show('appointments',this)"><b>📅</b>المواعيد</button>
+ <button onclick="show('orders',this)"><b>💊</b>الطلبات</button>
+ <button onclick="show('profile',this)"><b>👤</b>حسابي</button>
+</nav>
+</div>
+
+<div class="modal" id="doctorModal"><div class="sheet"><button class="close" onclick="closeModal('doctorModal')">×</button><h3 class="tbar tbar-sm tbar-blue">حجز طبيب</h3>
+<div class="field"><label>التخصص</label><select id="specialty"><option>باطنية</option><option>أطفال</option><option>نساء وولادة</option><option>جلدية</option><option>أسنان</option><option>عيون</option></select></div>
+<div class="field"><label>الطبيب</label><select id="doctor"><option>د. أحمد محمد — 20,000 ج</option><option>د. سارة علي — 25,000 ج</option></select></div>
+<div class="field"><label>التاريخ</label><input type="date" id="date"></div>
+<div class="field"><label>الموعد</label><select id="bookTime"></select></div>
+<div class="field"><label>📎 إرفاق صورة روشتة سابقة (اختياري)</label><input type="file" id="doctorPrescriptionFile" accept="image/*,.pdf"></div>
+<div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال بالطبيب">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+<button class="btn full" onclick="bookAppointment()">تأكيد الحجز</button></div></div>
+
+<div class="modal" id="orderModal"><div class="sheet"><button class="close" onclick="closeModal('orderModal')">×</button><h3 class="tbar tbar-sm tbar-amber">طلب دواء</h3>
+<div class="field"><label>الأصناف المطلوبة (كل صنف بسطر مستقل)</label><textarea id="medicine" rows="4" placeholder="مثال:&#10;باراسيتامول × 2&#10;فيتامين سي × 1&#10;شراب سعال × 1" style="width:100%;resize:vertical;font-family:inherit;font-size:inherit;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff"></textarea><div id="medicineSuggest" class="city-list"></div></div>
+<div class="field"><label>📎 إرسال صورة الروشتة (اختياري)</label><input type="file" id="orderPrescriptionFile" accept="image/*,.pdf"></div>
+<div class="field"><label>نقطة البيع</label><select><option>صيدلية الشفاء</option><option>صيدلية الأمل</option></select></div>
+<div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال بنقطة البيع">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <button class="btn full" onclick="createOrder()">إرسال الطلب</button></div></div>
+
+<div class="modal" id="labOrderModal"><div class="sheet"><button class="close" onclick="closeModal('labOrderModal')">×</button><h3 class="tbar tbar-sm tbar-indigo">طلب فحص معملي</h3>
+<div class="field"><label>الفحوصات المطلوبة (كل فحص بسطر مستقل)</label><textarea id="labTests" rows="4" placeholder="مثال:&#10;تحليل دم شامل&#10;وظائف كبد&#10;سونار بطن" style="width:100%;resize:vertical;font-family:inherit;font-size:inherit;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff"></textarea></div>
+<div class="field"><label>📎 إرسال تحويل الطبيب (اختياري)</label><input type="file" id="labPrescriptionFile" accept="image/*,.pdf"></div>
+<div class="field"><label>المعمل</label><select id="labOrderLab"></select></div>
+<div class="contact">
+      <a class="btn" href="tel:+249900000000" title="اتصال بالمعمل">📞</a>
+      <a class="btn alt" href="https://wa.me/249900000000" target="_blank" rel="noopener" title="واتساب">💬</a>
+    </div>
+    <button class="btn full" onclick="createLabOrder()">إرسال طلب الفحص</button></div></div>
+
+<div class="modal" id="emergencyModal"><div class="sheet"><button class="close" onclick="closeModal('emergencyModal')">×</button><h3 class="tbar tbar-sm tbar-red" style="font-size:20px;color:#c22f1a">🚨 أرقام الطوارئ</h3>
+<div class="notice">اضغط على أي رقم للاتصال مباشرة. هذه الأرقام مجانية دائمًا ويديرها المدير.</div>
+<div class="emergency-grid" id="emergencyGrid"></div></div></div>
+
+
+<div class="modal" id="doctorRegisterModal"><div class="sheet">
+  <button class="close" onclick="closeModal('doctorRegisterModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-blue">تسجيل طبيب</h3>
+  <div class="notice">اكتب اسم مدينتك — إذا لم تكن موجودة في القائمة تُضاف تلقائيًا وتصبح متاحة فورًا لبقية المستخدمين.</div>
+  <div class="field"><label>اسم الطبيب</label><input id="regDoctorName" placeholder="د. أحمد محمد"></div>
+  <div class="field"><label>التخصص</label><select id="regSpecialty"></select></div>
+  <div class="field"><label>المدينة</label>
+    <input id="regCity" list="cityOptions" placeholder="اكتب اسم المدينة">
+    <datalist id="cityOptions"></datalist>
+    <div id="cityList" class="city-list"></div>
+  </div>
+  <div class="field"><label>رقم الهاتف</label><input id="regPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <div class="field"><label>موقع العيادة (رابط خرائط قوقل)</label>
+    <input id="regDoctorLocation" placeholder="الصق رابط الموقع أو اضغط الزر تحت">
+    <button class="btn alt full" type="button" onclick="captureLocation('regDoctorLocation')" style="margin-top:8px">📍 تحديد موقع العيادة الحالي</button>
+  </div>
+  <button class="btn full" onclick="registerDoctor()">تسجيل الطبيب + تفعيل الشهر المجاني</button>
+</div></div>
+
+<div class="modal" id="pharmacyRegisterModal"><div class="sheet">
+  <button class="close" onclick="closeModal('pharmacyRegisterModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-amber">تسجيل نقطة بيع</h3>
+  <div class="notice">الشهر الأول مجانًا من تاريخ أول تسجيل.</div>
+  <div class="field"><label>اسم نقطة البيع</label><input id="regPharmacyName" placeholder="صيدلية الشفاء"></div>
+  <div class="field"><label>المدينة</label><select id="regPharmacyCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="regPharmacyPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <div class="field"><label>موقع نقطة البيع (رابط خرائط قوقل)</label>
+    <input id="regPharmacyLocation" placeholder="الصق رابط الموقع أو اضغط الزر تحت">
+    <button class="btn alt full" type="button" onclick="captureLocation('regPharmacyLocation')" style="margin-top:8px">📍 تحديد موقع نقطة البيع الحالي</button>
+  </div>
+  <button class="btn full" onclick="registerPharmacy()">تسجيل نقطة البيع + تفعيل الشهر المجاني</button>
+</div></div>
+
+<div class="modal" id="labRegisterModal"><div class="sheet">
+  <button class="close" onclick="closeModal('labRegisterModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-indigo">تسجيل معمل تحاليل</h3>
+  <div class="notice">أول شهرين مجانًا من تاريخ أول تسجيل — يختلف عن باقي الأدوار (شهر واحد).</div>
+  <div class="field"><label>اسم المعمل</label><input id="regLabName" placeholder="معمل الشفاء المركزي"></div>
+  <div class="field"><label>نوع الفحوصات</label><select id="regLabService" onchange="toggleLabServiceOther()"></select></div>
+  <div class="field" id="regLabServiceOtherField" style="display:none"><label>اكتب نوع الفحص</label><input id="regLabServiceOther" placeholder="مثال: تحليل جينات"></div>
+  <div class="field"><label>المدينة</label>
+    <input id="regLabCity" list="cityOptions" placeholder="اكتب اسم المدينة">
+  </div>
+  <div class="field"><label>رقم الهاتف</label><input id="regLabPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <div class="field"><label>موقع المعمل (رابط خرائط قوقل)</label>
+    <input id="regLabLocation" placeholder="الصق رابط الموقع أو اضغط الزر تحت">
+    <button class="btn alt full" type="button" onclick="captureLocation('regLabLocation')" style="margin-top:8px">📍 تحديد موقع المعمل الحالي</button>
+  </div>
+  <button class="btn full" onclick="registerLab()">تسجيل المعمل + تفعيل الشهرين المجانيين</button>
+</div></div>
+
+<div class="modal" id="wholesaleModal"><div class="sheet">
+  <button class="close" onclick="closeModal('wholesaleModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-gold">عميل البيع بالجملة</h3>
+  <div class="notice">الشهر الأول مجانًا من تاريخ أول تسجيل.</div>
+  <div class="field"><label>اسم العميل / المنشأة</label><input id="wholesaleName" placeholder="اسم الصيدلية أو الموزع"></div>
+  <div class="field"><label>المدينة</label><select id="wholesaleCity"></select></div>
+  <div class="field"><label>رقم الهاتف</label><input id="wholesalePhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <button class="btn full" onclick="registerWholesale()">تسجيل عميل الجملة + تفعيل الشهر المجاني</button>
+</div></div>
+
+<div class="modal" id="scheduleModal"><div class="sheet">
+  <button class="close" onclick="closeModal('scheduleModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-blue">إدارة أوقات الحجز</h3>
+  <div class="notice">أضف أو احذف الأوقات المتاحة — أي تعديل هنا ينعكس فورًا على شاشة حجز المريض، بدل الأوقات الثابتة.</div>
+  <div id="slotsList" class="list" style="margin-bottom:12px"></div>
+  <div class="field"><label>وقت جديد</label><input id="newSlotInput" placeholder="مثال: 5:00 مساءً"></div>
+  <button class="btn full" onclick="addTimeSlot()">➕ إضافة الوقت</button>
+</div></div>
+
+<div class="modal" id="loginModal"><div class="sheet">
+  <button class="close" onclick="closeModal('loginModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-teal" id="loginTitle">تسجيل الدخول برقم الهاتف</h3>
+  <div class="notice" id="loginNotice">رقم هاتفك هو حسابك. أدخل رقمك وكلمة المرور لتسجيل الدخول، أو أنشئ حسابًا جديدًا إن لم يكن لديك واحد.</div>
+  <div id="loginStep1">
+    <div class="field"><label>رقم الهاتف</label><input id="loginPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+    <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" placeholder="6 أحرف على الأقل"></div>
+    <div class="small" style="margin:-6px 0 10px;opacity:.8">🔑 كلمة المرور هذه من اختيارك أنت وحدك — التطبيق لا يعرفها ولا يخزّنها كنص واضح. اختر كلمة قوية يصعب تخمينها، واحتفظ بها في مكان آمن. لو نسيتها، تواصل مع إدارة الشفاء لاستعادة الدخول لحسابك.</div>
+    <div class="field" id="loginNameField" style="display:none"><label>الاسم الكامل</label><input id="loginName" placeholder="اكتب اسمك"></div>
+    <div class="field" id="loginRoleField" style="display:none"><label>نوع الحساب</label>
+      <select id="loginRoleSelect" onchange="renderLoginRoleExtraFields()">
+        <option value="patient">مريض</option>
+        <option value="doctor">طبيب</option>
+        <option value="pharmacy">نقطة بيع / صيدلية</option>
+        <option value="wholesale">عميل جملة</option>
+        <option value="lab">معمل تحاليل</option>
+      </select>
+    </div>
+    <div id="loginRoleExtraFields"></div>
+    <button class="btn full" id="loginSubmitBtn" onclick="handleLoginSubmit()">تسجيل الدخول ✅</button>
+    <button class="btn alt full" id="loginToggleBtn" onclick="toggleLoginMode()">ليس لديك حساب؟ أنشئ حسابًا جديدًا</button>
+  </div>
+  <button class="btn alt full" onclick="openRecovery()">نسيت كلمة المرور؟</button>
+</div></div>
+
+<div class="modal" id="recoveryModal"><div class="sheet">
+  <button class="close" onclick="closeModal('recoveryModal')">×</button>
+  <h3 class="tbar tbar-sm tbar-teal">استعادة الحساب</h3>
+  <div class="notice">إذا فقدت رمز الدخول القديم أو تغيّر رقمك، أرسل طلبك؛ ستتم مراجعته من الإدارة للتأكد من تسجيلك السابق قبل إعادة التفعيل — منعًا لأي محاولة انتحال.</div>
+  <div class="field"><label>الاسم</label><input id="recoveryName" placeholder="الاسم الكامل"></div>
+  <div class="field"><label>رقم الهاتف (القديم أو الحالي)</label><input id="recoveryPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
+  <div class="field"><label>ملاحظة (اختياري)</label><input id="recoveryNote" placeholder="مثال: فقدت الشريحة القديمة"></div>
+  <button class="btn full" onclick="submitRecovery()">إرسال طلب التحقق عبر واتساب 💬</button>
+</div></div>
+
+<script>
+const appointmentsSeed=[
+ {doctor:"د. أحمد محمد",date:"اليوم 10:00",type:"استشارة عامة",status:"مؤكد"},
+ {doctor:"د. سارة علي",date:"غدًا 16:00",type:"متابعة",status:"انتظار الدفع"}
+];
+const ordersSeed=[
+ {id:"#1001",pharmacy:"صيدلية الشفاء",items:"3 أصناف",status:"قيد التجهيز"},
+ {id:"#1000",pharmacy:"صيدلية الأمل",items:"وصفة مرفقة",status:"تم الاستلام"}
+];
+let appointments=JSON.parse(localStorage.getItem("alshifaAppointments")||"null")||appointmentsSeed;
+let orders=JSON.parse(localStorage.getItem("alshifaOrders")||"null")||ordersSeed;
+function saveAppointments(){localStorage.setItem("alshifaAppointments",JSON.stringify(appointments));}
+function saveOrders(){localStorage.setItem("alshifaOrders",JSON.stringify(orders));}
+let wholesaleOrders=JSON.parse(localStorage.getItem("alshifaWholesaleOrders")||"null")||[];
+function saveWholesaleOrders(){localStorage.setItem("alshifaWholesaleOrders",JSON.stringify(wholesaleOrders));}
+function show(id,btn){
+ if(id==="adminPanel" && !isRealAdmin()){ alert("لوحة المدير محمية — سجّل الدخول بحساب مدير معتمد."); return; }
+ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ else if(id==="patient")document.querySelector('.nav button').classList.add('active');
+ const subPanels={patient:"patientSubscriptionBox",doctorPanel:"doctorSubscriptionBox",pharmacyPanel:"pharmacySubscriptionBox",wholesalePanel:"wholesaleSubscriptionBox",labPanel:"labSubscriptionBox"};
+ if(subPanels[id] && typeof renderSubscriptionBox==="function"){
+   const role = id==="patient" ? "patient" : id.replace("Panel","");
+   renderSubscriptionBox(subPanels[id], role);
+ }
+ if(id==="adminPanel"){
+   if(typeof renderAdminPendingActivations==="function") renderAdminPendingActivations();
+   if(typeof renderSubConfigEditor==="function") renderSubConfigEditor();
+ }
+}
+function render(){
+ const a=document.getElementById('patientAppointments');
+ const aa=document.getElementById('allAppointments');
+ const o=document.getElementById('patientOrders');
+ const oo=document.getElementById('allOrders');
+ const p=document.getElementById('paymentList');
+ const ac=appointments.map(x=>`<div class="row"><div><b>${x.doctor}</b><div class="small">${x.date} · ${x.type}</div></div><span class="badge ${x.status.includes('انتظار')?'warning':''}">${x.status}</span></div>`).join('');
+ const oc=orders.map(x=>`<div class="row"><div><b>${x.type==='lab'?'🔬':'💊'} ${x.id}</b><div class="small">${x.pharmacy} · ${x.items}${x.prescriptionImage?' · 📎 مرفق':''}</div></div><span class="badge">${x.status}</span></div>`).join('');
+ a.innerHTML=appointments.slice(0,2).map(x=>`<div class="row"><div><b>${x.doctor}</b><div class="small">${x.date}</div></div><span class="badge">${x.status}</span></div>`).join('');
+ aa.innerHTML=ac;o.innerHTML=orders.slice(0,2).map(x=>`<div class="row"><div><b>${x.type==='lab'?'🔬':'💊'} ${x.id}</b><div class="small">${x.pharmacy} · ${x.items}${x.prescriptionImage?' · 📎 مرفق':''}</div></div><span class="badge">${x.status}</span></div>`).join('');oo.innerHTML=oc;
+ p.innerHTML=`<div class="row"><div><b>استشارة د. أحمد</b><div class="small">20,000 ج · عمولة المنصة محسوبة آليًا</div></div><span class="badge">مدفوع</span></div><div class="row"><div><b>طلب دواء #1001</b><div class="small">35,000 ج · إيصال قيد المراجعة</div></div><span class="badge warning">انتظار</span></div>`;
+}
+function openDoctor(){renderBookingTimeSelect();document.getElementById('doctorModal').classList.add('show')}
+function openOrder(){document.getElementById('orderModal').classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function bookAppointment(){
+ const d=document.getElementById('date').value||"موعد قريب";
+ const t=document.getElementById('bookTime').value||"";
+ appointments.unshift({doctor:document.getElementById('doctor').value.split(' —')[0],date:d+(t?(" — "+t):""),type:document.getElementById('specialty').value,status:"بانتظار الدفع"});
+ saveAppointments();
+ render();closeModal('doctorModal');show('appointments');alert('تم إنشاء الحجز. الحالة: بانتظار الدفع.');
+}
+function readFileAsDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function createOrder(){
+ const raw=document.getElementById('medicine').value||"";
+ const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+ if(lines.length===0){alert('اكتب صنفًا واحدًا على الأقل');return;}
+ const summary=lines.length===1?lines[0]:`${lines.length} أصناف`;
+ const fileInput=document.getElementById('orderPrescriptionFile');
+ let prescriptionImage=null;
+ if(fileInput && fileInput.files && fileInput.files[0]){
+   const f=fileInput.files[0];
+   if(f.size>5*1024*1024){ alert('حجم ملف الروشتة يجب ألا يتجاوز 5MB.'); return; }
+   prescriptionImage={name:f.name,type:f.type,size:f.size,attached:true};
+ }
+ orders.unshift({id:"#"+(1002+orders.length),pharmacy:"صيدلية الشفاء",items:summary,itemsDetail:lines,status:"بانتظار التأكيد",prescriptionImage});
+ saveOrders();
+ render();closeModal('orderModal');document.getElementById('medicine').value='';if(fileInput)fileInput.value='';show('orders');
+ alert('تم إرسال طلب الدواء بنجاح ('+lines.length+' صنف)'+(prescriptionImage?' مع صورة الروشتة 📎':'')+'.');
+}
+function openWholesaleOrder(){document.getElementById('wholesaleOrderModal').classList.add('show')}
+async function createWholesaleOrder(){
+ const raw=document.getElementById('wholesaleItems').value||"";
+ const pharmacy=document.getElementById('wholesaleOrderPharmacy').value;
+ const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+ if(lines.length===0){alert('اكتب صنفًا واحدًا على الأقل بصيغة: الاسم × الكمية × السعر');return;}
+ const items=[];
+ let grandTotal=0;
+ for(const line of lines){
+  const parts=line.split('×').map(p=>p.trim());
+  if(parts.length!==3){alert('صيغة غير صحيحة في السطر: "'+line+'"\nاستخدم: الاسم × الكمية × السعر');return;}
+  const name=parts[0];
+  const qty=parseFloat(parts[1].replace(/[^0-9.]/g,''));
+  const price=parseFloat(parts[2].replace(/[^0-9.]/g,''));
+  if(!name||isNaN(qty)||qty<=0||isNaN(price)||price<=0){alert('تأكد من صحة الكمية والسعر في السطر: "'+line+'"');return;}
+  const lineTotal=qty*price;
+  grandTotal+=lineTotal;
+  items.push({name,qty,price,lineTotal});
+ }
+ const fileInput=document.getElementById('wholesalePrescriptionFile');
+ let prescriptionImage=null;
+ if(fileInput && fileInput.files && fileInput.files[0]){
+   const f=fileInput.files[0];
+   if(f.size>5*1024*1024){ alert('حجم ملف الروشتة يجب ألا يتجاوز 5MB.'); return; }
+   prescriptionImage={name:f.name,type:f.type,size:f.size,attached:true};
+ }
+ const summary=items.length===1?items[0].name+" × "+items[0].qty:items.length+" أصناف";
+ wholesaleOrders.unshift({id:"#WS"+(1000+wholesaleOrders.length+1),pharmacy,items:summary,itemsDetail:items,total:grandTotal,status:"بانتظار التأكيد",createdAt:new Date().toISOString(),prescriptionImage});
+ saveWholesaleOrders();
+ renderWholesaleOrders();
+ closeModal('wholesaleOrderModal');
+ document.getElementById('wholesaleItems').value='';
+ if(fileInput)fileInput.value='';
+ alert('تم إرسال طلب الجملة بنجاح ('+items.length+' صنف) — الإجمالي: '+grandTotal.toLocaleString('ar')+' جنيه'+(prescriptionImage?' مع صورة الروشتة 📎':''));
+}
+function renderWholesaleOrders(){
+ const list=document.getElementById('wholesaleOrderList');
+ const countEl=document.getElementById('wholesaleOrderCount');
+ const pendingEl=document.getElementById('wholesaleOrderPending');
+ if(!list)return;
+ if(wholesaleOrders.length===0){
+  list.innerHTML='<div class="notice">لا توجد طلبات جملة بعد.</div>';
+ } else {
+  list.innerHTML=wholesaleOrders.map(o=>`<div class="row"><div><b>${o.id}</b><div class="small">${escapeHtml(o.pharmacy)} · ${escapeHtml(o.items)} · ${o.total.toLocaleString('ar')} ج</div></div><span class="badge ${o.status.includes('انتظار')?'warning':''}">${escapeHtml(o.status)}</span></div>`).join('');
+ }
+ if(countEl)countEl.textContent=wholesaleOrders.length;
+ if(pendingEl)pendingEl.textContent=wholesaleOrders.filter(o=>o.status.includes('انتظار')||o.status.includes('توريد')).length;
+}
+function notify(){alert('لا توجد إشعارات جديدة')}
+function setRole(role,el){
+ if(role==="admin" && !isRealAdmin()){ alert("لا يمكن فتح وضع المدير من تجربة الأدوار. يجب تسجيل الدخول بحساب مدير معتمد."); return; }
+ document.querySelectorAll('.role button').forEach(x=>x.classList.remove('sel'));if(el)el.classList.add('sel');
+ const names={patient:"مريض",doctor:"طبيب",pharmacy:"نقطة بيع / صيدلية",lab:"معمل تحاليل",wholesale:"عميل جملة",admin:"مدير"};
+ document.getElementById('currentRole').textContent=names[role];
+ if(role==="doctor")show('doctorPanel');else if(role==="pharmacy")show('pharmacyPanel');else if(role==="lab")show('labPanel');else if(role==="wholesale")show('wholesalePanel');else if(role==="admin")show('structurePreview');else show('patient');
+}
+window.onFirebaseLogin=function(profile){
+  if(!profile)return;
+  document.getElementById('currentRole').textContent = ({patient:"مريض",doctor:"طبيب",pharmacy:"نقطة بيع / صيدلية",lab:"معمل تحاليل",wholesale:"عميل جملة",admin:"مدير"})[profile.role] || "مريض";
+  const phoneEl=document.querySelector('#profile .row strong');
+  if(profile.phone){
+    const rows=document.querySelectorAll('#profile .row strong');
+    if(rows[1]) rows[1].textContent=profile.phone;
+  }
+  setRole(profile.role||"patient", document.querySelector('.role button'));
+  const subPanels={patient:"patientSubscriptionBox",doctor:"doctorSubscriptionBox",pharmacy:"pharmacySubscriptionBox",wholesale:"wholesaleSubscriptionBox",lab:"labSubscriptionBox"};
+  const boxId=subPanels[profile.role||"patient"];
+  if(boxId && typeof renderSubscriptionBox==="function") renderSubscriptionBox(boxId, profile.role||"patient");
+}
+
+const defaultCities=["أم القرى الجزيرة","الخرطوم","أم درمان","الخرطوم بحري","بورتسودان","كسلا","القضارف","ود مدني","عطبرة","الأبيض","نيالا","الفاشر","الجنينة","كوستي","دنقلا","شندي","وادي حلفا","الدمازين","سنار","كريمة","مروي","الفاو"];
+let cities=JSON.parse(localStorage.getItem("alshifaCities")||"null")||defaultCities.slice();
+cities=cities.filter(c=>c!=="أم القرى" && c!=="أم القرى الجزيرة");
+cities.unshift("أم القرى الجزيرة");
+defaultCities.forEach(c=>{ if(!cities.includes(c)) cities.push(c); });
+localStorage.setItem("alshifaCities",JSON.stringify(cities));
+
+const specialties=["عام","باطنية","أطفال","نساء وولادة","جلدية","أسنان","عيون","مخ وأعصاب","عظام"];
+const labServices=["تحليل دم","أشعة","سونار (موجات فوق صوتية)","تحليل بول","فحص شامل","تحليل هرمونات","مسحة/PCR","تحليل آخر"];
+
+const seedDoctors=[
+ {name:"د. أحمد محمد",city:"ود مدني",phone:"249900000001",specialty:"باطنية"},
+ {name:"د. سارة علي",city:"الخرطوم",phone:"249900000002",specialty:"نساء وولادة"},
+ {name:"د. عمر خالد",city:"بورتسودان",phone:"249900000003",specialty:"أطفال"},
+ {name:"د. ليلى إبراهيم",city:"كوستي",phone:"249900000004",specialty:"عيون"}
+];
+let directoryDoctors=JSON.parse(localStorage.getItem("alshifaDirectoryDoctors")||"null")||seedDoctors;
+const seedPharmacies=[
+ {name:"صيدلية الشفاء",city:"ود مدني",phone:"249900000010"},
+ {name:"صيدلية الأمل",city:"الخرطوم",phone:"249900000011"}
+];
+let directoryPharmacies=JSON.parse(localStorage.getItem("alshifaDirectoryPharmacies")||"null")||seedPharmacies;
+let directoryWholesale=JSON.parse(localStorage.getItem("alshifaDirectoryWholesale")||"null")||[];
+const seedLabs=[
+ {name:"معمل الشفاء المركزي",city:"أم القرى الجزيرة",phone:"249900000020",service:"فحص شامل"}
+];
+let directoryLabs=JSON.parse(localStorage.getItem("alshifaDirectoryLabs")||"null")||seedLabs;
+
+function populateCities(){
+  const dl=document.getElementById("cityOptions");
+  if(dl) dl.innerHTML=cities.map(c=>`<option value="${escapeHtml(c)}">`).join("");
+  ["wholesaleCity","regPharmacyCity"].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.innerHTML=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  });
+  const spec=document.getElementById("regSpecialty");
+  if(spec) spec.innerHTML=specialties.map(s=>`<option>${escapeHtml(s)}</option>`).join("");
+  const labServSel=document.getElementById("regLabService");
+  if(labServSel) labServSel.innerHTML=labServices.map(s=>`<option>${escapeHtml(s)}</option>`).join("");
+  const bbCitySel=document.getElementById("bbCity");
+  if(bbCitySel) bbCitySel.innerHTML=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  const oeCitySel=document.getElementById("oeCity");
+  if(oeCitySel) oeCitySel.innerHTML=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  const epCitySel=document.getElementById("epCity");
+  if(epCitySel) epCitySel.innerHTML=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  const acCitySel=document.getElementById("acCity");
+  if(acCitySel) acCitySel.innerHTML=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  const list=document.getElementById("cityList");
+  if(list) list.innerHTML=cities.map(c=>`<span class="city-chip" onclick="pickCity('${escapeHtml(c)}')">${escapeHtml(c)}</span>`).join("");
+  const badge=document.getElementById("citiesCountBadge");
+  if(badge) badge.textContent=cities.length+" مدينة";
+  const chips=document.getElementById("cityChipsScroll");
+  if(chips) chips.innerHTML=cities.map(c=>`<button class="city-chip-btn" onclick="pickCity('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function normalizeSudanPhone(phone){
+ const d=String(phone||"").replace(/\D/g,"");
+ if(d.startsWith("249") && d.length>=12) return "249"+d.slice(3,12);
+ if(d.startsWith("0") && d.length>=10) return "249"+d.slice(1,10);
+ return d;
+}
+function safeGoogleMapsUrl(value){
+ const raw=String(value||"").trim();
+ if(!raw)return "";
+ try{
+   const u=new URL(raw);
+   const host=u.hostname.toLowerCase();
+   const allowed=(u.protocol==="https:" && (host==="www.google.com"||host==="google.com"||host==="maps.google.com"||host.endsWith(".google.com")));
+   return allowed ? u.href : "";
+ }catch(e){ return ""; }
+}
+function isRealAdmin(){
+ return !!(window.fbCurrentUser && window.fbCurrentProfile && window.fbCurrentProfile.role==="admin");
+}
+function requireAdmin(message="هذا الإجراء مخصص للمدير فقط."){
+ if(!isRealAdmin()){ alert(message); return false; }
+ return true;
+}
+function requireOwnUser(uid){
+ return !!(window.fbCurrentUser && uid && window.fbCurrentUser.uid===uid);
+}
+
+
+/* ===== الشفاء2: صلاحيات الوصول للملف الصحي ===== */
+function grantDocId(patientUid,doctorPhone){ return patientUid+"__"+String(doctorPhone).replace(/\D/g,""); }
+
+async function renderAccessGrants(){
+  const wrap=document.getElementById("accessGrantsList");
+  if(!wrap) return;
+  if(!window.fbCurrentUser){ wrap.innerHTML='<div class="notice">سجّل الدخول لعرض الأطباء المصرّح لهم.</div>'; return; }
+  wrap.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+    const uid=window.fbCurrentUser.uid;
+    const all=window.fbQueryWhere ? await window.fbQueryWhere("accessGrants","patientId","==",uid) : [];
+    const active=all.filter(g=>g.status==="active");
+    if(!active.length){ wrap.innerHTML='<div class="notice">لا يوجد أطباء مصرّح لهم حالياً.</div>'; return; }
+    wrap.innerHTML=active.map(g=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(g.doctorName||"طبيب")}</b><div class="small">${escapeHtml(g.specialty||"")} · ${escapeHtml(g.city||"")}</div></div><button class="btn danger" onclick="revokeAccessGrant('${g.id}')">سحب الإذن ❌</button></div>`).join("");
+  }catch(e){
+    wrap.innerHTML='<div class="notice">تعذر تحميل الصلاحيات، تأكد من اتصالك بالإنترنت.</div>';
+    console.warn(e);
+  }
+}
+
+async function revokeAccessGrant(docId){
+  if(!confirm("هل تريد سحب إذن هذا الطبيب من رؤية ملفك؟")) return;
+  try{
+    await window.fbSaveDoc("accessGrants",docId,{status:"revoked",revokedAt:new Date().toISOString()});
+    renderAccessGrants();
+  }catch(e){
+    alert("تعذر سحب الإذن، تأكد من اتصالك بالإنترنت.");
+  }
+}
+
+function searchDoctorForGrant(){
+  const q=(document.getElementById("grantDoctorSearch").value||"").trim().toLowerCase();
+  const wrap=document.getElementById("grantDoctorResults");
+  if(!q){ wrap.innerHTML=""; return; }
+  const results=(typeof directoryDoctors!=="undefined"?directoryDoctors:[]).filter(d=>
+    (d.name||"").toLowerCase().includes(q) || (d.city||"").toLowerCase().includes(q) || (d.specialty||"").toLowerCase().includes(q)
+  ).slice(0,8);
+  if(!results.length){ wrap.innerHTML='<div class="notice">لم يتم العثور على طبيب.</div>'; return; }
+  wrap.innerHTML=results.map((d,i)=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(d.name)}</b><div class="small">${escapeHtml(d.specialty||"")} · ${escapeHtml(d.city||"")}</div></div><button class="btn" onclick='grantAccessToDoctor(${JSON.stringify(d).replace(/'/g,"&#39;")})'>منح الإذن ➕</button></div>`).join("");
+}
+
+async function grantAccessToDoctor(doctor){
+  if(!window.fbCurrentUser){ alert("سجّل الدخول أولاً."); return; }
+  if(!doctor.phone){ alert("رقم هاتف الطبيب غير متوفر."); return; }
+  const uid=window.fbCurrentUser.uid;
+  const docId=grantDocId(uid,doctor.phone);
+  try{
+    await window.fbSaveDoc("accessGrants",docId,{
+      patientId:uid,
+      doctorPhone:String(doctor.phone).replace(/\D/g,""),
+      doctorName:doctor.name||"",
+      specialty:doctor.specialty||"",
+      city:doctor.city||"",
+      status:"active",
+      grantedAt:new Date().toISOString()
+    });
+    document.getElementById("grantDoctorSearch").value="";
+    document.getElementById("grantDoctorResults").innerHTML="";
+    alert("تم منح الإذن بنجاح");
+    renderAccessGrants();
+  }catch(e){
+    alert("تعذر منح الإذن، تأكد من اتصالك بالإنترنت.");
+    console.warn(e);
+  }
+}
+async function saveHealthExtraInfo(){
+  const v=(document.getElementById("healthExtraInfo").value||"").trim();
+  const uid=window.fbCurrentUser&&window.fbCurrentUser.uid;
+  if(!uid){ alert("سجّل الدخول أولاً لحفظ معلوماتك الصحية بشكل آمن."); return; }
+  try{
+    await window.fbUpdateProfile(uid,{healthExtraInfo:v});
+    if(window.fbCurrentProfile) window.fbCurrentProfile.healthExtraInfo=v;
+    alert("تم حفظ المعلومات الصحية في حسابك بشكل آمن ✅");
+  }catch(e){
+    console.error(e);
+    alert("تعذر حفظ المعلومات الصحية. لم يتم تخزينها محليًا حفاظًا على الخصوصية.");
+  }
+}
+function pickCity(name){const el=document.getElementById("regCity"); if(el) el.value=name;}
+
+/* ===== اقتراح أسماء الأدوية أثناء الكتابة (اختصار الاسم مع أول حروف) ===== */
+const commonMedicines=["باراسيتامول","أموكسيسيلين","إيبوبروفين","فيتامين سي","أوميبرازول","سيتريزين","ميتفورمين","أسبرين","بنادول","كلورفينيرامين","أزيثروميسين","دايكلوفيناك","لوراتادين","فولتارين","إنسولين","فيتامين د","حديد","كالسيوم","شراب سعال","مضاد حموضة","بروفين","فلاجيل (مترونيدازول)","سيبروفلوكساسين","دومبيريدون","رانيتيدين","بانادول إكسترا","أموكسيل"];
+function attachMedicineAutocomplete(textareaId,suggestBoxId){
+  const ta=document.getElementById(textareaId);
+  const box=document.getElementById(suggestBoxId);
+  if(!ta||!box)return;
+  ta.addEventListener('input',()=>{
+    const pos=ta.selectionStart;
+    const text=ta.value.slice(0,pos);
+    const lastLine=text.split('\n').pop();
+    const word=lastLine.trim();
+    if(word.length<2){box.innerHTML='';return;}
+    const matches=commonMedicines.filter(m=>m.includes(word)).slice(0,6);
+    box.innerHTML=matches.map(m=>`<span class="city-chip" onclick="insertMedicineSuggestion('${textareaId}','${suggestBoxId}','${m.replace(/'/g,"\\'")}')">${escapeHtml(m)}</span>`).join('');
+  });
+}
+function insertMedicineSuggestion(textareaId,suggestBoxId,name){
+  const ta=document.getElementById(textareaId);
+  if(!ta)return;
+  const pos=ta.selectionStart;
+  const text=ta.value.slice(0,pos);
+  const linesArr=text.split('\n');
+  linesArr[linesArr.length-1]=name+" × 1";
+  const after=ta.value.slice(pos);
+  ta.value=linesArr.join('\n')+after;
+  ta.focus();
+  const box=document.getElementById(suggestBoxId);
+  if(box)box.innerHTML='';
+}
+
+/* ===== مشاركة التطبيق مقابل شهر مجاني إضافي (نظام قائم على الثقة — يمكن للإدارة المراجعة يدويًا) ===== */
+function getReferralCount(){return parseInt(localStorage.getItem("alshifaReferralCount")||"0",10);}
+function renderReferral(){
+  const el=document.getElementById("referralCount");
+  if(el) el.textContent=getReferralCount()+" / 5";
+}
+function registerReferralShare(){
+  let n=getReferralCount()+1;
+  if(n>5)n=5;
+  localStorage.setItem("alshifaReferralCount",String(n));
+  renderReferral();
+  if(n>=5){
+    const key="alshifaReg_patient";
+    let rec=JSON.parse(localStorage.getItem(key)||"null")||{registeredAt:new Date().toISOString()};
+    const base=new Date(rec.registeredAt);
+    base.setDate(base.getDate()+30);
+    rec.registeredAt=base.toISOString();
+    localStorage.setItem(key,JSON.stringify(rec));
+    localStorage.removeItem("alshifaActivated_patient");
+    localStorage.setItem("alshifaReferralCount","0");
+    renderReferral();renderTrials();
+    alert("🎉 تم رصد 5 مشاركات! تمت إضافة شهر مجاني إضافي لحساب المريض.");
+  } else {
+    alert(`تم تسجيل مشاركة رقم ${n} من 5.`);
+  }
+}
+
+/* ===== الوضع الليلي/النهاري ===== */
+function applyTheme(){
+  const dark=localStorage.getItem("alshifaTheme")==="dark";
+  document.body.classList.toggle("dark",dark);
+  const btn=document.getElementById("themeToggleBtn");
+  if(btn) btn.textContent=dark?"☀️":"🌙";
+}
+function toggleTheme(){
+  const dark=!document.body.classList.contains("dark");
+  localStorage.setItem("alshifaTheme",dark?"dark":"light");
+  applyTheme();
+}
+
+/* ===== زر المشاركة ===== */
+function shareApp(){
+  /* رابط ثابت ونظيف دايمًا (بدل location.href اللي ممكن يحمل معاه رموز/حالة داخلية
+     من التطبيق المثبّت كـ PWA، وده كان يخلي الرابط المُرسل ما يفتح صح عند المستلم) */
+  const appUrl="https://naserkder123-lang.github.io/al-shifa/";
+  const shareData={title:"الشفاء",text:"منصة الشفاء للرعاية الصحية — احجز طبيبك، اطلب دواءك، واحتفظ بملفك الصحي في مكان واحد.",url:appUrl};
+  const waFallback=()=>{
+    const msg=encodeURIComponent(shareData.text+"\n"+shareData.url);
+    window.open(`https://wa.me/?text=${msg}`,"_blank");
+  };
+  if(navigator.share){
+    navigator.share(shareData).catch(err=>{
+      if(err && err.name==="AbortError") return; // المستخدم ألغى المشاركة بنفسه
+      waFallback();
+    });
+  }else{
+    waFallback();
+  }
+}
+
+/* ===== عداد الزوار (محلي — يُحتسب مرة واحدة لكل جلسة) ===== */
+function trackVisit(){
+  let count=parseInt(localStorage.getItem("alshifaVisits")||"0",10);
+  if(!sessionStorage.getItem("alshifaVisitedThisSession")){
+    count+=1;
+    localStorage.setItem("alshifaVisits",String(count));
+    sessionStorage.setItem("alshifaVisitedThisSession","1");
+  }
+  const el=document.getElementById("visitorCount");
+  if(el) el.textContent=count.toLocaleString('ar-EG');
+}
+
+/* ===== الشهر الأول مجانًا — يُحسب من تاريخ أول تسجيل فعلي لكل دور ===== */
+function ensureRegistered(role){
+  const key="alshifaReg_"+role;
+  let rec=JSON.parse(localStorage.getItem(key)||"null");
+  if(!rec){rec={registeredAt:new Date().toISOString()};localStorage.setItem(key,JSON.stringify(rec));}
+  return rec;
+}
+/* ===== إعدادات الاشتراك الشهري — قابلة للتعديل بشكل منفصل لكل دور ===== */
+function getSettings(){
+  const defaults={doctorFee:3000,pharmacyFee:3000,wholesaleFee:3000,patientFee:3000,labFee:3000,adminPhone:"0969695656",bankName:"بنك الخرطوم",bankAccount:"2215732"};
+  return Object.assign(defaults,JSON.parse(localStorage.getItem("alshifaSettings")||"{}"));
+}
+function getMonthlyFee(role){
+  const s=getSettings();
+  if(role==="doctor")return s.doctorFee;
+  if(role==="pharmacy")return s.pharmacyFee;
+  if(role==="wholesale")return s.wholesaleFee;
+  if(role==="patient")return s.patientFee;
+  if(role==="lab")return s.labFee;
+  return 0;
+}
+function saveContactInfo(){
+  const s=getSettings();
+  const phoneEl=document.getElementById("adminPhoneInput");
+  const bankEl=document.getElementById("bankNameInput");
+  const accEl=document.getElementById("bankAccountInput");
+  if(phoneEl && phoneEl.value.trim()) s.adminPhone=phoneEl.value.trim();
+  if(bankEl && bankEl.value.trim()) s.bankName=bankEl.value.trim();
+  if(accEl && accEl.value.trim()) s.bankAccount=accEl.value.trim();
+  localStorage.setItem("alshifaSettings",JSON.stringify(s));
+  renderTrials();
+  alert("تم حفظ معلومات الدفع — ستظهر الآن لكل المستخدمين عند التفعيل.");
+}
+function saveMonthlyFee(role,inputId){
+  const input=document.getElementById(inputId);
+  const val=parseInt((input.value||"").trim(),10);
+  if(!val||val<=0){alert("اكتب مبلغًا صحيحًا أكبر من صفر");return;}
+  const s=getSettings();
+  if(role==="doctor")s.doctorFee=val;
+  else if(role==="pharmacy")s.pharmacyFee=val;
+  else if(role==="wholesale")s.wholesaleFee=val;
+  else if(role==="patient")s.patientFee=val;
+  else if(role==="lab")s.labFee=val;
+  localStorage.setItem("alshifaSettings",JSON.stringify(s));
+  renderTrials();
+  alert(`تم تحديث الاشتراك الشهري إلى ${val.toLocaleString('ar-EG')} جنيه لهذا الدور — يُطبَّق تلقائيًا بعد انتهاء الشهر المجاني.`);
+}
+function trialDays(role){ return role==="lab" ? 60 : 30; }
+function trialText(role,label){
+  const rec=ensureRegistered(role);
+  const start=new Date(rec.registeredAt);
+  const days=trialDays(role);
+  const end=new Date(start.getTime()+days*24*60*60*1000);
+  const daysLeft=Math.max(0,Math.ceil((end-new Date())/(24*60*60*1000)));
+  const dateStr=start.toLocaleDateString('ar-EG');
+  const periodLabel=days===60?"أول شهرين":"الشهر الأول";
+  if(daysLeft>0){
+    return `🎁 ${label} — ${periodLabel} مجانًا، متبقّي ${daysLeft} يوم (تسجيلك الأول: ${dateStr})`;
+  }
+  const fee=getMonthlyFee(role).toLocaleString('ar-EG');
+  return `⏳ ${label} — انتهت الفترة المجانية، الاشتراك الآن ${fee} ج شهريًا (تسجيلك الأول: ${dateStr})`;
+}
+function isTrialExpired(role){
+  const rec=ensureRegistered(role);
+  const start=new Date(rec.registeredAt);
+  const days=trialDays(role);
+  const end=new Date(start.getTime()+days*24*60*60*1000);
+  return new Date()>end;
+}
+function patientTrialText(){
+  const role="patient";
+  const rec=ensureRegistered(role);
+  const start=new Date(rec.registeredAt);
+  const days=trialDays(role);
+  const end=new Date(start.getTime()+days*24*60*60*1000);
+  const daysLeft=Math.max(0,Math.ceil((end-new Date())/(24*60*60*1000)));
+  if(daysLeft>0){
+    return `🎁 التسجيل بالنسبة للشهر الأول للكل مجانًا، متبقّي ${daysLeft} يوم — عدا الطوارئ مجانية 100%꧁꧂`;
+  }
+  const fee=getMonthlyFee(role).toLocaleString('ar-EG');
+  return `⏳ انتهى الشهر المجاني — الاشتراك الآن ${fee} ج شهريًا — عدا الطوارئ مجانية 100%꧁꧂`;
+}
+function renderTrials(){
+  const map={
+    trialDoctor:["doctor","الطبيب"],
+    trialPharmacy:["pharmacy","نقطة البيع"],
+    trialWholesale:["wholesale","عميل الجملة"],
+    trialLab:["lab","المعمل"]
+  };
+  Object.keys(map).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=trialText(map[id][0],map[id][1]);
+  });
+  const patientEl=document.getElementById("trialPatient");
+  if(patientEl) patientEl.textContent=patientTrialText();
+  renderActivationBlocks();
+}
+/* ===== تفعيل الاشتراك بعد انتهاء الشهر المجاني: عرض بيانات الدفع + استلام رقم العملية ===== */
+function renderActivationBlocks(){
+  renderActivationBlock('activateDoctor','doctor');
+  renderActivationBlock('activatePharmacy','pharmacy');
+  renderActivationBlock('activateWholesale','wholesale');
+  renderActivationBlock('activateLab','lab');
+}
+function renderActivationBlock(elId,role){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(!isTrialExpired(role)){el.innerHTML="";return;}
+  if(localStorage.getItem("alshifaActivated_"+role)==="1"){
+    el.innerHTML=`<div class="notice">✅ اشتراكك مفعّل لهذا الشهر.</div>`;
+    return;
+  }
+  const s=getSettings();
+  const fee=getMonthlyFee(role).toLocaleString('ar-EG');
+  el.innerHTML=`
+    <div class="notice" style="margin-top:10px">💳 لتفعيل اشتراكك (${fee} ج شهريًا): حوّل المبلغ إلى<br>
+    🏦 ${escapeHtml(s.bankName)} — حساب رقم <b>${escapeHtml(s.bankAccount)}</b><br>
+    📱 أو عبر رقم <b>${escapeHtml(s.adminPhone)}</b> (كاش/بنكك)<br>
+    ثم اكتب رقم العملية (المرجع) بالأسفل وأرسله — التفعيل يتم بعد المراجعة.</div>
+    <div class="field"><label>رقم العملية / مرجع التحويل</label><input id="txRef_${role}" placeholder="مثال: 123456789"></div>
+    <button class="btn full" onclick="submitActivation('${role}')">📤 إرسال إشعار الدفع</button>`;
+}
+function submitActivation(role){
+  const input=document.getElementById("txRef_"+role);
+  const ref=(input?input.value:"").trim();
+  if(!ref){alert("اكتب رقم العملية أولاً");return;}
+  const names={doctor:"طبيب",pharmacy:"نقطة بيع",wholesale:"عميل جملة",patient:"مريض",lab:"معمل"};
+  const s=getSettings();
+  const msg=encodeURIComponent(`إشعار دفع اشتراك - الشفاء\nالدور: ${names[role]||role}\nرقم العملية: ${ref}\nالمبلغ: ${getMonthlyFee(role).toLocaleString('ar-EG')} ج`);
+  window.open(`https://wa.me/${s.adminPhone.replace(/\D/g,'').replace(/^0/,'249')}?text=${msg}`,"_blank");
+  const pending=JSON.parse(localStorage.getItem("alshifaPendingActivations")||"[]");
+  pending.unshift({role,ref,time:new Date().toISOString()});
+  localStorage.setItem("alshifaPendingActivations",JSON.stringify(pending));
+  alert("تم إرسال رقم العملية للإدارة عبر واتساب — سيصلك التفعيل بعد المراجعة.");
+}
+
+/* ===== أرقام الطوارئ — مجانية دائمًا، يديرها المدير فقط (إضافة/تعديل/مسح) ===== */
+function openEmergency(){renderEmergencyGrid();document.getElementById('emergencyModal').classList.add('show');}
+function renderEmergencyGrid(){
+  const wrap=document.getElementById("emergencyGrid");
+  if(!wrap)return;
+  const epidemicBox=`<div class="emergency-box"><b>🦠 اشتباه بمرض وبائي</b><a href="#" onclick="closeModal('emergencyModal');show('epidemicList');renderEpidemicList();return false;">📍 اختر مدينتك</a></div>`;
+  const accidentBox=`<div class="emergency-box"><b>🚑 حادث سير</b><a href="#" onclick="closeModal('emergencyModal');show('accidentList');renderAccidentList();return false;">📍 اختر مدينتك</a></div>`;
+  const bloodBox=`<div class="emergency-box"><b>🩸 بنك الدم</b><a href="#" onclick="closeModal('emergencyModal');show('bloodBanksList');renderBloodBanksList();return false;">📍 اختر مدينتك</a></div>`;
+  const otherBox=`<div class="emergency-box"><b>☎️ أخرى</b><a href="#" onclick="closeModal('emergencyModal');show('otherEmergencyList');renderOtherEmergencyList();return false;">📍 اختر مدينتك</a></div>`;
+  wrap.innerHTML = epidemicBox + accidentBox + bloodBox + otherBox;
+}
+/* ===== أرقام الطوارئ وبنوك الدم: مصدر الحقيقة هو Firestore (publicSettings/emergency)
+   بحيث يراها كل المستخدمين على كل جهاز، وليس فقط جهاز المدير الذي حفظها.
+   localStorage تبقى فقط كنسخة احتياطية للعرض السريع/عدم الاتصال. ===== */
+async function saveEmergencyNumbers(){
+  await syncEmergencyConfigToFirestore();
+}
+/* يرفع الحالة الحالية لأرقام الطوارئ + بنوك الدم دفعة واحدة إلى وثيقة مشتركة على Firestore.
+   يتطلب قاعدة أمان Firestore تسمح بالكتابة على publicSettings/emergency للمدير فقط،
+   وبالقراءة للجميع (راجع ملاحظات الأمان). */
+async function syncEmergencyConfigToFirestore(){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  const payload={
+    epidemicNumbers:directoryEpidemic,
+    accidentNumbers:directoryAccident,
+    bloodBanks:directoryBloodBanks,
+    otherEmergency:directoryOtherEmergency,
+    updatedAt:(window.fbServerTimestamp?window.fbServerTimestamp():new Date().toISOString())
+  };
+  if(!window.fbSaveDoc){
+    alert("تم الحفظ محليًا فقط على هذا الجهاز — تعذر الوصول لخدمة Firebase، لن يراها بقية المستخدمين حتى تعود الخدمة.");
+    return;
+  }
+  try{
+    await window.fbSaveDoc("publicSettings","emergency",payload);
+    alert("تم حفظ أرقام الطوارئ وبنوك الدم — ستظهر الآن لكل المستخدمين على كل جهاز.");
+  }catch(e){
+    console.error(e);
+    alert("تعذر الحفظ على Firestore (تم الحفظ محليًا على جهازك فقط). تأكد من دخولك كمدير ومن اتصالك بالإنترنت، ومن قاعدة الأمان الخاصة بـ publicSettings/emergency.");
+  }
+}
+/* يقرأ أحدث نسخة من Firestore عند فتح التطبيق حتى يرى كل مستخدم نفس الأرقام
+   بغض النظر عن الجهاز الذي أضافها المدير منه. */
+async function loadEmergencyConfigFromFirestore(){
+  if(!window.fbGetDoc) return;
+  try{
+    const d=await window.fbGetDoc("publicSettings","emergency");
+    if(!d) return;
+    if(Array.isArray(d.epidemicNumbers)){
+      directoryEpidemic=d.epidemicNumbers;
+      saveEpidemicStore();
+    }
+    if(Array.isArray(d.accidentNumbers)){
+      directoryAccident=d.accidentNumbers;
+      saveAccidentStore();
+    }
+    if(Array.isArray(d.bloodBanks)){
+      directoryBloodBanks=d.bloodBanks;
+      saveBloodBanksStore();
+    }
+    if(Array.isArray(d.otherEmergency)){
+      directoryOtherEmergency=d.otherEmergency;
+      saveOtherEmergencyStore();
+    }
+    renderEmergencyGrid();
+    renderEpidemicAdminList();
+    renderEpidemicList();
+    renderAccidentAdminList();
+    renderAccidentList();
+    renderBloodBankAdminList();
+    renderBloodBanksList();
+    renderOtherEmergencyAdminList();
+    renderOtherEmergencyList();
+  }catch(e){
+    console.warn("تعذر تحميل أرقام الطوارئ من Firestore، استخدام النسخة المحلية المخزّنة",e);
+  }
+}
+
+/* ===== بنوك الدم — دليل حسب المدينة، يديره المدير (إضافة/تعديل/حذف) ===== */
+let directoryBloodBanks=JSON.parse(localStorage.getItem("alshifaBloodBanks")||"null")||[];
+let bbEditingIndex=-1;
+function saveBloodBanksStore(){localStorage.setItem("alshifaBloodBanks",JSON.stringify(directoryBloodBanks));}
+function addBloodBank(){
+  if(!requireAdmin("إدارة بنوك الدم مخصصة للمدير فقط.")) return;
+  const name=(document.getElementById("bbName").value||"").trim();
+  const city=document.getElementById("bbCity").value;
+  const phone=(document.getElementById("bbPhone").value||"").trim();
+  if(!name||!phone){alert("اكتب اسم بنك الدم ورقم الهاتف");return;}
+  const entry={name,city,phone:(phone.replace(/^0/,"249"))||"249900000000"};
+  if(bbEditingIndex>=0){
+    directoryBloodBanks[bbEditingIndex]=entry;
+    bbEditingIndex=-1;
+    const btn=document.getElementById("bbSubmitBtn");
+    if(btn) btn.textContent="➕ إضافة بنك دم";
+  }else{
+    directoryBloodBanks.unshift(entry);
+  }
+  saveBloodBanksStore();
+  document.getElementById("bbName").value="";document.getElementById("bbPhone").value="";
+  renderBloodBankAdminList();renderBloodBanksList();
+  syncEmergencyConfigToFirestore();
+}
+function editBloodBank(i){
+  const b=directoryBloodBanks[i];
+  if(!b)return;
+  bbEditingIndex=i;
+  document.getElementById("bbName").value=b.name;
+  document.getElementById("bbCity").value=b.city;
+  document.getElementById("bbPhone").value=(b.phone||"").replace(/^249/,"0");
+  const btn=document.getElementById("bbSubmitBtn");
+  if(btn) btn.textContent="💾 حفظ التعديل";
+  const field=document.getElementById("bbName");
+  if(field) field.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function deleteBloodBank(i){
+  if(!requireAdmin("إدارة بنوك الدم مخصصة للمدير فقط.")) return;
+  directoryBloodBanks.splice(i,1);
+  saveBloodBanksStore();
+  renderBloodBankAdminList();renderBloodBanksList();
+  syncEmergencyConfigToFirestore();
+}
+function renderBloodBankAdminList(){
+  const wrap=document.getElementById("bloodBankAdminList");
+  if(!wrap)return;
+  wrap.innerHTML=directoryBloodBanks.length?directoryBloodBanks.map((b,i)=>`<div class="row"><div><b>🩸 ${escapeHtml(b.name)}</b><div class="small">${escapeHtml(b.city||"-")} · ${escapeHtml(b.phone)}</div></div><div style="display:flex;gap:6px"><button class="btn alt" onclick="editBloodBank(${i})">تعديل</button><button class="btn danger" onclick="deleteBloodBank(${i})">حذف</button></div></div>`).join(""):`<div class="notice">لا توجد بنوك دم مضافة بعد.</div>`;
+}
+let bloodBankFilterCity="الكل";
+function setBloodBankFilter(city){bloodBankFilterCity=city;renderBloodBanksList();}
+function renderBloodBanksList(){
+  const cityWrap=document.getElementById("bloodBankCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${bloodBankFilterCity===c?'sel':''}" onclick="setBloodBankFilter('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryBloodBanks.filter(b=>bloodBankFilterCity==="الكل"||b.city===bloodBankFilterCity);
+  const wrap=document.getElementById("bloodBanksListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(b=>`<div class="row"><div><b>🩸 ${escapeHtml(b.name)}</b><div class="small">${escapeHtml(b.city||"-")}</div></div><div class="contact"><a class="btn" href="tel:+${b.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${b.phone}" target="_blank" rel="noopener" title="واتساب">💬</a></div></div>`).join(""):`<div class="notice">لا توجد بنوك دم مسجلة لهذه المدينة بعد.</div>`;
+  const badge=document.getElementById("bloodBanksCountBadge");
+  if(badge) badge.textContent=filtered.length+" بنك دم";
+}
+
+/* ===== "اشتباه بمرض وبائي" — قائمة حسب المدينة (نفس نمط بنك الدم/أخرى بالظبط) ===== */
+let directoryEpidemic=JSON.parse(localStorage.getItem("alshifaEpidemic")||"null")||[];
+function saveEpidemicStore(){localStorage.setItem("alshifaEpidemic",JSON.stringify(directoryEpidemic));}
+function addEpidemicNumber(){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  const city=document.getElementById("epCity").value;
+  const phone=(document.getElementById("epPhone").value||"").trim();
+  const approved=document.getElementById("epApproved").checked;
+  if(!phone){alert("اكتب رقم الهاتف");return;}
+  directoryEpidemic.unshift({city,phone:(phone.replace(/^0/,"249"))||"249900000000",approved});
+  saveEpidemicStore();
+  document.getElementById("epPhone").value="";
+  renderEpidemicAdminList();renderEpidemicList();
+  syncEmergencyConfigToFirestore();
+}
+function deleteEpidemicNumber(i){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  directoryEpidemic.splice(i,1);
+  saveEpidemicStore();
+  renderEpidemicAdminList();renderEpidemicList();
+  syncEmergencyConfigToFirestore();
+}
+function renderEpidemicAdminList(){
+  const wrap=document.getElementById("epidemicAdminList");
+  if(!wrap)return;
+  wrap.innerHTML=directoryEpidemic.length?directoryEpidemic.map((b,i)=>`<div class="row"><div><b>🦠 ${escapeHtml(b.city||"-")}</b><div class="small">${escapeHtml(b.phone)} · ${b.approved?'✅ معتمد':'⏳ لحين الموافقة'}</div></div><button class="btn danger" onclick="deleteEpidemicNumber(${i})">حذف</button></div>`).join(""):`<div class="notice">لا توجد أرقام مضافة بعد.</div>`;
+}
+let epidemicFilterCity="الكل";
+function setEpidemicFilter(city){epidemicFilterCity=city;renderEpidemicList();}
+function renderEpidemicList(){
+  const cityWrap=document.getElementById("epidemicCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${epidemicFilterCity===c?'sel':''}" onclick="setEpidemicFilter('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryEpidemic.filter(b=>epidemicFilterCity==="الكل"||b.city===epidemicFilterCity);
+  const wrap=document.getElementById("epidemicListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(b=>`<div class="row"><div><b>🦠 ${escapeHtml(b.city||"-")}</b>${b.approved?'':'<div class="small">لحين الموافقة من الجهات المسؤولة</div>'}</div><div class="contact"><a class="btn" href="tel:+${b.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${b.phone}" target="_blank" rel="noopener" title="واتساب">💬</a></div></div>`).join(""):`<div class="notice">لا يوجد رقم مسجل لهذه المدينة بعد.</div>`;
+  const badge=document.getElementById("epidemicCountBadge");
+  if(badge) badge.textContent=filtered.length+" رقم";
+}
+
+/* ===== "حادث سير" — قائمة حسب المدينة (نفس نمط بنك الدم/أخرى بالظبط) ===== */
+let directoryAccident=JSON.parse(localStorage.getItem("alshifaAccident")||"null")||[];
+function saveAccidentStore(){localStorage.setItem("alshifaAccident",JSON.stringify(directoryAccident));}
+function addAccidentNumber(){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  const city=document.getElementById("acCity").value;
+  const phone=(document.getElementById("acPhone").value||"").trim();
+  const approved=document.getElementById("acApproved").checked;
+  if(!phone){alert("اكتب رقم الهاتف");return;}
+  directoryAccident.unshift({city,phone:(phone.replace(/^0/,"249"))||"249900000000",approved});
+  saveAccidentStore();
+  document.getElementById("acPhone").value="";
+  renderAccidentAdminList();renderAccidentList();
+  syncEmergencyConfigToFirestore();
+}
+function deleteAccidentNumber(i){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  directoryAccident.splice(i,1);
+  saveAccidentStore();
+  renderAccidentAdminList();renderAccidentList();
+  syncEmergencyConfigToFirestore();
+}
+function renderAccidentAdminList(){
+  const wrap=document.getElementById("accidentAdminList");
+  if(!wrap)return;
+  wrap.innerHTML=directoryAccident.length?directoryAccident.map((b,i)=>`<div class="row"><div><b>🚑 ${escapeHtml(b.city||"-")}</b><div class="small">${escapeHtml(b.phone)} · ${b.approved?'✅ معتمد':'⏳ لحين الموافقة'}</div></div><button class="btn danger" onclick="deleteAccidentNumber(${i})">حذف</button></div>`).join(""):`<div class="notice">لا توجد أرقام مضافة بعد.</div>`;
+}
+let accidentFilterCity="الكل";
+function setAccidentFilter(city){accidentFilterCity=city;renderAccidentList();}
+function renderAccidentList(){
+  const cityWrap=document.getElementById("accidentCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${accidentFilterCity===c?'sel':''}" onclick="setAccidentFilter('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryAccident.filter(b=>accidentFilterCity==="الكل"||b.city===accidentFilterCity);
+  const wrap=document.getElementById("accidentListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(b=>`<div class="row"><div><b>🚑 ${escapeHtml(b.city||"-")}</b>${b.approved?'':'<div class="small">لحين الموافقة من الجهات المسؤولة</div>'}</div><div class="contact"><a class="btn" href="tel:+${b.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${b.phone}" target="_blank" rel="noopener" title="واتساب">💬</a></div></div>`).join(""):`<div class="notice">لا يوجد رقم مسجل لهذه المدينة بعد.</div>`;
+  const badge=document.getElementById("accidentCountBadge");
+  if(badge) badge.textContent=filtered.length+" رقم";
+}
+
+/* ===== "أخرى" — قائمة طوارئ مستقلة قائمة بذاتها حسب المدينة (نفس صفات بنك الدم: تعدد أرقام + مدينة)
+   ونفس صفة "اشتباه بمرض وبائي"/"حادث سير": حالة اعتماد لكل رقم. لا علاقة لها ببنك الدم إطلاقًا. ===== */
+let directoryOtherEmergency=JSON.parse(localStorage.getItem("alshifaOtherEmergency")||"null")||[];
+function saveOtherEmergencyStore(){localStorage.setItem("alshifaOtherEmergency",JSON.stringify(directoryOtherEmergency));}
+function addOtherEmergency(){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  const name=(document.getElementById("oeName").value||"").trim();
+  const city=document.getElementById("oeCity").value;
+  const phone=(document.getElementById("oePhone").value||"").trim();
+  const approved=document.getElementById("oeApproved").checked;
+  if(!name||!phone){alert("اكتب اسم/وصف الرقم ورقم الهاتف");return;}
+  directoryOtherEmergency.unshift({name,city,phone:(phone.replace(/^0/,"249"))||"249900000000",approved});
+  saveOtherEmergencyStore();
+  document.getElementById("oeName").value="";document.getElementById("oePhone").value="";
+  renderOtherEmergencyAdminList();renderOtherEmergencyList();
+  syncEmergencyConfigToFirestore();
+}
+function deleteOtherEmergency(i){
+  if(!requireAdmin("إدارة أرقام الطوارئ مخصصة للمدير فقط.")) return;
+  directoryOtherEmergency.splice(i,1);
+  saveOtherEmergencyStore();
+  renderOtherEmergencyAdminList();renderOtherEmergencyList();
+  syncEmergencyConfigToFirestore();
+}
+function renderOtherEmergencyAdminList(){
+  const wrap=document.getElementById("otherEmergencyAdminList");
+  if(!wrap)return;
+  wrap.innerHTML=directoryOtherEmergency.length?directoryOtherEmergency.map((b,i)=>`<div class="row"><div><b>☎️ ${escapeHtml(b.name)}</b><div class="small">${escapeHtml(b.city||"-")} · ${escapeHtml(b.phone)} · ${b.approved?'✅ معتمد':'⏳ لحين الموافقة'}</div></div><button class="btn danger" onclick="deleteOtherEmergency(${i})">حذف</button></div>`).join(""):`<div class="notice">لا توجد أرقام مضافة بعد في قائمة "أخرى".</div>`;
+}
+let otherEmergencyFilterCity="الكل";
+function setOtherEmergencyFilter(city){otherEmergencyFilterCity=city;renderOtherEmergencyList();}
+function renderOtherEmergencyList(){
+  const cityWrap=document.getElementById("otherEmergencyCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${otherEmergencyFilterCity===c?'sel':''}" onclick="setOtherEmergencyFilter('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryOtherEmergency.filter(b=>otherEmergencyFilterCity==="الكل"||b.city===otherEmergencyFilterCity);
+  const wrap=document.getElementById("otherEmergencyListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(b=>`<div class="row"><div><b>☎️ ${escapeHtml(b.name)}</b><div class="small">${escapeHtml(b.city||"-")}${b.approved?'':' · لحين الموافقة من الجهات المسؤولة'}</div></div><div class="contact"><a class="btn" href="tel:+${b.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${b.phone}" target="_blank" rel="noopener" title="واتساب">💬</a></div></div>`).join(""):`<div class="notice">لا توجد أرقام مسجلة لهذه المدينة بعد.</div>`;
+  const badge=document.getElementById("otherEmergencyCountBadge");
+  if(badge) badge.textContent=filtered.length+" رقم";
+}
+
+/* ===== تصفح المدن: الأطباء ونقاط البيع لكل مدينة، مع تواصل مباشر ===== */
+function renderCitiesBrowse(){
+  const wrap=document.getElementById("citiesBrowseList");
+  if(!wrap)return;
+  const blocks=cities.map(c=>{
+    const docs=directoryDoctors.filter(d=>d.city===c);
+    const phs=directoryPharmacies.filter(p=>p.city===c);
+    const labs=directoryLabs.filter(l=>l.city===c);
+    if(!docs.length && !phs.length && !labs.length) return "";
+    const docRows=docs.map(d=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(d.name)}</b><div class="small">${escapeHtml(d.specialty||"عام")}</div></div><div class="contact"><a class="btn" href="tel:+${d.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${d.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(d.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(d.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع العيادة">📍</a>`:""}</div></div>`).join("");
+    const phRows=phs.map(p=>`<div class="row"><div><b>💊 ${escapeHtml(p.name)}</b><div class="small">نقطة بيع</div></div><div class="contact"><a class="btn" href="tel:+${p.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${p.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(p.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(p.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع نقطة البيع">📍</a>`:""}</div></div>`).join("");
+    const labRows=labs.map(l=>`<div class="row"><div><b>🔬 ${escapeHtml(l.name)}</b><div class="small">${escapeHtml(l.service||"معمل تحاليل")}</div></div><div class="contact"><a class="btn" href="tel:+${l.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${l.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(l.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(l.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع المعمل">📍</a>`:""}</div></div>`).join("");
+    return `<div class="section" style="margin-top:14px"><h3 class="tbar tbar-lg tbar-teal">🏙️ ${escapeHtml(c)}</h3></div>${docRows}${phRows}${labRows}`;
+  }).join("");
+  wrap.innerHTML=blocks||`<div class="notice">لا توجد بيانات بعد لهذه المدن — سجّل كطبيب أو نقطة بيع لتظهر هنا.</div>`;
+}
+
+/* ===== أوقات الحجز — حرة وقابلة للتعديل من لوحة الطبيب بدل قائمة ثابتة ===== */
+const defaultTimeSlots=["10:00 صباحًا","11:00 صباحًا","12:00 ظهرًا","4:00 مساءً"];
+function getTimeSlots(){
+  return JSON.parse(localStorage.getItem("alshifaTimeSlots")||"null")||defaultTimeSlots;
+}
+function saveTimeSlots(slots){
+  localStorage.setItem("alshifaTimeSlots",JSON.stringify(slots));
+  renderBookingTimeSelect();
+  renderScheduleSlots();
+}
+function renderBookingTimeSelect(){
+  const sel=document.getElementById("bookTime");
+  if(!sel)return;
+  const slots=getTimeSlots();
+  sel.innerHTML=slots.length?slots.map(t=>`<option>${escapeHtml(t)}</option>`).join(""):`<option value="">لا توجد أوقات متاحة حاليًا</option>`;
+}
+function renderScheduleSlots(){
+  const wrap=document.getElementById("slotsList");
+  if(!wrap)return;
+  const slots=getTimeSlots();
+  wrap.innerHTML=slots.length?slots.map((t,i)=>`<div class="row"><b>${escapeHtml(t)}</b><button class="btn danger" onclick="removeTimeSlot(${i})">حذف</button></div>`).join(""):`<div class="notice">لا توجد أوقات مضافة بعد — أضف أول وقت متاح.</div>`;
+}
+function addTimeSlot(){
+  const input=document.getElementById("newSlotInput");
+  const val=(input.value||"").trim();
+  if(!val){alert("اكتب الوقت أولاً");return;}
+  const slots=getTimeSlots();
+  slots.push(val);
+  saveTimeSlots(slots);
+  input.value="";
+}
+function removeTimeSlot(i){
+  const slots=getTimeSlots();
+  slots.splice(i,1);
+  saveTimeSlots(slots);
+}
+function openSchedule(){
+  renderScheduleSlots();
+  document.getElementById('scheduleModal').classList.add('show');
+}
+
+/* ===== تحديد موقع العيادة / نقطة البيع عبر خرائط قوقل ===== */
+function captureLocation(inputId){
+  if(!navigator.geolocation){alert("متصفحك لا يدعم تحديد الموقع تلقائيًا، الصق رابط خرائط قوقل يدويًا.");return;}
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const link=`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+      const el=document.getElementById(inputId);
+      if(el) el.value=link;
+      alert("تم تحديد الموقع الحالي بنجاح ✅ — سيظهر زر 📍 للمرضى للوصول للموقع مباشرة.");
+    },
+    ()=>alert("تعذّر تحديد الموقع. تأكد من تفعيل صلاحية الموقع للمتصفح، أو الصق رابط خرائط قوقل يدويًا."),
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+function openDoctorRegister(){populateCities();document.getElementById("doctorRegisterModal").classList.add("show");}
+function openPharmacyRegister(){populateCities();document.getElementById("pharmacyRegisterModal").classList.add("show");}
+function openWholesale(){populateCities();document.getElementById("wholesaleModal").classList.add("show");}
+
+function registerDoctor(){
+  const name=(document.getElementById("regDoctorName").value||"").trim();
+  const specialty=document.getElementById("regSpecialty").value||"عام";
+  const city=(document.getElementById("regCity").value||"").trim();
+  const phone=(document.getElementById("regPhone").value||"").trim();
+  const location=(document.getElementById("regDoctorLocation").value||"").trim();
+  if(!name||!city){alert("اكتب اسم الطبيب والمدينة");return;}
+  const isNewCity=!cities.includes(city);
+  if(isNewCity){cities.push(city);localStorage.setItem("alshifaCities",JSON.stringify(cities));}
+  localStorage.setItem("alshifaReg_doctor",JSON.stringify({registeredAt:new Date().toISOString()}));
+  directoryDoctors.unshift({name,city,phone:(phone.replace(/^0/,"249"))||"249900000000",specialty,location});
+  localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
+  closeModal("doctorRegisterModal");
+  populateCities();renderTrials();renderCitiesBrowse();renderDoctorsList();
+  alert(`تم تسجيل ${name} (${specialty}) في ${city}${isNewCity?" (مدينة جديدة أُضيفت تلقائيًا)":""} وتفعيل الشهر الأول مجانًا.`);
+}
+function registerPharmacy(){
+  const name=(document.getElementById("regPharmacyName").value||"").trim();
+  const city=document.getElementById("regPharmacyCity").value;
+  const phone=(document.getElementById("regPharmacyPhone").value||"").trim();
+  const location=(document.getElementById("regPharmacyLocation").value||"").trim();
+  if(!name){alert("اكتب اسم نقطة البيع");return;}
+  localStorage.setItem("alshifaReg_pharmacy",JSON.stringify({registeredAt:new Date().toISOString()}));
+  directoryPharmacies.unshift({name,city,phone:(phone.replace(/^0/,"249"))||"249900000000",location});
+  localStorage.setItem("alshifaDirectoryPharmacies",JSON.stringify(directoryPharmacies));
+  closeModal("pharmacyRegisterModal");
+  renderTrials();renderCitiesBrowse();renderPharmaciesList();
+  alert(`تم تسجيل نقطة البيع في ${city} وتفعيل الشهر الأول مجانًا.`);
+}
+function registerWholesale(){
+  const name=(document.getElementById("wholesaleName").value||"").trim();
+  const city=document.getElementById("wholesaleCity").value;
+  const phone=(document.getElementById("wholesalePhone").value||"").trim();
+  if(!name){alert("اكتب اسم العميل");return;}
+  localStorage.setItem("alshifaReg_wholesale",JSON.stringify({registeredAt:new Date().toISOString()}));
+  directoryWholesale.unshift({name,city,phone:(phone.replace(/^0/,"249"))||"249900000000"});
+  localStorage.setItem("alshifaDirectoryWholesale",JSON.stringify(directoryWholesale));
+  closeModal("wholesaleModal");
+  renderTrials();
+  alert(`تم إنشاء حساب عميل الجملة (${name}) في ${city} — الشهر الأول مجانًا`);
+}
+function openLabRegister(){populateCities();toggleLabServiceOther();document.getElementById("labRegisterModal").classList.add("show");}
+function toggleLabServiceOther(){
+  const sel=document.getElementById("regLabService");
+  const wrap=document.getElementById("regLabServiceOtherField");
+  if(!sel||!wrap)return;
+  wrap.style.display = sel.value==="تحليل آخر" ? "" : "none";
+}
+function registerLab(){
+  const name=(document.getElementById("regLabName").value||"").trim();
+  const rawService=document.getElementById("regLabService").value||labServices[0];
+  const customService=(document.getElementById("regLabServiceOther").value||"").trim();
+  const service = (rawService==="تحليل آخر" && customService) ? customService : rawService;
+  const city=(document.getElementById("regLabCity").value||"").trim();
+  const phone=(document.getElementById("regLabPhone").value||"").trim();
+  const location=(document.getElementById("regLabLocation").value||"").trim();
+  if(!name||!city){alert("اكتب اسم المعمل والمدينة");return;}
+  const isNewCity=!cities.includes(city);
+  if(isNewCity){cities.push(city);localStorage.setItem("alshifaCities",JSON.stringify(cities));}
+  localStorage.setItem("alshifaReg_lab",JSON.stringify({registeredAt:new Date().toISOString()}));
+  directoryLabs.unshift({name,city,phone:(phone.replace(/^0/,"249"))||"249900000000",service,location});
+  localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+  closeModal("labRegisterModal");
+  populateCities();renderTrials();renderCitiesBrowse();renderLabsList();
+  alert(`تم تسجيل معمل ${name} (${service}) في ${city}${isNewCity?" (مدينة جديدة أُضيفت تلقائيًا)":""} وتفعيل أول شهرين مجانًا.`);
+}
+
+/* ===== قائمة الأطباء — تصفية حسب التخصص والمدينة ===== */
+let doctorFilterCity="الكل", doctorFilterSpecialty="الكل";
+function setDoctorFilter(type,val){
+  if(type==="specialty")doctorFilterSpecialty=val; else doctorFilterCity=val;
+  renderDoctorsList();
+}
+function renderDoctorsList(){
+  const specWrap=document.getElementById("specialtyChipsScroll");
+  if(specWrap) specWrap.innerHTML=["الكل",...specialties].map(s=>`<button class="city-chip-btn spec-chip ${doctorFilterSpecialty===s?'sel':''}" onclick="setDoctorFilter('specialty','${s}')">${escapeHtml(s)}</button>`).join("");
+  const cityWrap=document.getElementById("doctorCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${doctorFilterCity===c?'sel':''}" onclick="setDoctorFilter('city','${c}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryDoctors.filter(d=>
+    (doctorFilterCity==="الكل"||d.city===doctorFilterCity) &&
+    (doctorFilterSpecialty==="الكل"||d.specialty===doctorFilterSpecialty)
+  );
+  const wrap=document.getElementById("doctorsListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(d=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(d.name)}</b><div class="small">${escapeHtml(d.specialty)} · ${escapeHtml(d.city)}</div></div><div class="contact"><a class="btn" href="tel:+${d.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${d.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(d.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(d.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع العيادة">📍</a>`:""}</div></div>`).join(""):`<div class="notice">لا يوجد أطباء مطابقون لهذا التصفية.</div>`;
+  const badge=document.getElementById("doctorsCountBadge");
+  if(badge) badge.textContent=filtered.length+" طبيب";
+}
+
+/* ===== قائمة نقاط البيع — بحث بالاسم + تصفية حسب المدينة ===== */
+let pharmacyFilterCity="الكل";
+function setPharmacyFilter(city){
+  pharmacyFilterCity=city;
+  renderPharmaciesList();
+}
+function renderPharmaciesList(){
+  const cityWrap=document.getElementById("pharmacyCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${pharmacyFilterCity===c?'sel':''}" onclick="setPharmacyFilter('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
+  const searchEl=document.getElementById("pharmacySearchInput");
+  const q=(searchEl?searchEl.value:"").trim().toLowerCase();
+  const filtered=directoryPharmacies.filter(p=>
+    (pharmacyFilterCity==="الكل"||p.city===pharmacyFilterCity) &&
+    (!q||(p.name||"").toLowerCase().includes(q))
+  );
+  const wrap=document.getElementById("pharmaciesListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(p=>`<div class="row"><div><b>💊 ${escapeHtml(p.name)}</b><div class="small">${escapeHtml(p.city||"-")}</div></div><div class="contact"><a class="btn" href="tel:+${p.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${p.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(p.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(p.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع نقطة البيع">📍</a>`:""}</div></div>`).join(""):`<div class="notice">لا توجد نقاط بيع مطابقة.</div>`;
+  const badge2=document.getElementById("pharmaciesCountBadge");
+  if(badge2) badge2.textContent=filtered.length+" نقطة بيع";
+}
+
+/* ===== قائمة المعامل — تصفية حسب نوع الفحص والمدينة ===== */
+let labFilterCity="الكل", labFilterService="الكل";
+function setLabFilter(type,val){
+  if(type==="service")labFilterService=val; else labFilterCity=val;
+  renderLabsList();
+}
+function renderLabsList(){
+  const servWrap=document.getElementById("labServiceChipsScroll");
+  if(servWrap) servWrap.innerHTML=["الكل",...labServices].map(s=>`<button class="city-chip-btn spec-chip ${labFilterService===s?'sel':''}" onclick="setLabFilter('service','${s}')">${escapeHtml(s)}</button>`).join("");
+  const cityWrap=document.getElementById("labCityChipsScroll");
+  if(cityWrap) cityWrap.innerHTML=["الكل",...cities].map(c=>`<button class="city-chip-btn ${labFilterCity===c?'sel':''}" onclick="setLabFilter('city','${c}')">${escapeHtml(c)}</button>`).join("");
+  const filtered=directoryLabs.filter(l=>
+    (labFilterCity==="الكل"||l.city===labFilterCity) &&
+    (labFilterService==="الكل"||l.service===labFilterService)
+  );
+  const wrap=document.getElementById("labsListResults");
+  if(wrap) wrap.innerHTML=filtered.length?filtered.map(l=>`<div class="row"><div><b>🔬 ${escapeHtml(l.name)}</b><div class="small">${escapeHtml(l.service)} · ${escapeHtml(l.city)}</div></div><div class="contact"><a class="btn" href="tel:+${l.phone}" title="اتصال">📞</a><a class="btn alt" href="https://wa.me/${l.phone}" target="_blank" rel="noopener" title="واتساب">💬</a>${safeGoogleMapsUrl(l.location)?`<a class="btn location" href="${escapeHtml(safeGoogleMapsUrl(l.location))}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" title="موقع المعمل">📍</a>`:""}</div></div>`).join(""):`<div class="notice">لا توجد معامل مطابقة.</div>`;
+  const badge3=document.getElementById("labsCountBadge");
+  if(badge3) badge3.textContent=filtered.length+" معمل";
+}
+function openLabOrder(){
+  const sel=document.getElementById("labOrderLab");
+  if(sel) sel.innerHTML=directoryLabs.length?directoryLabs.map(l=>`<option>${escapeHtml(l.name)}</option>`).join(""):"<option>لا توجد معامل مسجلة بعد — سجّل معملك من صفحة حسابي</option>";
+  document.getElementById("labOrderModal").classList.add("show");
+}
+async function createLabOrder(){
+ const raw=document.getElementById('labTests').value||"";
+ const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+ if(lines.length===0){alert('اكتب فحصًا واحدًا على الأقل');return;}
+ const labSelect=document.getElementById('labOrderLab');
+ const labName=(labSelect && labSelect.value) || "معمل غير محدد";
+ const summary=lines.length===1?lines[0]:`${lines.length} فحوصات`;
+ const fileInput=document.getElementById('labPrescriptionFile');
+ let prescriptionImage=null;
+ if(fileInput && fileInput.files && fileInput.files[0]){
+   const f=fileInput.files[0];
+   if(f.size>5*1024*1024){ alert('حجم الملف يجب ألا يتجاوز 5MB.'); return; }
+   prescriptionImage={name:f.name,type:f.type,size:f.size,attached:true};
+ }
+ orders.unshift({id:"#"+(1002+orders.length),pharmacy:labName,items:summary,itemsDetail:lines,status:"بانتظار التأكيد",prescriptionImage,type:"lab"});
+ saveOrders();
+ render();closeModal('labOrderModal');document.getElementById('labTests').value='';if(fileInput)fileInput.value='';show('orders');
+ alert('تم إرسال طلب الفحص المعملي بنجاح ('+lines.length+' فحص)'+(prescriptionImage?' مع تحويل الطبيب 📎':'')+'.');
+}
+
+/* ===== الدخول برقم الهاتف عبر Firebase Auth، واستعادة الحساب عبر واتساب للإدارة ===== */
+const ADMIN_WHATSAPP="249969695656";
+let loginMode="signin"; // "signin" or "signup"
+function openLogin(){
+  loginMode="signin";
+  document.getElementById("loginStep1").style.display="";
+  document.getElementById("loginNameField").style.display="none";
+  document.getElementById("loginRoleField").style.display="none";
+  document.getElementById("loginRoleExtraFields").innerHTML="";
+  document.getElementById("loginTitle").textContent="تسجيل الدخول برقم الهاتف";
+  document.getElementById("loginSubmitBtn").textContent="تسجيل الدخول ✅";
+  document.getElementById("loginToggleBtn").textContent="ليس لديك حساب؟ أنشئ حسابًا جديدًا";
+  document.getElementById("loginPhone").value="";
+  document.getElementById("loginPassword").value="";
+  document.getElementById("loginName").value="";
+  document.getElementById("loginRoleSelect").value="patient";
+  document.getElementById("loginModal").classList.add("show");
+}
+function toggleLoginMode(){
+  loginMode = loginMode==="signin" ? "signup" : "signin";
+  const isSignup = loginMode==="signup";
+  document.getElementById("loginNameField").style.display = isSignup ? "" : "none";
+  document.getElementById("loginRoleField").style.display = isSignup ? "" : "none";
+  document.getElementById("loginTitle").textContent = isSignup ? "إنشاء حساب جديد" : "تسجيل الدخول برقم الهاتف";
+  document.getElementById("loginSubmitBtn").textContent = isSignup ? "إنشاء الحساب ✅" : "تسجيل الدخول ✅";
+  document.getElementById("loginToggleBtn").textContent = isSignup ? "لديك حساب بالفعل؟ سجّل الدخول" : "ليس لديك حساب؟ أنشئ حسابًا جديدًا";
+  if(isSignup) renderLoginRoleExtraFields(); else document.getElementById("loginRoleExtraFields").innerHTML="";
+}
+/* حقول إضافية تظهر عند إنشاء حساب حسب الدور المختار — لا تمس أي نموذج تسجيل قديم آخر */
+function renderLoginRoleExtraFields(){
+  const role=document.getElementById("loginRoleSelect").value;
+  const wrap=document.getElementById("loginRoleExtraFields");
+  if(role==="patient"){ wrap.innerHTML=""; return; }
+  populateCities();
+  const cityOptions=cities.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  let extra=`<div class="field"><label>المدينة</label><select id="loginExtraCity">${cityOptions}</select></div>`;
+  if(role==="doctor"){
+    extra+=`<div class="field"><label>التخصص</label><select id="loginExtraSpecialty">${specialties.map(s=>`<option>${escapeHtml(s)}</option>`).join("")}</select></div>`;
+  }
+  if(role==="lab"){
+    extra+=`<div class="field"><label>نوع الخدمة</label><select id="loginExtraService">${labServices.map(s=>`<option>${escapeHtml(s)}</option>`).join("")}</select></div>`;
+  }
+  extra+=`<div class="field"><label>رابط الموقع على الخريطة (اختياري)</label><input id="loginExtraLocation" placeholder="الصق رابط جوجل مابس"></div>`;
+  wrap.innerHTML=extra;
+}
+function phoneToEmail(phone){
+  return normalizeSudanPhone(phone)+"@alshifa.local";
+}
+/* بعد إنشاء حساب حقيقي لدور غير المريض، نضيفه أيضًا لقائمة الدليل العامة
+   (نفس منطق registerDoctor/registerPharmacy/... القديم) حتى يظهر للمرضى فورًا
+   ويحتفظ بنفس شكل البيانات القديمة — بدون حذف أو تعديل أي تسجيل قديم موجود. */
+function syncNewAccountToDirectory(role,profile){
+  const phone249=(profile.phone||"").replace(/^0/,"249");
+  if(role==="doctor"){
+    directoryDoctors.unshift({name:profile.name,city:profile.city,phone:phone249,specialty:profile.specialty,location:profile.location||"",uid:profile.uid});
+    localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
+    if(typeof renderDoctorsList==="function") renderDoctorsList();
+  }else if(role==="pharmacy"){
+    directoryPharmacies.unshift({name:profile.name,city:profile.city,phone:phone249,location:profile.location||"",uid:profile.uid});
+    localStorage.setItem("alshifaDirectoryPharmacies",JSON.stringify(directoryPharmacies));
+    if(typeof renderPharmaciesList==="function") renderPharmaciesList();
+  }else if(role==="wholesale"){
+    directoryWholesale.unshift({name:profile.name,city:profile.city,phone:phone249,uid:profile.uid});
+    localStorage.setItem("alshifaDirectoryWholesale",JSON.stringify(directoryWholesale));
+  }else if(role==="lab"){
+    directoryLabs.unshift({name:profile.name,city:profile.city,phone:phone249,service:profile.service,location:profile.location||"",uid:profile.uid});
+    localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+    if(typeof renderLabsList==="function") renderLabsList();
+  }
+  if(typeof renderCitiesBrowse==="function") renderCitiesBrowse();
+}
+async function handleLoginSubmit(){
+  const phone=(document.getElementById("loginPhone").value||"").trim();
+  const password=(document.getElementById("loginPassword").value||"").trim();
+  const name=(document.getElementById("loginName").value||"").trim();
+  if(!phone||!password){alert("اكتب رقم الهاتف وكلمة المرور");return;}
+  if(password.length<6){alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");return;}
+  const email=phoneToEmail(phone);
+  try{
+    if(loginMode==="signup"){
+      if(!name){alert("اكتب اسمك الكامل");return;}
+      const roleSel=document.getElementById("loginRoleSelect");
+      const role = roleSel ? roleSel.value : "patient";
+      const allowedSignupRoles=["patient","doctor","pharmacy","wholesale","lab"];
+      if(!allowedSignupRoles.includes(role)){ alert("هذا الدور لا يمكن إنشاؤه من التطبيق."); return; }
+      const normalizedPhone=normalizeSudanPhone(phone);
+      if(!normalizedPhone || normalizedPhone.length<9){ alert("رقم الهاتف غير صحيح."); return; }
+      const profile={name,phone:normalizedPhone,role,createdAt:new Date().toISOString()};
+      if(role!=="patient"){
+        const cityEl=document.getElementById("loginExtraCity");
+        profile.city=cityEl?cityEl.value:"";
+        const locEl=document.getElementById("loginExtraLocation");
+        profile.location=locEl?(locEl.value||"").trim():"";
+        if(role==="doctor"){ const sp=document.getElementById("loginExtraSpecialty"); profile.specialty=sp?sp.value:"عام"; }
+        if(role==="lab"){ const sv=document.getElementById("loginExtraService"); profile.service=sv?sv.value:labServices[0]; }
+      }
+      const user=await window.fbSignUp(email,password,profile);
+      if(role!=="patient"){ syncNewAccountToDirectory(role,Object.assign({},profile,{uid:user.uid})); }
+      alert("تم إنشاء حسابك بنجاح ✅ مرحبًا بك في الشفاء");
+    }else{
+      await window.fbSignIn(email,password);
+      alert("تم تسجيل الدخول بنجاح ✅");
+    }
+    closeModal("loginModal");
+  }catch(err){
+    console.error(err);
+    let msg="حدث خطأ، حاول مرة أخرى.";
+    if(err.code==="auth/email-already-in-use") msg="هذا الرقم مسجّل بالفعل — جرّب تسجيل الدخول بدلاً من إنشاء حساب.";
+    else if(err.code==="auth/invalid-credential"||err.code==="auth/wrong-password") msg="رقم الهاتف أو كلمة المرور غير صحيحة.";
+    else if(err.code==="auth/user-not-found") msg="لا يوجد حساب بهذا الرقم — أنشئ حسابًا جديدًا أولاً.";
+    else if(err.code==="auth/weak-password") msg="كلمة المرور ضعيفة جدًا.";
+    alert(msg);
+  }
+}
+function openRecovery(){
+  closeModal("loginModal");
+  document.getElementById("recoveryModal").classList.add("show");
+}
+function checkPhoneRegistered(phone){
+  const digits=phone.replace(/\D/g,"").slice(-9);
+  if(!digits) return false;
+  const all=[...directoryDoctors,...directoryPharmacies,...directoryWholesale,...directoryLabs];
+  return all.some(x=>x.phone && x.phone.replace(/\D/g,"").endsWith(digits));
+}
+function submitRecovery(){
+  const name=(document.getElementById("recoveryName").value||"").trim();
+  const phone=(document.getElementById("recoveryPhone").value||"").trim();
+  const note=(document.getElementById("recoveryNote").value||"").trim();
+  if(!name||!phone){alert("اكتب الاسم ورقم الهاتف");return;}
+  const found=checkPhoneRegistered(phone);
+  const requests=JSON.parse(localStorage.getItem("alshifaRecoveryRequests")||"[]");
+  requests.unshift({name,phone,note,found,status:found?"✅ مؤكد أنه مسجل مسبقًا":"⚠️ غير موجود في السجلات — تحقق يدويًا",time:new Date().toISOString()});
+  localStorage.setItem("alshifaRecoveryRequests",JSON.stringify(requests));
+  const verdict=found
+    ? "✅ تم العثور على تطابق في سجلاتنا — يبدو أنه مستخدم مسجل مسبقًا."
+    : "⚠️ لم يُعثر على تطابق في السجلات — يُرجى التحقق يدويًا، قد تكون محاولة احتيال.";
+  const msg=encodeURIComponent(`طلب استعادة حساب - الشفاء\nالاسم: ${name}\nالهاتف: ${phone}\nملاحظة: ${note||"-"}\nنتيجة الفحص التلقائي: ${verdict}`);
+  window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${msg}`,"_blank");
+  closeModal("recoveryModal");
+  renderRecoveryList();
+  alert("تم إرسال طلبك للإدارة عبر واتساب مرفقًا معه نتيجة الفحص التلقائي. سيتم الرد عليك بعد المراجعة.");
+}
+function renderRecoveryList(){
+  const wrap=document.getElementById("recoveryList");
+  if(!wrap)return;
+  const requests=JSON.parse(localStorage.getItem("alshifaRecoveryRequests")||"[]");
+  wrap.innerHTML=requests.length?requests.map(r=>`<div class="row"><div><b>${escapeHtml(r.name)}</b><div class="small">${escapeHtml(r.phone)} · ${escapeHtml(r.note||"-")}</div></div><span class="badge ${r.found?'':'danger'}">${escapeHtml(r.status)}</span></div>`).join(""):`<div class="notice">لا توجد طلبات استعادة حتى الآن.</div>`;
+}
+
+render();
+renderWholesaleOrders();
+populateCities();
+renderTrials();
+renderCitiesBrowse();
+renderPharmaciesList();
+renderDoctorsList();
+renderRecoveryList();
+applyTheme();
+trackVisit();
+renderBookingTimeSelect();
+const doctorFeeInputEl=document.getElementById("doctorFeeInput");
+if(doctorFeeInputEl) doctorFeeInputEl.value=getMonthlyFee("doctor");
+const pharmacyFeeInputEl=document.getElementById("pharmacyFeeInput");
+if(pharmacyFeeInputEl) pharmacyFeeInputEl.value=getMonthlyFee("pharmacy");
+const wholesaleFeeInputEl=document.getElementById("wholesaleFeeInput");
+if(wholesaleFeeInputEl) wholesaleFeeInputEl.value=getMonthlyFee("wholesale");
+const patientFeeInputEl=document.getElementById("patientFeeInput");
+if(patientFeeInputEl) patientFeeInputEl.value=getMonthlyFee("patient");
+const labFeeInputEl=document.getElementById("labFeeInput");
+if(labFeeInputEl) labFeeInputEl.value=getMonthlyFee("lab");
+const _s=getSettings();
+const adminPhoneInputEl=document.getElementById("adminPhoneInput");
+if(adminPhoneInputEl) adminPhoneInputEl.value=_s.adminPhone;
+const bankNameInputEl=document.getElementById("bankNameInput");
+if(bankNameInputEl) bankNameInputEl.value=_s.bankName;
+const bankAccountInputEl=document.getElementById("bankAccountInput");
+if(bankAccountInputEl) bankAccountInputEl.value=_s.bankAccount;
+const healthExtraInfoEl=document.getElementById("healthExtraInfo");
+if(healthExtraInfoEl) healthExtraInfoEl.value="";
+renderActivationBlocks();
+renderReferral();
+renderLabsList();
+renderEmergencyGrid();
+renderEpidemicAdminList();
+renderEpidemicList();
+renderAccidentAdminList();
+renderAccidentList();
+renderBloodBankAdminList();
+renderBloodBanksList();
+renderOtherEmergencyAdminList();
+renderOtherEmergencyList();
+attachMedicineAutocomplete('medicine','medicineSuggest');
+attachMedicineAutocomplete('wholesaleItems','wholesaleItemsSuggest');
+</script>
+<script>
+/* =====================================================================
+   نظام الاشتراكات متعدد الأشهر — Multi-Month Subscriptions
+   حاليًا: مُفعَّل بشكل آمن وحقيقي (Firestore + قواعد أمان) لدور "المريض" فقط،
+   لأنه الدور الوحيد صاحب حساب دخول حقيقي (Firebase Auth). باقي الأدوار
+   (طبيب/صيدلية/جملة/معمل) لسه على نظام محلي قديم لحين ربطهم بحسابات حقيقية.
+   ===================================================================== */
+
+/* ---- إعدادات الأسعار المركزية (تُقرأ من Firestore، مع نسخة احتياطية محلية) ---- */
+const SUB_DEFAULT_CONFIG = {
+  doctor:   [{months:1,price:3000},{months:3,price:8000},{months:6,price:15000},{months:12,price:28000}],
+  pharmacy: [{months:1,price:3000},{months:3,price:8000},{months:6,price:15000},{months:12,price:28000}],
+  wholesale:[{months:1,price:3000},{months:3,price:8000},{months:6,price:15000},{months:12,price:28000}],
+  patient:  [{months:1,price:3000},{months:3,price:8000},{months:6,price:15000},{months:12,price:28000}],
+  lab:      [{months:1,price:3000},{months:3,price:8000},{months:6,price:15000},{months:12,price:28000}]
+};
+let _subConfigCache=null;
+async function loadSubConfig(){
+  if(_subConfigCache) return _subConfigCache;
+  try{
+    if(window.fbGetDoc){
+      const d=await window.fbGetDoc("subscriptionConfig","main");
+      if(d){
+        const merged=Object.assign({},SUB_DEFAULT_CONFIG,d);
+        _subConfigCache=merged;
+        localStorage.setItem("alshifaSubConfigCache",JSON.stringify(merged));
+        return merged;
+      }
+    }
+  }catch(e){ console.warn("تعذر تحميل أسعار الاشتراك من Firestore، استخدام النسخة المحلية",e); }
+  const cached=localStorage.getItem("alshifaSubConfigCache");
+  _subConfigCache = cached?JSON.parse(cached):SUB_DEFAULT_CONFIG;
+  return _subConfigCache;
+}
+async function saveSubConfigRole(role,durations){
+  const cfg=await loadSubConfig();
+  cfg[role]=durations;
+  _subConfigCache=cfg;
+  localStorage.setItem("alshifaSubConfigCache",JSON.stringify(cfg));
+  if(window.fbSaveDoc){
+    await window.fbSaveDoc("subscriptionConfig","main",cfg);
+  }
+}
+
+/* ---- أدوات حساب التواريخ والوقت المتبقي ---- */
+function addMonthsISO(startISO, months){
+  const base = startISO ? new Date(startISO) : new Date();
+  const src = isNaN(base.getTime()) ? new Date() : base;
+  return new Date(src.getFullYear(), src.getMonth()+months, src.getDate(), src.getHours(), src.getMinutes(), src.getSeconds()).toISOString();
+}
+function extendEndDate(currentEndISO, months){
+  const now=new Date();
+  const currentEnd = currentEndISO ? new Date(currentEndISO) : null;
+  const stillValid = currentEnd && !isNaN(currentEnd.getTime()) && currentEnd>now;
+  const base = stillValid ? currentEnd.toISOString() : now.toISOString();
+  return addMonthsISO(base, months);
+}
+function remainingBreakdown(endISO){
+  const end=new Date(endISO), now=new Date();
+  const ms=end-now;
+  if(!endISO || isNaN(end.getTime()) || ms<=0) return {expired:true,days:0,months:0,remDays:0};
+  const totalDays=Math.ceil(ms/86400000);
+  const months=Math.floor(totalDays/30);
+  return {expired:false,days:totalDays,months,remDays:totalDays-months*30};
+}
+function remainingText(endISO){
+  const b=remainingBreakdown(endISO);
+  if(b.expired) return "الاشتراك منتهٍ";
+  if(b.months<=0) return `متبقي ${b.days} يوم`;
+  if(b.remDays<=0) return `متبقي ${b.months} ${b.months===1?"شهر":"أشهر"}`;
+  return `متبقي ${b.months} ${b.months===1?"شهر":"أشهر"} و${b.remDays} يوم`;
+}
+function formatDateAr(iso){ try{ return new Date(iso).toLocaleDateString('ar-EG'); }catch(e){ return "-"; } }
+function subStatusLabel(status){
+  return ({trial:"🎁 تجربة مجانية",active:"✅ نشط",expiring_soon:"⏳ ينتهي قريبًا",expired:"❌ منتهٍ",payment_pending:"🕓 الدفع قيد المراجعة",suspended:"⛔ موقوف",cancelled:"🚫 ملغى"})[status]||status;
+}
+
+/* ---- اشتراك المريض: مبني على Firestore فعليًا، القراءة فقط من طرف المستخدم ---- */
+const SUB_ROLE_NAMES_AR={doctor:"طبيب",pharmacy:"نقطة بيع",wholesale:"عميل جملة",patient:"مريض",lab:"معمل"};
+async function getSubscriptionState(role){
+  const uid = window.fbCurrentUser && window.fbCurrentUser.uid;
+  if(!uid) return null;
+  const profile = window.fbCurrentProfile || (window.fbGetProfile ? await window.fbGetProfile(uid) : null);
+  const createdAt = (profile && profile.createdAt) || new Date().toISOString();
+  let sub=null;
+  try{ sub = window.fbGetDoc ? await window.fbGetDoc("subscriptions", uid) : null; }
+  catch(e){ console.warn("تعذر قراءة الاشتراك",e); }
+  if(sub && sub.subscriptionEndDate){
+    const b=remainingBreakdown(sub.subscriptionEndDate);
+    const status = b.expired ? "expired" : (b.days<=7 ? "expiring_soon" : "active");
+    return {source:"paid", status, startDate:sub.subscriptionStartDate, endDate:sub.subscriptionEndDate, paidMonths:sub.paidMonths||0};
+  }
+  const trialEnd = new Date(new Date(createdAt).getTime() + trialDays(role)*86400000).toISOString();
+  const b=remainingBreakdown(trialEnd);
+  return {source:"trial", status: b.expired?"expired":"trial", startDate:createdAt, endDate:trialEnd, paidMonths:0};
+}
+
+async function renderSubscriptionBox(elId,role){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  const profile = window.fbCurrentProfile;
+  if(!window.fbCurrentUser || !profile || profile.role!==role){
+    el.innerHTML = window.fbCurrentUser
+      ? `` /* المستخدم مسجّل دخول لكن بدور مختلف — هذه اللوحة تُعرض أيضًا كمعاينة بدون حساب حقيقي لهذا الدور */
+      : `<div class="notice">سجّل الدخول أو أنشئ حساب "${SUB_ROLE_NAMES_AR[role]}" لعرض وتفعيل اشتراكك الحقيقي (منفصل عن التسجيل في الدليل العام).</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="notice">جارِ تحميل حالة الاشتراك...</div>`;
+  let state;
+  try{ state = await getSubscriptionState(role); }
+  catch(e){ console.error(e); el.innerHTML=`<div class="notice">تعذر تحميل حالة الاشتراك — تأكد من اتصالك بالإنترنت.</div>`; return; }
+  if(!state){ el.innerHTML=""; return; }
+  const cfg=await loadSubConfig();
+  const options=cfg[role]||SUB_DEFAULT_CONFIG[role];
+  el.innerHTML=`
+    <div class="card">
+      <div class="row"><span>الحالة</span><strong>${subStatusLabel(state.status)}</strong></div>
+      <div class="row"><span>البداية</span><strong>${formatDateAr(state.startDate)}</strong></div>
+      <div class="row"><span>النهاية</span><strong>${formatDateAr(state.endDate)}</strong></div>
+      <div class="row"><span>الوقت المتبقي</span><strong>${remainingText(state.endDate)}</strong></div>
+      <div class="field" style="margin-top:10px"><label>اختر مدة التجديد / الإضافة</label>
+        <select id="subMonths_${role}">${options.map(o=>`<option value="${o.months}">${o.months} شهر — ${o.price.toLocaleString('ar-EG')} ج</option>`).join("")}</select>
+      </div>
+      <button class="btn full" onclick="startRenewal('${elId}','${role}')">💳 ${state.source==="paid"?"إضافة أشهر":"تجديد الاشتراك"}</button>
+      <div id="renewalPayBlock_${role}"></div>
+    </div>`;
+}
+
+async function startRenewal(elId,role){
+  const sel=document.getElementById("subMonths_"+role);
+  if(!sel) return;
+  const months=parseInt(sel.value,10);
+  const cfg=await loadSubConfig();
+  const opt=(cfg[role]||SUB_DEFAULT_CONFIG[role]).find(o=>o.months===months);
+  const price=opt?opt.price:0;
+  const s=getSettings();
+  const block=document.getElementById("renewalPayBlock_"+role);
+  block.innerHTML=`
+    <div class="notice" style="margin-top:10px">💳 المبلغ المطلوب: <b>${price.toLocaleString('ar-EG')} ج</b> مقابل ${months} شهر<br>
+    🏦 ${escapeHtml(s.bankName)} — حساب رقم <b>${escapeHtml(s.bankAccount)}</b><br>
+    📱 أو عبر رقم <b>${escapeHtml(s.adminPhone)}</b> (كاش/بنكك)<br>
+    ثم اكتب رقم العملية (المرجع) وأرسله — التفعيل بعد المراجعة.</div>
+    <div class="field"><label>رقم العملية / مرجع التحويل</label><input id="txRef_${role}" placeholder="مثال: 123456789"></div>
+    <button class="btn full" onclick="submitActivation('${elId}','${role}',${months},${price})">📤 إرسال إشعار الدفع</button>`;
+}
+
+async function submitActivation(elId,role,months,price){
+  const uid=window.fbCurrentUser && window.fbCurrentUser.uid;
+  const profile=window.fbCurrentProfile;
+  if(!uid || !profile){ alert("سجّل الدخول أولاً"); return; }
+  if(profile.role!==role){ alert("لا يمكنك إنشاء طلب اشتراك لدور مختلف عن دور حسابك."); return; }
+  const cfg=await loadSubConfig();
+  const opt=(cfg[role]||SUB_DEFAULT_CONFIG[role]).find(o=>o.months===Number(months));
+  if(!opt){ alert("مدة الاشتراك غير صالحة."); return; }
+  months=opt.months; price=opt.price;
+  const refInput=document.getElementById("txRef_"+role);
+  const ref=(refInput?refInput.value:"").trim();
+  if(!ref){ alert("اكتب رقم العملية أولاً"); return; }
+  let state=null;
+  try{ state = await getSubscriptionState(role); }catch(e){}
+  const record={
+    uid, role, months, amount:price, transactionId:ref,
+    status:"pending",
+    prevEndDate: state?state.endDate:null,
+    requestedAt: new Date().toISOString()
+  };
+  try{
+    if(window.fbAddDoc){ await window.fbAddDoc("pendingActivations", record); }
+    const s=getSettings();
+    const msg=encodeURIComponent(`إشعار دفع اشتراك - الشفاء\nالدور: ${SUB_ROLE_NAMES_AR[role]||role}\nالمدة: ${months} شهر\nرقم العملية: ${ref}\nالمبلغ: ${price.toLocaleString('ar-EG')} ج`);
+    window.open(`https://wa.me/${s.adminPhone.replace(/\D/g,'').replace(/^0/,'249')}?text=${msg}`,"_blank");
+    alert("تم إرسال طلبك للإدارة — سيتم تفعيل اشتراكك بعد المراجعة.");
+    renderSubscriptionBox(elId,role);
+  }catch(e){
+    console.error(e);
+    alert("تعذر إرسال الطلب. تأكد من اتصالك بالإنترنت، ومن أن قواعد أمان Firestore منشورة، وحاول مجددًا.");
+  }
+}
+
+/* ---- لوحة الأدمن: مراجعة طلبات التفعيل + إعداد الأسعار ---- */
+async function renderAdminPendingActivations(){
+  if(!requireAdmin("عرض طلبات التفعيل مخصص للمدير فقط.")) return;
+  const el=document.getElementById("adminPendingActivations");
+  if(!el) return;
+  el.innerHTML=`<div class="notice">جارِ التحميل...</div>`;
+  let list=[];
+  try{ if(window.fbGetCollection) list=await window.fbGetCollection("pendingActivations"); }
+  catch(e){ console.warn(e); el.innerHTML=`<div class="notice">تعذر تحميل الطلبات — تأكد أن حسابك مضاف كأدمن في قواعد الأمان.</div>`; return; }
+  list=list.filter(x=>x.status==="pending");
+  if(!list.length){ el.innerHTML=`<div class="notice">لا توجد طلبات تفعيل معلّقة حاليًا.</div>`; return; }
+  const names={doctor:"طبيب",pharmacy:"نقطة بيع",wholesale:"عميل جملة",patient:"مريض",lab:"معمل"};
+  el.innerHTML=list.map(r=>`
+    <div class="row">
+      <div><b>${names[r.role]||r.role}</b> — ${r.months} شهر — ${(r.amount||0).toLocaleString('ar-EG')} ج
+      <div class="small">مرجع: ${escapeHtml(r.transactionId||"")} · بتاريخ ${formatDateAr(r.requestedAt)}</div></div>
+      <div class="contact">
+        <button class="btn" onclick="approveActivation('${r.id}')">✅ موافقة</button>
+        <button class="btn alt" onclick="rejectActivation('${r.id}')">❌ رفض</button>
+      </div>
+    </div>`).join("");
+}
+
+async function approveActivation(reqId){
+  if(!requireAdmin("الموافقة على الاشتراكات مخصصة للمدير فقط.")) return;
+  try{
+    const all=await window.fbGetCollection("pendingActivations");
+    const rec=all.find(x=>x.id===reqId);
+    if(!rec){ alert("الطلب غير موجود"); return; }
+    const currentSub=await window.fbGetDoc("subscriptions",rec.uid);
+    const newEnd=extendEndDate(currentSub?currentSub.subscriptionEndDate:rec.prevEndDate, rec.months);
+    const newStart=(currentSub && currentSub.subscriptionStartDate) ? currentSub.subscriptionStartDate : new Date().toISOString();
+    const paidMonths=((currentSub&&currentSub.paidMonths)||0)+rec.months;
+    await window.fbSaveDoc("subscriptions", rec.uid, {
+      role:rec.role, subscriptionStatus:"active",
+      subscriptionStartDate:newStart, subscriptionEndDate:newEnd,
+      paidMonths, paymentAmount:rec.amount, transactionId:rec.transactionId,
+      updatedAt:new Date().toISOString()
+    });
+    await window.fbSaveDoc("pendingActivations", reqId, {status:"approved", reviewedAt:new Date().toISOString(), newEndDate:newEnd});
+    try{
+      await window.fbAddDoc("paymentHistory/"+rec.uid+"/records", {
+        date:new Date().toISOString(), months:rec.months, amount:rec.amount, status:"approved",
+        transactionId:rec.transactionId, prevEndDate:currentSub?currentSub.subscriptionEndDate:null, newEndDate:newEnd
+      });
+    }catch(e){ console.warn("تعذر حفظ سجل الدفع (غير حرج)",e); }
+    alert("تم تفعيل الاشتراك — التاريخ الجديد: "+formatDateAr(newEnd));
+    renderAdminPendingActivations();
+  }catch(e){
+    console.error(e);
+    alert("تعذر تنفيذ الموافقة — تأكد أن UID حسابك مضاف ضمن قائمة الأدمن في قواعد أمان Firestore.");
+  }
+}
+async function rejectActivation(reqId){
+  if(!requireAdmin("رفض الاشتراكات مخصص للمدير فقط.")) return;
+  try{
+    await window.fbSaveDoc("pendingActivations", reqId, {status:"rejected", reviewedAt:new Date().toISOString()});
+    alert("تم رفض الطلب.");
+    renderAdminPendingActivations();
+  }catch(e){ console.error(e); alert("تعذر تنفيذ الرفض."); }
+}
+
+/* ---- محرر أسعار الاشتراك للأدمن (1/3/6/12 شهر لكل دور) ---- */
+const SUB_ROLE_LABELS={doctor:"💙 الطبيب",pharmacy:"🟠 نقطة البيع",wholesale:"🟡 عميل الجملة",patient:"💚 المريض",lab:"🔬 المعمل"};
+async function renderSubConfigEditor(){
+  if(!requireAdmin("إدارة الأسعار مخصصة للمدير فقط.")) return;
+  const el=document.getElementById("subConfigEditor");
+  if(!el) return;
+  const cfg=await loadSubConfig();
+  el.innerHTML=Object.keys(SUB_ROLE_LABELS).map(role=>{
+    const durations=cfg[role]||SUB_DEFAULT_CONFIG[role];
+    const inputs=durations.map((d,i)=>`
+      <div class="field" style="margin-top:8px"><label>${d.months} شهر (جنيه)</label>
+      <input type="number" inputmode="numeric" id="subPrice_${role}_${i}" value="${d.price}"></div>`).join("");
+    return `<div class="section" style="margin-top:14px"><h3 class="tbar tbar-sm tbar-slate">${SUB_ROLE_LABELS[role]}</h3></div>
+      ${inputs}
+      <button class="btn full" onclick="saveSubConfigFromForm('${role}')">💾 حفظ أسعار ${SUB_ROLE_LABELS[role]}</button>`;
+  }).join("");
+}
+async function saveSubConfigFromForm(role){
+  if(!requireAdmin("تعديل الأسعار مخصص للمدير فقط.")) return;
+  const cfg=await loadSubConfig();
+  const durations=(cfg[role]||SUB_DEFAULT_CONFIG[role]).map((d,i)=>{
+    const input=document.getElementById(`subPrice_${role}_${i}`);
+    const val=parseInt((input&&input.value)||"0",10);
+    return {months:d.months, price: (val>0?val:d.price)};
+  });
+  try{
+    await saveSubConfigRole(role,durations);
+    alert("تم حفظ الأسعار الجديدة — ستظهر لكل المستخدمين فورًا.");
+  }catch(e){
+    console.error(e);
+    alert("تعذر الحفظ على Firestore (تم الحفظ محليًا على جهازك فقط) — تأكد من اتصالك بالإنترنت وصلاحياتك كأدمن.");
+  }
+}
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, updateDoc, collection,
+  query, where, getDocs, addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtrZfdFQva6q6br5I514j49PbblgbwJrE",
+  authDomain: "al-shifa-6b8d7.firebaseapp.com",
+  projectId: "al-shifa-6b8d7",
+  storageBucket: "al-shifa-6b8d7.firebasestorage.app",
+  messagingSenderId: "761357599772",
+  appId: "1:761357599772:web:2e854057c0f079ec830bd9"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+const fbDb = getFirestore(fbApp);
+
+window.fbCurrentUser = null;
+window.fbCurrentProfile = null;
+
+window.fbSignUp = async function(email, password, profile){
+  const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
+  await setDoc(doc(fbDb, "users", cred.user.uid), profile);
+  window.fbCurrentUser = cred.user;
+  window.fbCurrentProfile = profile;
+  return cred.user;
+};
+
+window.fbSignIn = async function(email, password){
+  const cred = await signInWithEmailAndPassword(fbAuth, email, password);
+  const snap = await getDoc(doc(fbDb, "users", cred.user.uid));
+  window.fbCurrentUser = cred.user;
+  window.fbCurrentProfile = snap.exists() ? snap.data() : null;
+  return cred.user;
+};
+
+window.fbSignOut = async function(){
+  await signOut(fbAuth);
+  window.fbCurrentUser = null;
+  window.fbCurrentProfile = null;
+};
+
+window.fbGetProfile = async function(uid){
+  if(!requireOwnUser(uid)) throw new Error("Unauthorized profile read");
+  const snap = await getDoc(doc(fbDb, "users", uid));
+  return snap.exists() ? snap.data() : null;
+};
+
+window.fbUpdateProfile = async function(uid, data){
+  if(!requireOwnUser(uid)) throw new Error("Unauthorized profile update");
+  const safe={...data};
+  delete safe.role;
+  delete safe.uid;
+  delete safe.createdAt;
+  await updateDoc(doc(fbDb, "users", uid), safe);
+};
+
+window.fbSaveDoc = async function(collectionName, id, data){
+  const uid=window.fbCurrentUser&&window.fbCurrentUser.uid;
+  if(collectionName==="accessGrants" && (!uid || !String(id).startsWith(uid+"__"))) throw new Error("Unauthorized access grant");
+  if(collectionName==="publicSettings" && !isRealAdmin()) throw new Error("Admin required");
+  if(collectionName==="subscriptionConfig" && !isRealAdmin()) throw new Error("Admin required");
+  if(collectionName==="subscriptions" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized subscription write");
+  if(collectionName==="pendingActivations" && !isRealAdmin() && data && data.uid!==uid) throw new Error("Unauthorized activation owner");
+  await setDoc(doc(fbDb, collectionName, id), data, { merge: true });
+};
+
+window.fbGetCollection = async function(collectionName){
+  if(collectionName==="pendingActivations" && !isRealAdmin()) throw new Error("Admin required");
+  const snap = await getDocs(collection(fbDb, collectionName));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+window.fbQueryWhere = async function(collectionName, field, op, value){
+  if(collectionName==="accessGrants" && !(isRealAdmin() || (window.fbCurrentUser && field==="patientId" && op==="==" && value===window.fbCurrentUser.uid))) throw new Error("Unauthorized access grant query");
+  const q = query(collection(fbDb, collectionName), where(field, op, value));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+window.fbGetDoc = async function(collectionName, id){
+  const uid=window.fbCurrentUser&&window.fbCurrentUser.uid;
+  if(collectionName==="subscriptions" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized subscription read");
+  if(collectionName==="pendingActivations" && !isRealAdmin()) throw new Error("Admin required");
+  const snap = await getDoc(doc(fbDb, collectionName, id));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+};
+window.fbAddDoc = async function(collectionName, data){
+  const uid=window.fbCurrentUser&&window.fbCurrentUser.uid;
+  if(collectionName==="pendingActivations" && (!uid || isRealAdmin() || !data || data.uid!==uid || data.role!==(window.fbCurrentProfile&&window.fbCurrentProfile.role))) throw new Error("Invalid activation creator");
+  if(String(collectionName).startsWith("paymentHistory/") && !isRealAdmin()) throw new Error("Admin required");
+  const ref = await addDoc(collection(fbDb, collectionName), data);
+  return ref.id;
+};
+window.fbServerTimestamp = function(){ return serverTimestamp(); };
+
+onAuthStateChanged(fbAuth, async (user) => {
+  window.fbCurrentUser = user;
+  if(user){
+    window.fbCurrentProfile = await window.fbGetProfile(user.uid);
+    if(typeof window.onFirebaseLogin === "function") window.onFirebaseLogin(window.fbCurrentProfile);
+  } else {
+    window.fbCurrentProfile = null;
+  }
+});
+
+/* أرقام الطوارئ وبنوك الدم بيانات عامة، تُقرأ من Firestore بمجرد جاهزية الاتصال
+   بغض النظر عن حالة تسجيل الدخول (لا تتطلب مصادقة) */
+if(typeof window.loadEmergencyConfigFromFirestore === "function"){
+  window.loadEmergencyConfigFromFirestore();
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
