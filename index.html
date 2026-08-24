@@ -2530,45 +2530,76 @@ window.fbAddDoc = async function(collectionName, data){
   const ref = await addDoc(collection(fbDb, collectionName), data);
   return ref.id;
 };
-window.fbServerTimestamp = function(){ return serverTimestamp(); };
+window.fbServerTimestamp = function() { return serverTimestamp(); };
 
 onAuthStateChanged(fbAuth, async (user) => {
   window.fbCurrentUser = user;
-  if(user){
-    window.fbCurrentProfile = await window.fbGetProfile(user.uid);
-    if(typeof window.onFirebaseLogin === "function") window.onFirebaseLogin(window.fbCurrentProfile);
+  if (user) {
+    window.fbCurrentProfile = await window.fbGetProfile?.(user.uid);
+    if (typeof window.onFirebaseLogin === "function") window.onFirebaseLogin(user);
   } else {
     window.fbCurrentProfile = null;
   }
 });
 
-/* أرقام الطوارئ وبنوك الدم بيانات عامة، تُقرأ من Firestore بمجرد جاهزية الاتصال
-   بغض النظر عن حالة تسجيل الدخول (لا تتطلب مصادقة) */
-if(typeof window.loadEmergencyConfigFromFirestore === "function"){
+if (typeof window.loadEmergencyConfigFromFirestore === "function") {
   window.loadEmergencyConfigFromFirestore();
 }
-if(typeof window.loadDoctorsFromFirestore === "function"){
+if (typeof window.loadDoctorsFromFirestore === "function") {
   window.loadDoctorsFromFirestore();
 }
-if(typeof window.loadPharmaciesFromFirestore === "function"){
+if (typeof window.loadPharmaciesFromFirestore === "function") {
   window.loadPharmaciesFromFirestore();
 }
-if(typeof window.loadWholesaleFromFirestore === "function"){
+if (typeof window.loadWholesaleFromFirestore === "function") {
   window.loadWholesaleFromFirestore();
 }
-if(typeof window.loadLabsFromFirestore === "function"){
+if (typeof window.loadLabsFromFirestore === "function") {
   window.loadLabsFromFirestore();
 }
 </script>
 
+<script type="module">
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const auth = getAuth();
+  const db = getFirestore();
+
+  function formatPhoneNumber(phone) {
+    let cleaned = phone.trim().replace(/\s+/g, '');
+    if (cleaned.startsWith('0')) cleaned = '+249' + cleaned.substring(1);
+    else if (!cleaned.startsWith('+')) cleaned = '+249' + cleaned;
+    return cleaned;
+  }
+
+  async function handleRegister(email, password, fullName, phone, role) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+
+      await setDoc(doc(db, "users", uid), {
+        uid: uid,
+        fullName: fullName,
+        phone: formatPhoneNumber(phone),
+        role: role,
+        status: 'active',
+        createdAt: serverTimestamp()
+      });
+      alert("تم إنشاء الحساب وحفظ البيانات بنجاح!");
+    } catch (error) {
+      alert("خطأ في التسجيل: " + error.message);
+    }
+  }
+</script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js').catch(function (err) {
-      console.warn('SW registration failed:', err);
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function (err) {
+        console.warn('SW registration failed:', err);
+      });
     });
-  });
-}
+  }
 </script>
 </body>
 </html>
