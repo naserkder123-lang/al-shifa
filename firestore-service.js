@@ -4,18 +4,23 @@ import {
   addDoc, 
   query, 
   where, 
-  getDocs 
+  getDocs,
+  serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 1. تسجيل الأحداث (Audit Logs)
 export async function logAuditEvent(action, details = {}) {
   if (!auth.currentUser) return;
-  await addDoc(collection(db, "auditLogs"), {
-    userId: auth.currentUser.uid,
-    action: action,
-    details: details,
-    timestamp: new Date().toISOString()
-  });
+  try {
+    await addDoc(collection(db, "auditLogs"), {
+      userId: auth.currentUser.uid,
+      action: action,
+      details: details,
+      timestamp: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("فشل تسجيل الحدث:", error);
+  }
 }
 
 // 2. إنشاء موعد جديد
@@ -29,7 +34,7 @@ export async function createAppointment(doctorId, date, time, notes) {
     time: time,
     notes: notes,
     status: "pending",
-    createdAt: new Date().toISOString()
+    createdAt: serverTimestamp()
   });
 
   await logAuditEvent("CREATE_APPOINTMENT", { appointmentId: docRef.id, doctorId });
