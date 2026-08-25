@@ -1,5 +1,6 @@
 const CACHE_NAME = 'alshifa-cache-v3';
 const URLS_TO_CACHE = [
+  './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
@@ -28,20 +29,29 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // تجاهل الطلبات الخارجية غير التابعة لـ HTTP/HTTPS (مثل إضافة المتصفح)
+  if (!event.request.url.startsWith('http')) return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((response) => {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
+      if (cached) return cached;
+
+      return fetch(event.request)
+        .then((response) => {
+          // التحقق من صحة الاستجابة ونوعها قبل التخزين المؤقت
+          if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
-          })
-          .catch(() => cached)
-      );
+          }
+
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+
+          return response;
+        })
+        .catch(() => cached);
     })
   );
 });
