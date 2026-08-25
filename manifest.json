@@ -1,4 +1,5 @@
 {
+  "id": "./index.html",
   "name": "الشفاء | منصة الرعاية الصحية",
   "short_name": "الشفاء",
   "description": "منصة الرعاية الصحية الذكية - احجز طبيبك، اطلب دواءك، واحتفظ بملفك الصحي في مكان واحد",
@@ -10,6 +11,7 @@
   "theme_color": "#0b6b57",
   "dir": "rtl",
   "lang": "ar",
+  "categories": ["medical", "health", "lifestyle"],
   "icons": [
     {
       "src": "icons/icon-192.png",
