@@ -5,8 +5,14 @@ import {
   signOut, 
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { 
+  doc, 
+  setDoc, 
+  getDoc, 
+  serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// 1. تسجيل مستخدم جديد
 export async function registerUser(email, password, userData) {
   const { role, fullName, phone } = userData;
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -18,7 +24,7 @@ export async function registerUser(email, password, userData) {
     role: role,
     fullName: fullName,
     phone: phone,
-    createdAt: new Date().toISOString()
+    createdAt: serverTimestamp()
   });
 
   const roleCollections = {
@@ -33,13 +39,14 @@ export async function registerUser(email, password, userData) {
       uid: user.uid,
       fullName: fullName,
       phone: phone,
-      createdAt: new Date().toISOString()
+      createdAt: serverTimestamp()
     });
   }
 
   return user;
 }
 
+// 2. تسجيل الدخول
 export async function loginUser(email, password) {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
@@ -49,12 +56,14 @@ export async function loginUser(email, password) {
   return { user, profile: userDoc.data() };
 }
 
+// 3. تسجيل الخروج
 export async function logoutUser() {
   await signOut(auth);
 }
 
+// 4. مراقبة حالة تسجيل الدخول
 export function watchAuthState(callback) {
-  onAuthStateChanged(auth, async (user) => {
+  return onAuthStateChanged(auth, async (user) => {
     if (user) {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       callback(user, userDoc.exists() ? userDoc.data() : null);
