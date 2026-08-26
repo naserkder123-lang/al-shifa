@@ -1,38 +1,45 @@
 {
-  "id": "./index.html",
   "name": "الشفاء | منصة الرعاية الصحية",
   "short_name": "الشفاء",
-  "description": "منصة الرعاية الصحية الذكية - احجز طبيبك، اطلب دواءك، واحتفظ بملفك الصحي في مكان واحد",
-  "start_url": "./index.html",
+  "description": "منصة الرعاية الصحية الذكية لحجز الأطباء وطلب الأدوية وإدارة الملف الصحي.",
+  "start_url": "./",
   "scope": "./",
+  "id": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#f6fafb",
   "theme_color": "#0b6b57",
   "dir": "rtl",
   "lang": "ar",
-  "categories": ["medical", "health", "lifestyle"],
+  "categories": [
+    "medical",
+    "health"
+  ],
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-192-maskable.png",
+      "src": "./icons/icon-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icons/icon-512-maskable.png",
+      "src": "./icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
