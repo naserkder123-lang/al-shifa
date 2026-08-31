@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alshifa-cache-v6';
+const CACHE_NAME = 'alshifa-cache-v7';
 
 const APP_SHELL = [
   './',
