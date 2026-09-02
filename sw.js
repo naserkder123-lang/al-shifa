@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alshifa-cache-v8';
+const CACHE_NAME = 'alshifa-cache-v9';
 
 const APP_SHELL = [
   './',
@@ -13,10 +13,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
       .catch((error) => {
         console.error('Alshifa cache installation failed:', error);
+        throw error;
       })
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -39,7 +40,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
 
-  // نريد فقط GET
+  // التعامل مع طلبات GET فقط
   if (request.method !== 'GET') {
     return;
   }
@@ -52,7 +53,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // تجاهل أي بروتوكول غير HTTP/HTTPS
+  // السماح فقط بطلبات HTTP و HTTPS
   if (
     requestURL.protocol !== 'http:' &&
     requestURL.protocol !== 'https:'
@@ -60,14 +61,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // لا نتدخل في الطلبات الخارجية.
-  // هذا مهم حتى لا يتدخل Service Worker في Firebase
-  // أو APIs أو خدمات خارجية.
+  // عدم التدخل في الطلبات الخارجية مثل Firebase
   if (requestURL.origin !== self.location.origin) {
     return;
   }
 
-  // التعامل مع صفحات التطبيق والتنقل
+  const pathname = requestURL.pathname.toLowerCase();
+
+  // عدم تخزين أو اعتراض طلبات تسجيل الدخول والمصادقة وواجهات API
+  if (
+    pathname.startsWith('/api/') ||
+    pathname.includes('/login') ||
+    pathname.includes('/signin') ||
+    pathname.includes('/auth') ||
+    pathname.includes('/logout') ||
+    pathname.includes('/session')
+  ) {
+    return;
+  }
+
+  // صفحات التطبيق: الشبكة أولًا ثم الكاش عند عدم توفر الشبكة
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -95,7 +108,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // الملفات الثابتة: Cache First
+  // تخزين الملفات الثابتة فقط
+  const isStaticFile =
+    /\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|json)$/i
+      .test(requestURL.pathname);
+
+  if (!isStaticFile) {
+    return;
+  }
+
+  // الملفات الثابتة: الكاش أولًا ثم الشبكة
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
@@ -120,7 +142,13 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            return undefined;
+            return new Response('المحتوى غير متاح دون اتصال', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: {
+                'Content-Type': 'text/plain; charset=utf-8'
+              }
+            });
           });
       })
   );
