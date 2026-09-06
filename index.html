@@ -2030,6 +2030,10 @@ async function handleLoginSubmit(){
     else if(err.code==="auth/invalid-credential"||err.code==="auth/wrong-password") msg="رقم الهاتف أو كلمة المرور غير صحيحة.";
     else if(err.code==="auth/user-not-found") msg="لا يوجد حساب بهذا الرقم — أنشئ حسابًا جديدًا أولاً.";
     else if(err.code==="auth/weak-password") msg="كلمة المرور ضعيفة جدًا.";
+    else if(err.code==="auth/too-many-requests") msg="محاولات كثيرة جدًا، حاول مرة أخرى بعد قليل.";
+    else if(err.code==="auth/network-request-failed") msg="تأكد من اتصالك بالإنترنت وحاول مرة أخرى.";
+    else if(err.code==="permission-denied") msg="خطأ في الصلاحيات — تواصل مع الدعم الفني.";
+    else if(err.code==="app/no-profile") msg="لم يتم العثور على بيانات حسابك — تواصل مع الدعم الفني.";
     alert(msg);
   }
 }
