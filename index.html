@@ -2495,11 +2495,11 @@ async function saveSubConfigFromForm(role){
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier, onSnapshot
+  signOut, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, updateDoc, collection,
-  query, where, getDocs, addDoc, serverTimestamp
+  query, where, getDocs, addDoc, serverTimestamp, onSnapshot
  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL
