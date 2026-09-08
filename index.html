@@ -1990,6 +1990,20 @@ function syncNewAccountToDirectory(role,profile){
   }
   if(typeof renderCitiesBrowse==="function") renderCitiesBrowse();
 }
+ function waitForAuthReady(timeoutMs = 8000){
+  return new Promise(function(resolve){
+    const start = Date.now();
+    (function check(){
+      if(typeof window.fbSignIn === "function" && typeof window.fbSignUp === "function"){
+        resolve(true);
+      } else if(Date.now() - start >= timeoutMs){
+        resolve(false);
+      } else {
+        setTimeout(check, 150);
+      }
+    })();
+  });
+}
 async function handleLoginSubmit(){
   const phone=(document.getElementById("loginPhone").value||"").trim();
   const password=(document.getElementById("loginPassword").value||"").trim();
@@ -1997,7 +2011,9 @@ async function handleLoginSubmit(){
   if(!phone||!password){alert("اكتب رقم الهاتف وكلمة المرور");return;}
   if(password.length<6){alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");return;}
   const email=phoneToEmail(phone);
-  try{
+const authReady = await waitForAuthReady();
+if(!authReady){ alert("النظام لسه بيتحمّل، انتظر لحظة وحاول تاني."); return; }
+try{
     if(loginMode==="signup"){
       if(!name){alert("اكتب اسمك الكامل");return;}
       const roleSel=document.getElementById("loginRoleSelect");
