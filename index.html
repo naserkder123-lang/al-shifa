@@ -2055,7 +2055,8 @@ try{
       if(role!=="patient"){ syncNewAccountToDirectory(role,Object.assign({},profile,{uid:user.uid})); }
       alert("تم إنشاء حسابك بنجاح ✅ مرحبًا بك في الشفاء");
     }else{
-      await window.fbSignIn(email,password);
+      alert("EMAIL="+email);
+await window.fbSignIn(email,password);
       alert("تم تسجيل الدخول بنجاح ✅");
     }
     closeModal("loginModal");
