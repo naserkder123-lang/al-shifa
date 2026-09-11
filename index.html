@@ -2589,7 +2589,7 @@ window.fbSignUp = async function(email, password, profile){
   window.fbCurrentProfile = profile;
   return cred.user;
 };
-
+window.fbSignIn = async function(email, password){
 
   console.log("FB SIGNIN TEST:", {
     email: email,
