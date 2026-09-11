@@ -941,16 +941,7 @@ function populateCities(){
   if(chips) chips.innerHTML=cities.map(c=>`<button class="city-chip-btn" onclick="pickCity('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("");
 }
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
-function normalizeSudanPhone(phone){
-  let d = String(phone || "").replace(/\D/g, "");
 
-  if (d.startsWith("249")) d = d.slice(3);
-  if (d.startsWith("0")) d = d.slice(1);
-
-  d = d.slice(-9);
-
-  return d.length === 9 ? "249" + d : "";
-}
 function safeGoogleMapsUrl(value){
  const raw=String(value||"").trim();
  if(!raw)return "";
