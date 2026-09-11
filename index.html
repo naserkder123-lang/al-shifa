@@ -2021,7 +2021,16 @@ async function handleLoginSubmit(){
   const name=(document.getElementById("loginName").value||"").trim();
   if(!phone||!password){alert("اكتب رقم الهاتف وكلمة المرور");return;}
   if(password.length<6){alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");return;}
-  const email=phoneToEmail(phone);
+  const normalizedPhone = normalizeSudanPhone(phone);
+const email = normalizedPhone ? normalizedPhone + "@alshifa.local" : "";
+
+console.log("ALSHIFA LOGIN DEBUG", {
+  rawPhone: phone,
+  normalizedPhone: normalizedPhone,
+  email: email,
+  passwordLength: password.length,
+  loginMode: loginMode
+});
 const authReady = await waitForAuthReady();
 if(!authReady){ alert("النظام لسه بيتحمّل، انتظر لحظة وحاول تاني."); return; }
 try{
