@@ -2543,7 +2543,13 @@ window.fbSignUp = async function(email, password, profile){
 };
 
 window.fbSignIn = async function(email, password){
+  console.log("FB SIGNIN TEST:", {
+    email: email,
+    passwordLength: String(password || "").length
+  });
+
   const cred = await signInWithEmailAndPassword(fbAuth, email, password);
+
   const snap = await getDoc(doc(fbDb, "users", cred.user.uid));
   window.fbCurrentUser = cred.user;
   window.fbCurrentProfile = snap.exists() ? snap.data() : null;
