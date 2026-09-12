@@ -2059,7 +2059,7 @@ async function handleLoginSubmit(){
     );
   }
 }
-  if(!phone||!password){alert("اكتب رقم الهاتف وكلمة المرور");return;}
+ 
   if(password.length<6){alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");return;}
   const normalizedPhone = normalizeSudanPhone(phone);
 const email = normalizedPhone ? normalizedPhone + "@alshifa.local" : "";
