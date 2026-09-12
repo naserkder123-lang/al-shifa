@@ -2090,30 +2090,208 @@ try{
         profile.location=locEl?(locEl.value||"").trim():"";
         if(role==="doctor"){ const sp=document.getElementById("loginExtraSpecialty"); profile.specialty=sp?sp.value:"عام"; }
         if(role==="lab"){ const sv=document.getElementById("loginExtraService"); profile.service=sv?sv.value:labServices[0]; }
+async function handleLoginSubmit(){
+  const phone = (document.getElementById("loginPhone")?.value || "").trim();
+  const password = (document.getElementById("loginPassword")?.value || "").trim();
+  const name = (document.getElementById("loginName")?.value || "").trim();
+
+  if (!phone || !password) {
+    alert("اكتب رقم الهاتف وكلمة المرور");
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+    return;
+  }
+
+  try {
+    const normalizedPhone = normalizeSudanPhone(phone);
+
+    if (!normalizedPhone) {
+      alert("رقم الهاتف غير صحيح.");
+      return;
+    }
+
+    const email = normalizedPhone + "@alshifa.local";
+
+    console.log("ALSHIFA LOGIN DEBUG", {
+      rawPhone: phone,
+      normalizedPhone: normalizedPhone,
+      email: email,
+      passwordLength: password.length
+    });
+
+    const authReady = await waitForAuthReady(8000);
+
+    if (authReady === false) {
+      alert("النظام لسه بيتحمّل، انتظر لحظة وحاول تاني.");
+      return;
+    }
+
+    if (
+      typeof window.fbSignIn !== "function" ||
+      typeof window.fbSignUp !== "function"
+    ) {
+      throw new Error("Firebase login functions are not ready");
+    }
+
+    const loginMode =
+      window.loginMode ||
+      document.getElementById("loginMode")?.value ||
+      "signin";
+
+    if (loginMode === "signup") {
+
+      if (!name) {
+        alert("اكتب اسمك الكامل");
+        return;
       }
-      const user=await window.fbSignUp(email,password,profile);
-      if(role!=="patient"){ syncNewAccountToDirectory(role,Object.assign({},profile,{uid:user.uid})); }
+
+      const roleSel = document.getElementById("loginRoleSelect");
+      const role = roleSel ? roleSel.value : "patient";
+
+      const allowedSignupRoles = [
+        "patient",
+        "doctor",
+        "pharmacy",
+        "wholesale",
+        "lab"
+      ];
+
+      if (!allowedSignupRoles.includes(role)) {
+        alert("هذا الدور لا يمكن إنشاؤه من التطبيق.");
+        return;
+      }
+
+      const profile = {
+        name: name,
+        phone: normalizedPhone,
+        role: role,
+        createdAt: new Date().toISOString()
+      };
+
+      if (role !== "patient") {
+
+        const cityEl = document.getElementById("loginExtraCity");
+        profile.city = cityEl ? cityEl.value : "";
+
+        const locEl = document.getElementById("loginExtraLocation");
+        profile.location = locEl
+          ? (locEl.value || "").trim()
+          : "";
+
+        if (role === "doctor") {
+          const sp = document.getElementById("loginExtraSpecialty");
+          profile.specialty = sp ? sp.value : "عام";
+        }
+
+        if (role === "lab") {
+          const sv = document.getElementById("loginExtraService");
+          profile.service = sv
+            ? sv.value
+            : (typeof labServices !== "undefined" && labServices.length
+                ? labServices[0]
+                : "");
+        }
+      }
+
+      const user = await window.fbSignUp(
+        email,
+        password,
+        profile
+      );
+
+      if (
+        role !== "patient" &&
+        user &&
+        user.uid &&
+        typeof syncNewAccountToDirectory === "function"
+      ) {
+        syncNewAccountToDirectory(
+          role,
+          Object.assign({}, profile, { uid: user.uid })
+        );
+      }
+
       alert("تم إنشاء حسابك بنجاح ✅ مرحبًا بك في الشفاء");
-    }else{
-      function phoneToEmail(phone){ return normalizeSudanPhone(phone).replace(/\D/g,"")+"@alshifa.local"; }
+
+    } else {
+
+      const result = await window.fbSignIn(
+        email,
+        password
+      );
+
+      if (!result || !result.user) {
+        throw new Error("Firebase login returned no user");
+      }
+
+      window.fbCurrentUser = result.user;
+      window.fbCurrentProfile = result.profile || null;
 
       alert("تم تسجيل الدخول بنجاح ✅");
+
+      if (typeof updateUIForCurrentUser === "function") {
+        updateUIForCurrentUser();
+      }
+
+      if (typeof renderApp === "function") {
+        renderApp();
+      }
     }
-    closeModal("loginModal");
-  }catch(err){
-    console.error(err);
-    let msg="حدث خطأ، حاول مرة أخرى.";
-    if(err.code==="auth/email-already-in-use") msg="هذا الرقم مسجّل بالفعل — جرّب تسجيل الدخول بدلاً من إنشاء حساب.";
-    else if(err.code==="auth/invalid-credential"||err.code==="auth/wrong-password") msg="رقم الهاتف أو كلمة المرور غير صحيحة.";
-    else if(err.code==="auth/user-not-found") msg="لا يوجد حساب بهذا الرقم — أنشئ حسابًا جديدًا أولاً.";
-    else if(err.code==="auth/too-many-requests") msg="محاولات كثيرة جدًا، حاول مرة أخرى بعد قليل.";
-    else if(err.code==="auth/network-request-failed") msg="تأكد من اتصالك بالإنترنت وحاول مرة أخرى.";
-    else if(err.code==="permission-denied") msg="خطأ في الصلاحيات — تواصل مع الدعم الفني.";
-    else if(err.code==="app/no-profile") msg="لم يتم العثور على بيانات حسابك — تواصل مع الدعم الفني.";
-    alert(msg + "\n\n[DEBUG] " + (err.code||"no-code") + ": " + (err.message||""));
+
+    if (typeof closeLoginModal === "function") {
+      closeLoginModal();
+    } else if (typeof closeModal === "function") {
+      closeModal("loginModal");
+    }
+
+  } catch (err) {
+
+    console.error("ALSHIFA LOGIN ERROR:", err);
+
+    let msg = "حدث خطأ، حاول مرة أخرى.";
+
+    if (err.code === "auth/email-already-in-use") {
+      msg = "هذا الرقم مسجّل بالفعل — جرّب تسجيل الدخول بدلاً من إنشاء حساب.";
+    }
+    else if (
+      err.code === "auth/invalid-credential" ||
+      err.code === "auth/wrong-password"
+    ) {
+      msg = "رقم الهاتف أو كلمة المرور غير صحيحة.";
+    }
+    else if (err.code === "auth/user-not-found") {
+      msg = "لا يوجد حساب بهذا الرقم — أنشئ حسابًا جديدًا أولاً.";
+    }
+    else if (err.code === "auth/weak-password") {
+      msg = "كلمة المرور ضعيفة — يجب أن تكون 6 أحرف على الأقل.";
+    }
+    else if (err.code === "auth/too-many-requests") {
+      msg = "محاولات كثيرة جدًا، حاول مرة أخرى بعد قليل.";
+    }
+    else if (err.code === "auth/network-request-failed") {
+      msg = "تأكد من اتصالك بالإنترنت وحاول مرة أخرى.";
+    }
+    else if (err.code === "permission-denied") {
+      msg = "خطأ في الصلاحيات — تواصل مع الدعم الفني.";
+    }
+    else if (err.code === "app/no-profile") {
+      msg = "لم يتم العثور على بيانات حسابك — تواصل مع الدعم الفني.";
+    }
+
+    alert(
+      msg +
+      "\n\n[DEBUG] " +
+      (err.code || "no-code") +
+      ": " +
+      (err.message || "")
+    );
   }
 }
-let __otpMode="signin";
+
+let __otpMode = "signin";
 let __otpProfileDraft=null;
 async function sendPhoneOtp(){
   const raw=(document.getElementById("loginPhone").value||"").trim();
