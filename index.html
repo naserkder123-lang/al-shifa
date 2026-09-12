@@ -2113,7 +2113,7 @@ async function handleLoginSubmit(){
       return;
     }
 
-    const email = normalizedPhone + "@alshifa.local";
+    const email = normalizedPhone.replace(/^\+/, "") + "@alshifa.local";
 
     console.log("ALSHIFA LOGIN DEBUG", {
       rawPhone: phone,
