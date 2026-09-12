@@ -2772,7 +2772,10 @@ window.fbSignIn = async function(email, password){
   const snap = await getDoc(doc(fbDb, "users", cred.user.uid));
   window.fbCurrentUser = cred.user;
   window.fbCurrentProfile = snap.exists() ? snap.data() : null;
-  return cred.user;
+  return {
+  user: cred.user,
+  profile: window.fbCurrentProfile
+};
 };
 
 window.fbSignOut = async function(){
