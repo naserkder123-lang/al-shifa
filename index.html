@@ -906,13 +906,6 @@ localStorage.setItem("alshifaCities",JSON.stringify(cities));
 const specialties=["عام","باطنية","أطفال","نساء وولادة","جلدية","أسنان","عيون","مخ وأعصاب","عظام"];
 const labServices=["تحليل دم","أشعة","سونار (موجات فوق صوتية)","تحليل بول","فحص شامل","تحليل هرمونات","مسحة/PCR","تحليل آخر"];
 
-const seedDoctors=[];
-let directoryDoctors=JSON.parse(localStorage.getItem("alshifaDirectoryDoctors")||"null")||seedDoctors;
-const seedPharmacies=[];
-let directoryPharmacies=JSON.parse(localStorage.getItem("alshifaDirectoryPharmacies")||"null")||seedPharmacies;
-let directoryWholesale=JSON.parse(localStorage.getItem("alshifaDirectoryWholesale")||"null")||[];
-const seedLabs=[];
-let directoryLabs=JSON.parse(localStorage.getItem("alshifaDirectoryLabs")||"null")||seedLabs;
 
 function populateCities(){
   const dl=document.getElementById("cityOptions");
