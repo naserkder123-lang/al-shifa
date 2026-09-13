@@ -1945,6 +1945,10 @@ function renderLoginRoleExtraFields(){
   wrap.innerHTML=extra;
 }
 function phoneToEmail(phone){
+  const normalized = normalizeSudanPhone(phone);
+  if(!normalized) return "";
+  return normalized + "@alshifa.local";
+}
   return normalizeSudanPhone(phone)+"@alshifa.local";
 }
 /* بعد إنشاء حساب حقيقي لدور غير المريض، نضيفه أيضًا لقائمة الدليل العامة
