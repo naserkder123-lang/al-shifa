@@ -2015,6 +2015,66 @@ async function handleLoginSubmit(){
   }
 
   try {
+    const normalizedPhone = normalizeSudanPhone(phone);
+
+    if (!normalizedPhone) {
+      alert("رقم الهاتف السوداني غير صحيح");
+      return;
+    }
+
+    const email = normalizedPhone + "@alshifa.local";
+
+    console.log("LOGIN USING:", {
+      phone: phone,
+      normalizedPhone: normalizedPhone,
+      email: email
+    });
+
+    await waitForAuthReady(8000);
+
+    if (typeof window.fbSignIn !== "function") {
+      throw new Error("Firebase login function is not ready");
+    }
+
+    const result = await window.fbSignIn(email, password);
+
+    if (!result || !result.user) {
+      throw new Error("Firebase login returned no user");
+    }
+
+    window.fbCurrentUser = result.user;
+    window.fbCurrentProfile = result.profile || null;
+
+    alert("تم تسجيل الدخول بنجاح");
+
+    if (typeof closeLoginModal === "function") {
+      closeLoginModal();
+    }
+
+    if (typeof updateUIForCurrentUser === "function") {
+      updateUIForCurrentUser();
+    }
+
+    if (typeof renderApp === "function") {
+      renderApp();
+    }
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    alert(
+      "فشل تسجيل الدخول.\n\n" +
+      "رقم الهاتف أو كلمة المرور غير صحيحة."
+    );
+  }
+}
+
+  if (password.length < 6) {
+    alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+    return;
+  }
+
+  try {
     const email = phoneToEmail(phone);
 
     console.log("LOGIN USING:", {
