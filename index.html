@@ -2276,6 +2276,13 @@ async function sendPhoneOtp(){
     __otpProfileDraft={...collectRoleExtraFields(role),name,role,phone};
   }
   __otpMode=loginMode;
+ function normalizeSudanPhone(v){
+  const d=String(v||"").replace(/\D/g,"");
+  if(d.startsWith("249")&&d.length===12)return d;
+  if(d.startsWith("0")&&d.length===10)return "249"+d.slice(1);
+  if(d.length===9)return "249"+d;
+  return "";
+}
   try{
     await window.fbPhoneSendOtp(phone);
     document.getElementById("otpField").style.display="";
