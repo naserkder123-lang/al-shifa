@@ -1897,7 +1897,7 @@ async function createLabOrder(){
 /* ===== الدخول برقم الهاتف عبر Firebase Auth، واستعادة الحساب عبر واتساب للإدارة ===== */
 const ADMIN_WHATSAPP="249969695656";
 let loginMode="signin";
-function openLogin(){
+window.loginMode="signin";
   loginMode="signin";
   document.getElementById("loginStep1").style.display="";
   document.getElementById("loginNameField").style.display="none";
