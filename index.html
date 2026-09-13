@@ -2061,36 +2061,7 @@ async function handleLoginSubmit(){
   }
 }
  
-  if(password.length<6){alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");return;}
-  const normalizedPhone = normalizeSudanPhone(phone);
-const email = normalizedPhone ? normalizedPhone + "@alshifa.local" : "";
-
-console.log("ALSHIFA LOGIN DEBUG", {
-  rawPhone: phone,
-  normalizedPhone: normalizedPhone,
-  email: email,
-  passwordLength: password.length,
-  loginMode: loginMode
-});
-const authReady = await waitForAuthReady();
-if(!authReady){ alert("النظام لسه بيتحمّل، انتظر لحظة وحاول تاني."); return; }
-try{
-    if(loginMode==="signup"){
-      if(!name){alert("اكتب اسمك الكامل");return;}
-      const roleSel=document.getElementById("loginRoleSelect");
-      const role = roleSel ? roleSel.value : "patient";
-      const allowedSignupRoles=["patient","doctor","pharmacy","wholesale","lab"];
-      if(!allowedSignupRoles.includes(role)){ alert("هذا الدور لا يمكن إنشاؤه من التطبيق."); return; }
-      const normalizedPhone=normalizeSudanPhone(phone);
-      if(!normalizedPhone || normalizedPhone.length<9){ alert("رقم الهاتف غير صحيح."); return; }
-      const profile={name,phone:normalizedPhone,role,createdAt:new Date().toISOString()};
-      if(role!=="patient"){
-        const cityEl=document.getElementById("loginExtraCity");
-        profile.city=cityEl?cityEl.value:"";
-        const locEl=document.getElementById("loginExtraLocation");
-        profile.location=locEl?(locEl.value||"").trim():"";
-        if(role==="doctor"){ const sp=document.getElementById("loginExtraSpecialty"); profile.specialty=sp?sp.value:"عام"; }
-        if(role==="lab"){ const sv=document.getElementById("loginExtraService"); profile.service=sv?sv.value:labServices[0]; }
+ 
 async function handleLoginSubmit(){
   const phone = (document.getElementById("loginPhone")?.value || "").trim();
   const password = (document.getElementById("loginPassword")?.value || "").trim();
