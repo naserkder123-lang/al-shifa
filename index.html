@@ -1948,8 +1948,6 @@ function phoneToEmail(phone){
   if(!normalized) return "";
   return normalized + "@alshifa.local";
 }
-  return normalizeSudanPhone(phone)+"@alshifa.local";
-}
 /* بعد إنشاء حساب حقيقي لدور غير المريض، نضيفه أيضًا لقائمة الدليل العامة
    (نفس منطق registerDoctor/registerPharmacy/... القديم) حتى يظهر للمرضى فورًا
    ويحتفظ بنفس شكل البيانات القديمة — بدون حذف أو تعديل أي تسجيل قديم موجود. */
