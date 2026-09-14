@@ -1916,23 +1916,7 @@ window.openLogin = function(){
   document.getElementById("loginRoleSelect").value="patient";
   document.getElementById("loginModal").classList.add("show");
 }
-  document.getElementById("loginStep1").style.display="";
-  document.getElementById("loginNameField").style.display="none";
-  document.getElementById("loginRoleField").style.display="none";
-  document.getElementById("loginRoleExtraFields").innerHTML="";
-  document.getElementById("loginTitle").textContent="تسجيل الدخول برقم الهاتف";
-  document.getElementById("loginSubmitBtn").textContent="تسجيل الدخول ✅";
-  document.getElementById("loginToggleBtn").textContent="ليس لديك حساب؟ أنشئ حسابًا جديدًا";
-  document.getElementById("loginPhone").value="";
-  document.getElementById("loginOtp").value="";
-  document.getElementById("otpField").style.display="none";
-  document.getElementById("confirmOtpBtn").style.display="none";
-  document.getElementById("sendOtpBtn").textContent="📲 إرسال رمز التحقق SMS";
-  if(document.getElementById("loginPassword"))document.getElementById("loginPassword").value="";
-  document.getElementById("loginName").value="";
-  document.getElementById("loginRoleSelect").value="patient";
-  document.getElementById("loginModal").classList.add("show");
-}
+ 
 function toggleLoginMode(){
   loginMode = loginMode==="signin" ? "signup" : "signin";
   const isSignup = loginMode==="signup";
