@@ -2002,6 +2002,10 @@ function syncNewAccountToDirectory(role,profile){
   });
 }
 
+  }
+
+async function handleLoginSubmit(){
+  const phone = (document.getElementById("loginPhone").value || "").trim();
   const password = (document.getElementById("loginPassword").value || "").trim();
 
   if (!phone || !password) {
