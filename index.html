@@ -1665,7 +1665,8 @@ function renderOtherEmergencyList(){
 }
 
 /* ===== تصفح المدن: الأطباء ونقاط البيع لكل مدينة، مع تواصل مباشر ===== */
-function renderCitiesBrowse(){
+let directoryPharmacies = [];
+ function renderCitiesBrowse(){
   const wrap=document.getElementById("citiesBrowseList");
   if(!wrap)return;
   const blocks=cities.map(c=>{
