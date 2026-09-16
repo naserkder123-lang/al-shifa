@@ -2939,7 +2939,7 @@ function orderStatusAr(s){return ({pending:"جديد",accepted:"مقبول",prep
 function labStatusAr(s){return ({pending:"جديد",accepted:"مقبول",sample_collected:"تم سحب العينة",processing:"قيد التحليل",result_ready:"النتيجة جاهزة",released:"تم إصدار النتيجة",cancelled:"ملغى"})[s]||s||"غير معروف";}
 function populateProviderSelectors(){
   const ps=document.getElementById("orderPharmacy");
-  if(ps)ps.innerHTML=(directoryPharmacies||[]).filter(x=>x.uid).map(x=>`<option value="${escapeHtml(x.uid)}" data-name="${escapeHtml(x.name||"")}" data-phone="${escapeHtml(x.phone||"")}">${escapeHtml(x.name||"نقطة بيع")}${x.city?" — "+escapeHtml(x.city):""}</option>`).join("")||'<option value="">لا توجد نقطة بيع مرتبطة بحساب بعد</option>';
+  if(ps)ps.innerHTML=(window.directoryPharmacies||[]).filter(x=>x.uid).map(x=>`<option value="${escapeHtml(x.uid)}" data-name="${escapeHtml(x.name||"")}" data-phone="${escapeHtml(x.phone||"")}">${escapeHtml(x.name||"نقطة بيع")}${x.city?" — "+escapeHtml(x.city):""}</option>`).join("")||'<option value="">لا توجد نقطة بيع مرتبطة بحساب بعد</option>';
   const ds=document.getElementById("doctor");
   if(ds)ds.innerHTML=(directoryDoctors||[]).filter(x=>x.uid).map(x=>`<option value="${escapeHtml(x.uid)}" data-name="${escapeHtml(x.name||"")}" data-specialty="${escapeHtml(x.specialty||"")}">${escapeHtml(x.name||"طبيب")} — ${escapeHtml(x.specialty||"")}</option>`).join("")||'<option value="">لا يوجد طبيب مرتبط بحساب بعد</option>';
   const ls=document.getElementById("labOrderLab");
