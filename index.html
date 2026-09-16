@@ -2007,32 +2007,6 @@ function syncNewAccountToDirectory(role,profile){
     })();
   });
 }
-
-
-
-
-  const phone = (document.getElementById("loginPhone")?.value || "").trim();
-  const password = (document.getElementById("loginPassword")?.value || "").trim();
-  const name = (document.getElementById("loginName")?.value || "").trim();
-
-  if (!phone || !password) {
-    alert("اكتب رقم الهاتف وكلمة المرور");
-    return;
-  }
-
-  if (password.length < 6) {
-    alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
-    return;
-  }
-
-  try {
-    const normalizedPhone = (()=>{const d=String(phone||"").replace(/\D/g,"");if(d.startsWith("249")&&d.length===12)return d;if(d.startsWith("0")&&d.length===10)return "249"+d.slice(1);if(d.length===9)return "249"+d;return "";})();
-
-    if (!normalizedPhone) {
-      alert("رقم الهاتف غير صحيح.");
-      return;
-    }
-
     async function handleLoginSubmit(){
   const phone = (document.getElementById("loginPhone")?.value || "").trim();
   const password = (document.getElementById("loginPassword")?.value || "").trim();
