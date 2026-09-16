@@ -3015,11 +3015,7 @@ async function publishLabResult(orderId,patientId,testSummary){
     await window.fbUpdateDoc("labOrders",orderId,{status:"released",resultPublishedAt:window.fbServerTimestamp()});loadLabOrders();alert("تم ربط النتيجة بالمريض ونشرها بأمان ✅");
   }catch(e){alert("تعذر نشر النتيجة: "+e.message);}
 }
-const __oldShow=window.show;window.show=async function(id,btn){
-  __oldShow(id,btn);
-  if(["appointments","orders","health","patient"].includes(id)&&window.fbCurrentUser)await loadRemotePatientData();
-  if(id==="doctorPanel")await loadDoctorAppointments();if(id==="pharmacyPanel")await loadPharmacyOrders();if(id==="labPanel")await loadLabOrders();
-};
+
 const __oldOpenOrder=window.openOrder;window.openOrder=function(){populateProviderSelectors();document.getElementById("orderModal").classList.add("show");};
 const __oldOpenDoctor=window.openDoctor;window.openDoctor=function(){populateProviderSelectors();renderBookingTimeSelect();document.getElementById("doctorModal").classList.add("show");};
 const __oldOpenLabOrder=window.openLabOrder;window.openLabOrder=function(){populateProviderSelectors();document.getElementById("labOrderModal").classList.add("show");};
