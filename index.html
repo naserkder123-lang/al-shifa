@@ -2108,7 +2108,10 @@ function syncNewAccountToDirectory(role,profile){
         name: name,
         phone: normalizedPhone,
         role: role,
-        createdAt: new Date().toISOString()
+        }
+
+async function handleLoginSubmit(){
+  const phone = (document.getElementById("loginPhone")?.value || "").trim();
       };
 
       if (role !== "patient") {
