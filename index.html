@@ -2287,9 +2287,7 @@ function openRoleSignupPrefill(role,data={}){
   const sv=document.getElementById("loginExtraService"); if(sv&&data.service) sv.value=data.service;
 }
 
-function openRecovery(){
-  closeModal("loginModal");
-  document.getElementById("recoveryModal").classList.add("show");
+
 }
 function checkPhoneRegistered(phone){
   const digits=phone.replace(/\D/g,"").slice(-9);
