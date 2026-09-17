@@ -1993,6 +1993,11 @@ function syncNewAccountToDirectory(role,profile){
   }
   if(typeof renderCitiesBrowse==="function") renderCitiesBrowse();
 }
+ function openLogin(){
+  loginMode = "signin";
+  window.loginMode = "signin";
+  document.getElementById("loginModal").classList.add("show");
+}
  function waitForAuthReady(timeoutMs = 8000){
   return new Promise(function(resolve){
     const start = Date.now();
