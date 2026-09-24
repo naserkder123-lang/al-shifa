@@ -3025,3 +3025,104 @@ window.addEventListener("beforeunload",()=>{(window.__alshifaUnsubs||[]).forEach
 </script>
 </body>
 </html>
+<script>
+/* الشفاء — باتش الدفعة 1: لا تحذف شيئًا، الدوال هنا تحلّ محل القديمة */
+try{
+  if(typeof directoryWholesale==="undefined")
+    window.directoryWholesale=JSON.parse(localStorage.getItem("alshifaDirectoryWholesale")||"[]");
+}catch(e){ window.directoryWholesale=[]; }
+
+(function(){
+  const run=n=>{ if(typeof window[n]==="function") window[n](); };
+  const toISO=v=>{
+    if(!v) return null;
+    if(typeof v.toDate==="function") return v.toDate().toISOString();
+    const d=new Date(v); return isNaN(d)?null:d.toISOString();
+  };
+
+  /* 1) إنشاء الحساب كان يُنفَّذ كتسجيل دخول + تحميل البيانات بعد الدخول */
+  const _login=window.handleLoginSubmit;
+  if(_login) window.handleLoginSubmit=async function(){
+    window.loginMode=(typeof loginMode!=="undefined")?loginMode:"signin";
+    await _login.apply(this,arguments);
+    if(window.fbCurrentUser){
+      if(!window.fbCurrentProfile){
+        try{ window.fbCurrentProfile=await window.fbGetProfile(window.fbCurrentUser.uid); }catch(e){}
+      }
+      if(window.fbCurrentProfile) window.onFirebaseLogin(window.fbCurrentProfile);
+    }
+  };
+
+  /* 2) تحديث «تصفح المدن» ولوحات المزوّدين عند فتحها */
+  const _show=window.show;
+  window.show=function(id,btn){
+    _show(id,btn);
+    if(id==="citiesBrowse") run("renderCitiesBrowse");
+    if(id==="doctorPanel") run("loadDoctorAppointments");
+    if(id==="pharmacyPanel") run("loadPharmacyOrders");
+    if(id==="labPanel") run("loadLabOrders");
+  };
+
+  /* 3) قوائم الطبيب/الصيدلية/المعمل في النماذج */
+  window.populateProviderSelectors=function(){
+    const fill=(id,list,label,empty)=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.innerHTML=(list||[]).filter(x=>x.uid).map(x=>`<option value="${escapeHtml(x.uid)}" data-name="${escapeHtml(x.name||"")}">${label(x)}</option>`).join("")||`<option value="">${empty}</option>`;
+    };
+    const withCity=x=>escapeHtml(x.name||"")+(x.city?" — "+escapeHtml(x.city):"");
+    fill("orderPharmacy",directoryPharmacies,withCity,"لا توجد نقطة بيع مرتبطة بحساب بعد");
+    fill("doctor",directoryDoctors,x=>escapeHtml(x.name||"")+" — "+escapeHtml(x.specialty||""),"لا يوجد طبيب مرتبط بحساب بعد");
+    fill("labOrderLab",directoryLabs,withCity,"لا يوجد معمل مرتبط بحساب بعد");
+  };
+
+  /* 4) عند الدخول: تاريخ إنشاء الحساب (بداية التجربة) + التحديث الفوري */
+  const _onLogin=window.onFirebaseLogin;
+  window.onFirebaseLogin=function(p){
+    if(p){
+      const m=window.fbCurrentUser&&window.fbCurrentUser.metadata;
+      p.createdAt=toISO(p.createdAt)||toISO(m&&m.creationTime)||new Date().toISOString();
+    }
+    if(_onLogin) _onLogin(p);
+    if(p){ run("startRealtimeListeners"); if(p.role==="patient") run("loadRemotePatientData"); }
+  };
+
+  /* 5) إعطاء id لقوائم اللوحات حتى تظهر الطلبات الحقيقية */
+  [["doctorPanel","doctorAppointmentsList"],["pharmacyPanel","pharmacyOrdersList"],["labPanel","labOrdersList"]].forEach(([panel,id])=>{
+    const el=document.querySelector("#"+panel+" .list");
+    if(el&&!document.getElementById(id)){ el.id=id; el.innerHTML='<div class="notice">سجّل الدخول بحساب هذا الدور لعرض الطلبات.</div>'; }
+  });
+
+  /* 6) تنظيف */
+  const rc=document.querySelectorAll("#recaptcha-container"); if(rc.length>1) rc[0].remove();
+  window.renderActivationBlock=function(id){ const el=document.getElementById(id); if(el) el.innerHTML=""; };
+  const _ptt=window.patientTrialText;
+  if(_ptt) window.patientTrialText=()=>_ptt().replace(/[\uA9C1\uA9C2]/g,"");
+  const hv=document.getElementById("health");
+  if(hv){ const w=document.createTreeWalker(hv,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())) n.nodeValue=n.nodeValue.split("\\n").join(""); }
+  run("renderTrials");
+
+  /* 7) دوال Firebase تُعرَّف داخل الـmodule، فنغلّفها بعد اكتمال التحميل */
+  window.addEventListener("load",()=>{
+    const add=window.fbAddDoc;
+    if(add) window.fbAddDoc=function(c,data){
+      if(c==="pendingActivations"&&window.fbCurrentUser){
+        const id=window.fbCurrentUser.uid+"_"+Date.now();
+        return window.fbSaveDoc(c,id,data).then(()=>id);
+      }
+      return add.apply(this,arguments);
+    };
+    const qw=window.fbQueryWhere;
+    if(qw) window.fbQueryWhere=async function(){
+      const rows=await qw.apply(this,arguments);
+      rows.forEach(r=>{ if(r&&r.createdAt&&typeof r.createdAt.toDate==="function") r.createdAt=r.createdAt.toDate().toISOString(); });
+      return rows;
+    };
+    const sd=window.fbSaveDoc;
+    if(sd) window.fbSaveDoc=function(c){
+      const p=sd.apply(this,arguments);
+      if(["doctors","pharmacies","labs","wholesale"].includes(c)) p.catch(e=>alert("تعذر حفظ بياناتك في الدليل العام ("+c+"): "+(e.code||"")+" "+(e.message||"")));
+      return p;
+    };
+  });
+})();
+</script>
