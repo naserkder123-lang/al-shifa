@@ -3158,3 +3158,40 @@ try{
   };
 })();
 </script>
+<script>
+/* الشفاء — باتش الدفعة 3: إصلاح مؤقت لتجديد الاشتراك */
+window.submitActivation = async function(elId, role, months, price){
+  const uid = window.fbCurrentUser && window.fbCurrentUser.uid;
+  const profile = window.fbCurrentProfile;
+  if(!uid || !profile){ alert("سجّل الدخول أولاً"); return; }
+  if(profile.role !== role){ alert("لا يمكنك إنشاء طلب اشتراك لدور مختلف عن دور حسابك."); return; }
+  const cfg = await loadSubConfig();
+  const opt = (cfg[role]||SUB_DEFAULT_CONFIG[role]).find(o=>o.months===Number(months));
+  if(!opt){ alert("مدة الاشتراك غير صالحة."); return; }
+  months = opt.months; price = opt.price;
+  const refInput = document.getElementById("txRef_"+role);
+  const ref = (refInput?refInput.value:"").trim();
+  if(!ref){ alert("اكتب رقم العملية أولاً"); return; }
+  let state=null;
+  try{ state = await getSubscriptionState(role); }catch(e){}
+  const record={
+    uid, role, months, amount:price, transactionId:ref,
+    status:"pending",
+    prevEndDate: state?state.endDate:null,
+    requestedAt: new Date().toISOString()
+  };
+  const s = getSettings();
+  const msg = encodeURIComponent("إشعار دفع اشتراك - الشفاء\nالدور: "+(SUB_ROLE_NAMES_AR[role]||role)+"\nالمدة: "+months+" شهر\nرقم العملية: "+ref+"\nالمبلغ: "+price.toLocaleString('ar-EG')+" ج");
+  let firestoreOk=false, errText="";
+  try{
+    if(window.fbAddDoc){ await window.fbAddDoc("pendingActivations", record); firestoreOk=true; }
+  }catch(e){ errText=(e&&e.code)?e.code:((e&&e.message)||"خطأ غير معروف"); }
+  window.open("https://wa.me/"+s.adminPhone.replace(/\D/g,'').replace(/^0/,'249')+"?text="+msg,"_blank");
+  if(firestoreOk){
+    alert("تم إرسال طلبك للإدارة — سيتم تفعيل اشتراكك بعد المراجعة.");
+  }else{
+    alert("تم فتح واتساب برسالتك، لكن تعذر حفظ الطلب في القاعدة (الخطأ: "+errText+"). أرسل رسالة واتساب على أي حال، والمدير سيفعّل اشتراكك يدويًا.");
+  }
+  renderSubscriptionBox(elId,role);
+};
+</script>
