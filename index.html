@@ -3195,3 +3195,67 @@ window.submitActivation = async function(elId, role, months, price){
   renderSubscriptionBox(elId,role);
 };
 </script>
+<script>
+/* الشفاء — باتش الدفعة 4: تنقية عرض البيانات + أزرار اتصال حقيقية */
+(function(){
+  window.render=function(){
+    const a=document.getElementById('patientAppointments');
+    const aa=document.getElementById('allAppointments');
+    const o=document.getElementById('patientOrders');
+    const oo=document.getElementById('allOrders');
+    const rowAppt=x=>`<div class="row"><div><b>${escapeHtml(x.doctor||"")}</b><div class="small">${escapeHtml(x.date||"")} · ${escapeHtml(x.type||"")}</div></div><span class="badge ${String(x.status||"").includes('انتظار')?'warning':''}">${escapeHtml(x.status||"")}</span></div>`;
+    const rowOrder=x=>`<div class="row"><div><b>${x.type==='lab'?'🔬':'💊'} ${escapeHtml(x.id||"")}</b><div class="small">${escapeHtml(x.pharmacy||"")} · ${escapeHtml(x.items||"")}${x.prescriptionImage?' · 📎 مرفق':''}</div></div><span class="badge">${escapeHtml(x.status||"")}</span></div>`;
+    if(a) a.innerHTML=appointments.slice(0,2).map(x=>`<div class="row"><div><b>${escapeHtml(x.doctor||"")}</b><div class="small">${escapeHtml(x.date||"")}</div></div><span class="badge">${escapeHtml(x.status||"")}</span></div>`).join('');
+    if(aa) aa.innerHTML=appointments.map(rowAppt).join('');
+    if(o) o.innerHTML=orders.slice(0,2).map(rowOrder).join('');
+    if(oo) oo.innerHTML=orders.map(rowOrder).join('');
+  };
+
+  function realPhone(list,uid){ const f=(list||[]).find(x=>x.uid===uid); return f&&f.phone; }
+  function ensureId(selector,id){ const el=document.querySelector(selector); if(el&&!el.id) el.id=id; return document.getElementById(id); }
+  ensureId('#doctorModal .contact a:not(#doctorWaBtn)','doctorCallBtn');
+  ensureId('#orderModal .contact a:not(#orderWaBtn)','orderCallBtn');
+  ensureId('#labOrderModal .contact a:not(#labWaBtn)','labCallBtn');
+
+  window.prepareDoctorWa=function(){
+    const specialty=document.getElementById('specialty').value;
+    const sel=document.getElementById('doctor');
+    const opt=sel.options[sel.selectedIndex];
+    const name=(opt&&(opt.dataset.name||opt.textContent))||"";
+    const phone=realPhone(directoryDoctors,sel.value)||"249900000000";
+    const date=document.getElementById('date').value||"غير محدد";
+    const time=(document.getElementById('bookTime')&&document.getElementById('bookTime').value)||"غير محدد";
+    const msg=`مرحبًا، أرغب في حجز موعد عبر تطبيق الشفاء.\nالتخصص: ${specialty}\nالطبيب: ${name}\nالتاريخ: ${date}\nالموعد: ${time}`;
+    document.getElementById('doctorWaBtn').href="https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
+    const cb=document.getElementById('doctorCallBtn'); if(cb) cb.href="tel:+"+phone;
+  };
+  window.prepareOrderWa=function(){
+    const sel=document.getElementById('orderPharmacy');
+    const opt=sel.options[sel.selectedIndex];
+    const name=(opt&&(opt.dataset.name||opt.textContent))||"";
+    const phone=realPhone(directoryPharmacies,sel.value)||"249900000000";
+    const medicine=(document.getElementById('medicine').value||"لم تُكتب الأصناف بعد").trim();
+    const msg=`مرحبًا، أرغب في طلب أدوية عبر تطبيق الشفاء.\nنقطة البيع: ${name}\nالأصناف المطلوبة:\n${medicine}`;
+    document.getElementById('orderWaBtn').href="https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
+    const cb=document.getElementById('orderCallBtn'); if(cb) cb.href="tel:+"+phone;
+  };
+  window.prepareLabWa=function(){
+    const sel=document.getElementById('labOrderLab');
+    const opt=sel.options[sel.selectedIndex];
+    const name=(opt&&(opt.dataset.name||opt.textContent))||"غير محدد";
+    const phone=realPhone(directoryLabs,sel.value)||"249900000000";
+    const tests=(document.getElementById('labTests').value||"لم تُكتب الفحوصات بعد").trim();
+    const msg=`مرحبًا، أرغب في إجراء فحص معملي عبر تطبيق الشفاء.\nالمعمل: ${name}\nالفحوصات المطلوبة:\n${tests}`;
+    document.getElementById('labWaBtn').href="https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
+    const cb=document.getElementById('labCallBtn'); if(cb) cb.href="tel:+"+phone;
+  };
+
+  const _pps=window.populateProviderSelectors;
+  window.populateProviderSelectors=function(){
+    if(_pps) _pps();
+    try{ prepareDoctorWa(); }catch(e){}
+    try{ prepareOrderWa(); }catch(e){}
+    try{ prepareLabWa(); }catch(e){}
+  };
+})();
+</script>
