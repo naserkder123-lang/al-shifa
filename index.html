@@ -3126,3 +3126,35 @@ try{
   });
 })();
 </script>
+<script>
+/* الشفاء — باتش الدفعة 2 */
+(function(){
+  function roleBlocks(){
+    const role=window.fbCurrentProfile&&window.fbCurrentProfile.role;
+    if(role&&role!=="patient"){
+      const names={doctor:"طبيب",pharmacy:"نقطة بيع",lab:"معمل",wholesale:"عميل جملة",admin:"مدير"};
+      alert("هذه الشاشة مخصصة لحسابات المرضى فقط.\nأنت مسجّل دخول كـ"+(names[role]||role)+".");
+      return true;
+    }
+    return false;
+  }
+  ["bookAppointment","createOrder","createLabOrder"].forEach(name=>{
+    const orig=window[name];
+    if(orig) window[name]=function(){ if(roleBlocks()) return; return orig.apply(this,arguments); };
+  });
+
+  const oldTrialIds=["trialDoctor","trialPharmacy","trialWholesale","trialLab"];
+  function hideOldTrialNotices(){
+    oldTrialIds.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display="none";
+    });
+  }
+  hideOldTrialNotices();
+  const _renderTrials=window.renderTrials;
+  window.renderTrials=function(){
+    if(_renderTrials) _renderTrials();
+    hideOldTrialNotices();
+  };
+})();
+</script>
