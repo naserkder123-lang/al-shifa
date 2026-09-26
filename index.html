@@ -3323,3 +3323,17 @@ window.submitActivation = async function(elId, role, months, price){
   };
 })();
 </script>
+<script>
+/* الشفاء — باتش الدفعة 5: رسالة تعطّل خدمة SMS */
+(function(){
+  const btn = document.getElementById('sendOtpBtn');
+  if(btn && !document.getElementById('otpUnavailableNotice')){
+    const notice = document.createElement('div');
+    notice.id = 'otpUnavailableNotice';
+    notice.className = 'notice';
+    notice.style.marginTop = '8px';
+    notice.textContent = 'هذه الخدمة غير متاحة بسبب القيود المفروضة على السودان';
+    btn.insertAdjacentElement('afterend', notice);
+  }
+})();
+</script>
