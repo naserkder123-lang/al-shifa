@@ -3337,3 +3337,17 @@ window.submitActivation = async function(elId, role, months, price){
   }
 })();
 </script>
+<script>
+/* الشفاء — باتش الدفعة 7ب: فلترة بحث منح الصلاحية */
+window.searchDoctorForGrant = function(){
+  const q=(document.getElementById("grantDoctorSearch").value||"").trim().toLowerCase();
+  const wrap=document.getElementById("grantDoctorResults");
+  if(!q){ wrap.innerHTML=""; return; }
+  const results=(typeof directoryDoctors!=="undefined"?directoryDoctors:[]).filter(d=>
+    d.verified===true &&
+    ((d.name||"").toLowerCase().includes(q) || (d.city||"").toLowerCase().includes(q) || (d.specialty||"").toLowerCase().includes(q))
+  ).slice(0,8);
+  if(!results.length){ wrap.innerHTML='<div class="notice">لم يتم العثور على طبيب.</div>'; return; }
+  wrap.innerHTML=results.map((d,i)=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(d.name)}</b><div class="small">${escapeHtml(d.specialty||"")} · ${escapeHtml(d.city||"")}</div></div><button class="btn" onclick='grantAccessToDoctor(${JSON.stringify(d).replace(/'/g,"&#39;")})'>منح الإذن ➕</button></div>`).join('');
+};
+</script>
