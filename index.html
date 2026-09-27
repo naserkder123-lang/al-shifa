@@ -3355,3 +3355,110 @@ window.searchDoctorForGrant = function(){
   wrap.innerHTML=results.map((d,i)=>`<div class="row"><div><b>👨‍⚕️ ${escapeHtml(d.name)}</b><div class="small">${escapeHtml(d.specialty||"")} · ${escapeHtml(d.city||"")}</div></div><button class="btn" onclick='grantAccessToDoctor(${JSON.stringify(d).replace(/'/g,"&#39;")})'>منح الإذن ➕</button></div>`).join('');
 };
 </script>
+<script>
+function getMyDoctorEntry(){
+  if(!window.fbCurrentUser) return null;
+  const list=(typeof directoryDoctors!=="undefined")?directoryDoctors:[];
+  return list.find(d=>d.uid===window.fbCurrentUser.uid) || null;
+}
+
+function renderDoctorVerificationBox(){
+  const box=document.getElementById("doctorVerificationBox");
+  if(!box) return;
+  const entry=getMyDoctorEntry();
+  const status=(entry && entry.verificationStatus) || "not_submitted";
+  if(status==="verified"){
+    box.innerHTML='<div class="notice" style="color:#2e7d32">✅ رخصتك موثّقة</div>';
+    return;
+  }
+  if(status==="pending"){
+    box.innerHTML='<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>';
+    return;
+  }
+  const rejected=status==="rejected";
+  const msg=rejected?"❌ تم رفض الطلب. حاول رفع صورة أوضح":"🪪 حسابك غير موثّق. ارفع صورة رخصة مزاولة المهنة عشان يظهر ملفك للمرضى";
+  const btnText=rejected?"إعادة إرسال صورة الرخصة":"إرسال صورة الرخصة";
+  box.innerHTML=`<div class="notice">${msg}</div>
+    <input type="file" id="doctorLicenseFile" accept="image/*" style="margin-top:8px">
+    <button class="btn full" style="margin-top:8px" onclick="submitDoctorVerification()">${btnText}</button>`;
+}
+
+async function submitDoctorVerification(){
+  const fileInput=document.getElementById("doctorLicenseFile");
+  const file=fileInput && fileInput.files && fileInput.files[0];
+  if(!file){ alert("اختر صورة الرخصة أولاً"); return; }
+  if(!window.fbCurrentUser){ alert("سجل الدخول أولاً"); return; }
+  const uid=window.fbCurrentUser.uid;
+  try{
+    const path="doctorLicenses/"+uid+"/"+Date.now()+"_"+file.name;
+    const url=await window.fbUploadFile(path,file);
+    const entry=getMyDoctorEntry()||{};
+    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseUrl:url});
+    await window.fbSaveDoc("doctors",uid,updated);
+    if(typeof directoryDoctors!=="undefined"){
+      const idx=directoryDoctors.findIndex(d=>d.uid===uid);
+      if(idx>-1) directoryDoctors[idx]=updated; else directoryDoctors.unshift(updated);
+      localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
+    }
+    renderDoctorVerificationBox();
+    const waText=encodeURIComponent("طلب توثيق رخصة طبيب جديد: "+(updated.name||"")+" - "+(updated.phone||""));
+    window.open("https://wa.me/249969695656?text="+waText,"_blank");
+  }catch(e){
+    alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
+  }
+}
+
+function renderPendingDoctorVerifications(){
+  const list=document.getElementById("adminPendingDoctorVerifications");
+  if(!list) return;
+  if(!(window.isRealAdmin && window.isRealAdmin())){ list.innerHTML=""; return; }
+  const all=(typeof directoryDoctors!=="undefined")?directoryDoctors:[];
+  const pending=all.filter(d=>d.verificationStatus==="pending");
+  if(pending.length===0){ list.innerHTML='<div class="notice">لا يوجد أطباء بانتظار التوثيق حالياً</div>'; return; }
+  list.innerHTML=pending.map(d=>{
+    const linkHtml=d.licenseUrl?`<br><a href="${d.licenseUrl}" target="_blank">📎 صورة الرخصة</a>`:"";
+    return `<div class="row"><div><b>${d.name||""}</b> — ${d.specialty||""} — ${d.city||""}${linkHtml}</div>
+      <div><button class="btn" onclick="approveDoctorVerification('${d.uid}')">قبول</button>
+      <button class="btn alt" onclick="rejectDoctorVerification('${d.uid}')">رفض</button></div></div>`;
+  }).join("");
+}
+
+async function approveDoctorVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryDoctors.findIndex(d=>d.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryDoctors[idx],{verified:true,verificationStatus:"verified"});
+  try{
+    await window.fbSaveDoc("doctors",uid,updated);
+    directoryDoctors[idx]=updated;
+    localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
+    renderPendingDoctorVerifications();
+    if(typeof renderDoctorsList==="function") renderDoctorsList();
+  }catch(e){ alert("تعذر قبول التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
+async function rejectDoctorVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryDoctors.findIndex(d=>d.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryDoctors[idx],{verified:false,verificationStatus:"rejected"});
+  try{
+    await window.fbSaveDoc("doctors",uid,updated);
+    directoryDoctors[idx]=updated;
+    localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
+    renderPendingDoctorVerifications();
+  }catch(e){ alert("تعذر رفض التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
+const __origShow=window.show;
+if(typeof __origShow==="function"){
+  window.show=function(viewId){
+    const r=__origShow.apply(this,arguments);
+    try{
+      if(viewId==="doctorPanel") renderDoctorVerificationBox();
+      if(viewId==="adminPanel") renderPendingDoctorVerifications();
+    }catch(e){ console.warn("verification render error",e); }
+    return r;
+  };
+}
+</script>
