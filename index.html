@@ -3407,7 +3407,27 @@ async function submitDoctorVerification(){
     alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
   }
 }
-
+function compressImageToBase64(file,maxSize,quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("تعذرت قراءة الملف"));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("تعذرت معالجة الصورة"));
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>h){ if(w>maxSize){ h=Math.round(h*maxSize/w); w=maxSize; } }
+        else{ if(h>maxSize){ w=Math.round(w*maxSize/h); h=maxSize; } }
+        const canvas=document.createElement("canvas");
+        canvas.width=w; canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",quality));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 function renderPendingDoctorVerifications(){
   const list=document.getElementById("adminPendingDoctorVerifications");
   if(!list) return;
