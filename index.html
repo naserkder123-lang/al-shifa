@@ -3373,7 +3373,9 @@ function renderDoctorVerificationBox(){
     return;
   }
   if(status==="pending"){
-    box.innerHTML='<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>';
+    const waText=encodeURIComponent("طلب توثيق رخصة طبيب جديد: "+(entry.name||"")+" - "+(entry.phone||""));
+    box.innerHTML=`<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>
+      <a class="btn full" style="margin-top:8px" href="https://wa.me/249969695656?text=${waText}" target="_blank">📲 إرسال إشعار للإدارة عبر واتساب</a>`;
     return;
   }
   const rejected=status==="rejected";
