@@ -3403,8 +3403,6 @@ const url=uploadResult.url;
       localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
     }
     renderDoctorVerificationBox();
-    const waText=encodeURIComponent("طلب توثيق رخصة طبيب جديد: "+(updated.name||"")+" - "+(updated.phone||""));
-    window.open("https://wa.me/249969695656?text="+waText,"_blank");
   }catch(e){
     alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
   }
