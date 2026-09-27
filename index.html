@@ -3392,7 +3392,8 @@ async function submitDoctorVerification(){
   const uid=window.fbCurrentUser.uid;
   try{
     const path="doctorLicenses/"+uid+"/"+Date.now()+"_"+file.name;
-    const url=await window.fbUploadFile(path,file);
+    const uploadResult=await window.fbUploadFile(file,path);
+const url=uploadResult.url;
     const entry=getMyDoctorEntry()||{};
     const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseUrl:url});
     await window.fbSaveDoc("doctors",uid,updated);
