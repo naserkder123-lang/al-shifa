@@ -3393,9 +3393,7 @@ async function submitDoctorVerification(){
   if(!window.fbCurrentUser){ alert("سجل الدخول أولاً"); return; }
   const uid=window.fbCurrentUser.uid;
   try{
-    const path="doctorLicenses/"+uid+"/"+Date.now()+"_"+file.name;
-    const uploadResult=await window.fbUploadFile(file,path);
-const url=uploadResult.url;
+    const base64=await compressImageToBase64(file,800,0.6);
     const entry=getMyDoctorEntry()||{};
     const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseUrl:url});
     await window.fbSaveDoc("doctors",uid,updated);
