@@ -3396,7 +3396,7 @@ async function submitDoctorVerification(){
     const base64=await compressImageToBase64(file,800,0.6);
     const entry=getMyDoctorEntry()||{};
     const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseImage:base64
-    await window.fbSaveDoc("doctors",uid,updated);
+    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseImage:base64});
     if(typeof directoryDoctors!=="undefined"){
       const idx=directoryDoctors.findIndex(d=>d.uid===uid);
       if(idx>-1) directoryDoctors[idx]=updated; else directoryDoctors.unshift(updated);
