@@ -2733,7 +2733,7 @@ window.fbSaveDoc = async function(collectionName, id, data){
   if(collectionName==="subscriptions" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized subscription write");
   if(collectionName==="pendingActivations" && !isRealAdmin() && data && data.uid!==uid) throw new Error("Unauthorized activation owner");
   if(collectionName==="patientReported" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized health data write");
-  if(collectionName==="doctors" && id!==uid) throw new Error("Unauthorized doctor directory write");
+  if(collectionName==="doctors" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized doctor directory write");
   if(collectionName==="pharmacies" && id!==uid) throw new Error("Unauthorized pharmacy directory write");
   if(collectionName==="wholesale" && id!==uid) throw new Error("Unauthorized wholesale directory write");
   if(collectionName==="labs" && id!==uid) throw new Error("Unauthorized lab directory write");
