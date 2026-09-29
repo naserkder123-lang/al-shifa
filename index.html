@@ -2705,7 +2705,11 @@ window.fbSignIn = async function(email, password){
 };
 
 window.fbSignOut = async function(){
-  await signOut(fbAuth);
+  try{
+    await signOut(fbAuth);
+  }catch(e){
+    console.warn("signOut warning:", e);
+  }
   window.fbCurrentUser = null;
   window.fbCurrentProfile = null;
 };
