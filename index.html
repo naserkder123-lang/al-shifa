@@ -3346,23 +3346,7 @@ window.submitActivation = async function(elId, role, months, price){
   }
 })();
 </script>
-async function approveDoctorVerification(uid){
-  alert("1: uid="+uid);
-  if(!(window.isRealAdmin && window.isRealAdmin())){ alert("2: مش مدير"); return; }
-  const idx=directoryDoctors.findIndex(d=>d.uid===uid);
-  alert("3: idx="+idx);
-  if(idx===-1) return;
-  const updated=Object.assign({},directoryDoctors[idx],{verified:true,verificationStatus:"verified"});
-  try{
-    alert("4: جاري الحفظ");
-    await window.fbSaveDoc("doctors",uid,updated);
-    alert("5: تم الحفظ");
-    directoryDoctors[idx]=updated;
-    localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
-    renderPendingDoctorVerifications();
-    if(typeof renderDoctorsList==="function") renderDoctorsList();
-  }catch(e){ alert("تعذر قبول التوثيق: "+((e&&(e.message||e.code))||e)); }
-}
+
 </script>
 <script>
 function getMyDoctorEntry(){
