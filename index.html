@@ -1969,7 +1969,7 @@ function syncNewAccountToDirectory(role,profile){
     directoryDoctors.unshift(entry);
     localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
     if(window.fbSaveDoc && profile.uid){
-      window.fbSaveDoc("doctors",profile.uid,entry).catch(e=>console.warn("تعذر مزامنة الطبيب مع Firestore",e));
+     window.fbSaveDoc("doctors",profile.uid,entry).catch(e=>alert("تعذر مزامنة الطبيب: "+((e&&(e.message||e.code))||e)));
     }
     if(typeof renderDoctorsList==="function") renderDoctorsList();
   }else if(role==="pharmacy"){
