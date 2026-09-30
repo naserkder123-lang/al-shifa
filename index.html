@@ -3381,18 +3381,21 @@ function renderDoctorVerificationBox(){
 async function submitDoctorVerification(){
   const fileInput=document.getElementById("doctorLicenseFile");
   const file=fileInput && fileInput.files && fileInput.files[0];
-  if(!file){ alert("اختر صورة الرخصة أولاً"); return; }
-  if(!window.fbCurrentUser){ alert("سجل الدخول أولاً"); return; }
+  if(!file){ alert("اختر صورة الرخصة أولا"); return; }
+  if(!window.fbCurrentUser){ alert("سجل الدخول أولا"); return; }
   const uid=window.fbCurrentUser.uid;
   try{
     const base64=await compressImageToBase64(file,800,0.6);
+    await window.fbSaveDoc("licenseSubmissions",uid,{image:base64,role:"doctor",submittedAt:new Date().toISOString()});
     const entry=getMyDoctorEntry()||{};
-    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending",licenseImage:base64});
+    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending"});
+    delete updated.licenseImage;
     if(typeof directoryDoctors!=="undefined"){
       const idx=directoryDoctors.findIndex(d=>d.uid===uid);
       if(idx>-1) directoryDoctors[idx]=updated; else directoryDoctors.unshift(updated);
       localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));
     }
+    await window.fbSaveDoc("doctors",uid,updated);
     renderDoctorVerificationBox();
   }catch(e){
     alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
