@@ -3476,13 +3476,229 @@ async function rejectDoctorVerification(uid){
   }catch(e){ alert("تعذر رفض التوثيق: "+((e&&(e.message||e.code))||e)); }
 }
 
+function getMyPharmacyEntry(){
+  if(!window.fbCurrentUser) return null;
+  const list=(typeof directoryPharmacies!=="undefined")?directoryPharmacies:[];
+  return list.find(p=>p.uid===window.fbCurrentUser.uid) || null;
+}
+
+function renderPharmacyVerificationBox(){
+  const box=document.getElementById("pharmacyVerificationBox");
+  if(!box) return;
+  const entry=getMyPharmacyEntry();
+  const status=(entry && entry.verificationStatus) || "not_submitted";
+  if(status==="verified"){
+    box.innerHTML='<div class="notice" style="color:#2e7d32">✅ رخصتك موثقة</div>';
+    return;
+  }
+  if(status==="pending"){
+    box.innerHTML='<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>';
+    return;
+  }
+  const rejected=status==="rejected";
+  const msg=rejected?"❌ الصورة غير موثقة، ارفع صورة رخصة أوضح":"ارفع صورة رخصة الصيدلية للتوثيق";
+  const btnText=rejected?"إعادة إرسال صورة الرخصة":"إرسال صورة الرخصة";
+  box.innerHTML=`<div class="notice">${msg}</div>
+    <input type="file" id="pharmacyLicenseFile" accept="image/*" style="margin-top:8px">
+    <button class="btn full" style="margin-top:8px" onclick="submitPharmacyVerification()">${btnText}</button>`;
+}
+
+async function submitPharmacyVerification(){
+  const fileInput=document.getElementById("pharmacyLicenseFile");
+  const file=fileInput && fileInput.files && fileInput.files[0];
+  if(!file){ alert("اختر صورة الرخصة أولا"); return; }
+  if(!window.fbCurrentUser){ alert("سجل الدخول أولا"); return; }
+  const uid=window.fbCurrentUser.uid;
+  try{
+    const base64=await compressImageToBase64(file,800,0.6);
+    await window.fbSaveDoc("licenseSubmissions",uid,{image:base64,role:"pharmacy",submittedAt:new Date().toISOString()});
+    const entry=getMyPharmacyEntry()||{};
+    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending"});
+    if(typeof directoryPharmacies!=="undefined"){
+      const idx=directoryPharmacies.findIndex(p=>p.uid===uid);
+      if(idx>-1) directoryPharmacies[idx]=updated; else directoryPharmacies.unshift(updated);
+      localStorage.setItem("alshifaDirectoryPharmacies",JSON.stringify(directoryPharmacies));
+    }
+    await window.fbSaveDoc("pharmacies",uid,updated);
+    renderPharmacyVerificationBox();
+  }catch(e){
+    alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
+  }
+}
+
+function renderPendingPharmacyVerifications(){
+  const list=document.getElementById("adminPendingPharmacyVerifications");
+  if(!list) return;
+  if(!(window.isRealAdmin && window.isRealAdmin())){ list.innerHTML=""; return; }
+  const all=(typeof directoryPharmacies!=="undefined")?directoryPharmacies:[];
+  const pending=all.filter(p=>p.verificationStatus==="pending");
+  if(pending.length===0){ list.innerHTML='<div class="notice">لا يوجد صيدليات بانتظار التوثيق حاليًا</div>'; return; }
+  list.innerHTML=pending.map(p=>{
+    return `<div class="row"><div><b>${p.name||""}</b> — ${p.city||""}
+      <div id="lic-${p.uid}" style="margin-top:6px"><button class="btn alt" onclick="viewPharmacyLicense('${p.uid}')">📄 عرض صورة الرخصة</button></div></div>
+      <div><button class="btn" onclick="approvePharmacyVerification('${p.uid}')">قبول</button>
+      <button class="btn alt" onclick="rejectPharmacyVerification('${p.uid}')">رفض</button></div></div>`;
+  }).join("");
+}
+
+async function viewPharmacyLicense(uid){
+  const box=document.getElementById("lic-"+uid);
+  if(!box) return;
+  box.innerHTML="جاري التحميل...";
+  try{
+    const sub=await window.fbGetDoc("licenseSubmissions",uid);
+    if(!sub || !sub.image){ box.innerHTML='<span style="color:#b00">لا توجد صورة مرفوعة</span>'; return; }
+    box.innerHTML=`<img src="${sub.image}" style="max-width:100%;border-radius:8px">`;
+  }catch(e){
+    box.innerHTML='<span style="color:#b00">تعذر تحميل الصورة: '+((e&&(e.message||e.code))||e)+'</span>';
+  }
+}
+
+async function approvePharmacyVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryPharmacies.findIndex(p=>p.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryPharmacies[idx],{verified:true,verificationStatus:"verified"});
+  try{
+    await window.fbSaveDoc("pharmacies",uid,updated);
+    directoryPharmacies[idx]=updated;
+    localStorage.setItem("alshifaDirectoryPharmacies",JSON.stringify(directoryPharmacies));
+    renderPendingPharmacyVerifications();
+    if(typeof renderPharmaciesList==="function") renderPharmaciesList();
+  }catch(e){ alert("تعذر قبول التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
+async function rejectPharmacyVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryPharmacies.findIndex(p=>p.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryPharmacies[idx],{verified:false,verificationStatus:"rejected"});
+  try{
+    await window.fbSaveDoc("pharmacies",uid,updated);
+    directoryPharmacies[idx]=updated;
+    localStorage.setItem("alshifaDirectoryPharmacies",JSON.stringify(directoryPharmacies));
+    renderPendingPharmacyVerifications();
+  }catch(e){ alert("تعذر رفض التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
+function getMyLabEntry(){
+  if(!window.fbCurrentUser) return null;
+  const list=(typeof directoryLabs!=="undefined")?directoryLabs:[];
+  return list.find(l=>l.uid===window.fbCurrentUser.uid) || null;
+}
+
+function renderLabVerificationBox(){
+  const box=document.getElementById("labVerificationBox");
+  if(!box) return;
+  const entry=getMyLabEntry();
+  const status=(entry && entry.verificationStatus) || "not_submitted";
+  if(status==="verified"){
+    box.innerHTML='<div class="notice" style="color:#2e7d32">✅ رخصتك موثقة</div>';
+    return;
+  }
+  if(status==="pending"){
+    box.innerHTML='<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>';
+    return;
+  }
+  const rejected=status==="rejected";
+  const msg=rejected?"❌ الصورة غير موثقة، ارفع صورة رخصة أوضح":"ارفع صورة رخصة المعمل للتوثيق";
+  const btnText=rejected?"إعادة إرسال صورة الرخصة":"إرسال صورة الرخصة";
+  box.innerHTML=`<div class="notice">${msg}</div>
+    <input type="file" id="labLicenseFile" accept="image/*" style="margin-top:8px">
+    <button class="btn full" style="margin-top:8px" onclick="submitLabVerification()">${btnText}</button>`;
+}
+
+async function submitLabVerification(){
+  const fileInput=document.getElementById("labLicenseFile");
+  const file=fileInput && fileInput.files && fileInput.files[0];
+  if(!file){ alert("اختر صورة الرخصة أولا"); return; }
+  if(!window.fbCurrentUser){ alert("سجل الدخول أولا"); return; }
+  const uid=window.fbCurrentUser.uid;
+  try{
+    const base64=await compressImageToBase64(file,800,0.6);
+    await window.fbSaveDoc("licenseSubmissions",uid,{image:base64,role:"lab",submittedAt:new Date().toISOString()});
+    const entry=getMyLabEntry()||{};
+    const updated=Object.assign({},entry,{uid:uid,verified:false,verificationStatus:"pending"});
+    if(typeof directoryLabs!=="undefined"){
+      const idx=directoryLabs.findIndex(l=>l.uid===uid);
+      if(idx>-1) directoryLabs[idx]=updated; else directoryLabs.unshift(updated);
+      localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+    }
+    await window.fbSaveDoc("labs",uid,updated);
+    renderLabVerificationBox();
+  }catch(e){
+    alert("تعذر إرسال صورة الرخصة: "+((e&&(e.message||e.code))||e));
+  }
+}
+
+function renderPendingLabVerifications(){
+  const list=document.getElementById("adminPendingLabVerifications");
+  if(!list) return;
+  if(!(window.isRealAdmin && window.isRealAdmin())){ list.innerHTML=""; return; }
+  const all=(typeof directoryLabs!=="undefined")?directoryLabs:[];
+  const pending=all.filter(l=>l.verificationStatus==="pending");
+  if(pending.length===0){ list.innerHTML='<div class="notice">لا يوجد معامل بانتظار التوثيق حاليًا</div>'; return; }
+  list.innerHTML=pending.map(l=>{
+    return `<div class="row"><div><b>${l.name||""}</b> — ${l.city||""}
+      <div id="lic-${l.uid}" style="margin-top:6px"><button class="btn alt" onclick="viewLabLicense('${l.uid}')">📄 عرض صورة الرخصة</button></div></div>
+      <div><button class="btn" onclick="approveLabVerification('${l.uid}')">قبول</button>
+      <button class="btn alt" onclick="rejectLabVerification('${l.uid}')">رفض</button></div></div>`;
+  }).join("");
+}
+
+async function viewLabLicense(uid){
+  const box=document.getElementById("lic-"+uid);
+  if(!box) return;
+  box.innerHTML="جاري التحميل...";
+  try{
+    const sub=await window.fbGetDoc("licenseSubmissions",uid);
+    if(!sub || !sub.image){ box.innerHTML='<span style="color:#b00">لا توجد صورة مرفوعة</span>'; return; }
+    box.innerHTML=`<img src="${sub.image}" style="max-width:100%;border-radius:8px">`;
+  }catch(e){
+    box.innerHTML='<span style="color:#b00">تعذر تحميل الصورة: '+((e&&(e.message||e.code))||e)+'</span>';
+  }
+}
+
+async function approveLabVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryLabs.findIndex(l=>l.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryLabs[idx],{verified:true,verificationStatus:"verified"});
+  try{
+    await window.fbSaveDoc("labs",uid,updated);
+    directoryLabs[idx]=updated;
+    localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+    renderPendingLabVerifications();
+    if(typeof renderLabsList==="function") renderLabsList();
+  }catch(e){ alert("تعذر قبول التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
+async function rejectLabVerification(uid){
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
+  const idx=directoryLabs.findIndex(l=>l.uid===uid);
+  if(idx===-1) return;
+  const updated=Object.assign({},directoryLabs[idx],{verified:false,verificationStatus:"rejected"});
+  try{
+    await window.fbSaveDoc("labs",uid,updated);
+    directoryLabs[idx]=updated;
+    localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+    renderPendingLabVerifications();
+  }catch(e){ alert("تعذر رفض التوثيق: "+((e&&(e.message||e.code))||e)); }
+}
+
 const __origShow=window.show;
 if(typeof __origShow==="function"){
   window.show=function(viewId){
     const r=__origShow.apply(this,arguments);
     try{
       if(viewId==="doctorPanel") renderDoctorVerificationBox();
-      if(viewId==="adminPanel") renderPendingDoctorVerifications();
+      if(viewId==="pharmacyPanel") renderPharmacyVerificationBox();
+      if(viewId==="labPanel") renderLabVerificationBox();
+      if(viewId==="adminPanel"){
+        renderPendingDoctorVerifications();
+        renderPendingPharmacyVerifications();
+        renderPendingLabVerifications();
+      }
     }catch(e){ console.warn("verification render error",e); }
     return r;
   };
