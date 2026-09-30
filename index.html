@@ -3428,13 +3428,26 @@ function renderPendingDoctorVerifications(){
   if(!(window.isRealAdmin && window.isRealAdmin())){ list.innerHTML=""; return; }
   const all=(typeof directoryDoctors!=="undefined")?directoryDoctors:[];
   const pending=all.filter(d=>d.verificationStatus==="pending");
-  if(pending.length===0){ list.innerHTML='<div class="notice">لا يوجد أطباء بانتظار التوثيق حالياً</div>'; return; }
+  if(pending.length===0){ list.innerHTML='<div class="notice">لا يوجد أطباء بانتظار التوثيق حاليًا</div>'; return; }
   list.innerHTML=pending.map(d=>{
-    const linkHtml=d.licenseImage?`<br><img src="${d.licenseImage}" style="max-width:100%;border-radius:8px;margin-top:6px">`:"";
-    return `<div class="row"><div><b>${d.name||""}</b> — ${d.specialty||""} — ${d.city||""}${linkHtml}</div>
+    return `<div class="row"><div><b>${d.name||""}</b> — ${d.specialty||""} — ${d.city||""}
+      <div id="lic-${d.uid}" style="margin-top:6px"><button class="btn alt" onclick="viewDoctorLicense('${d.uid}')">📄 عرض صورة الرخصة</button></div></div>
       <div><button class="btn" onclick="approveDoctorVerification('${d.uid}')">قبول</button>
       <button class="btn alt" onclick="rejectDoctorVerification('${d.uid}')">رفض</button></div></div>`;
   }).join("");
+}
+
+async function viewDoctorLicense(uid){
+  const box=document.getElementById("lic-"+uid);
+  if(!box) return;
+  box.innerHTML="جاري التحميل...";
+  try{
+    const sub=await window.fbGetDoc("licenseSubmissions",uid);
+    if(!sub || !sub.image){ box.innerHTML='<span style="color:#b00">لا توجد صورة مرفوعة</span>'; return; }
+    box.innerHTML=`<img src="${sub.image}" style="max-width:100%;border-radius:8px">`;
+  }catch(e){
+    box.innerHTML='<span style="color:#b00">تعذر تحميل الصورة: '+((e&&(e.message||e.code))||e)+'</span>';
+  }
 }
 
 async function approveDoctorVerification(uid){
