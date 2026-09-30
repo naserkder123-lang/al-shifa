@@ -3435,8 +3435,7 @@ function renderPendingDoctorVerifications(){
 }
 
 async function approveDoctorVerification(uid){
-  alert("جلستي الحالية:\nuid="+(window.fbCurrentUser&&window.fbCurrentUser.uid)+"\nrole="+(window.fbCurrentProfile&&window.fbCurrentProfile.role));
-  if(!(window.isRealAdmin && window.isRealAdmin())){ alert("مش مدير - توقف هنا"); return; }
+  if(!(window.isRealAdmin && window.isRealAdmin())) return;
   const idx=directoryDoctors.findIndex(d=>d.uid===uid);
   if(idx===-1) return;
   const updated=Object.assign({},directoryDoctors[idx],{verified:true,verificationStatus:"verified"});
@@ -3448,7 +3447,6 @@ async function approveDoctorVerification(uid){
     if(typeof renderDoctorsList==="function") renderDoctorsList();
   }catch(e){ alert("تعذر قبول التوثيق: "+((e&&(e.message||e.code))||e)); }
 }
-
 async function rejectDoctorVerification(uid){
   if(!(window.isRealAdmin && window.isRealAdmin())) return;
   const idx=directoryDoctors.findIndex(d=>d.uid===uid);
