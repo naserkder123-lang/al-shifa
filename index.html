@@ -3760,3 +3760,66 @@ if(typeof __origShow==="function"){
   };
 }
 </script>
+
+<script>
+(function(){
+ function fmt(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return "";
+  return d.toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});
+ }
+ function esc(s){return (typeof escapeHtml==="function")?escapeHtml(s):String(s);}
+ async function renderWsForPharmacy(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||p.role!=="pharmacy"||!window.fbQueryWhere)return;
+  var list=document.getElementById("pharmacyOrdersList");
+  if(!list)return;
+  var rows=await window.fbQueryWhere("medicineOrders","pharmacyId","==",u.uid);
+  rows=rows.filter(function(x){return x.orderType==="wholesale";});
+  list.querySelectorAll(".row").forEach(function(r){
+   if((r.textContent||"").indexOf("طلب جملة")>-1)r.remove();
+  });
+  var box=document.getElementById("wsPharmBox");
+  if(!box){
+   box=document.createElement("div");
+   box.id="wsPharmBox";
+   list.parentNode.insertBefore(box,list);
+  }
+  if(!rows.length){box.innerHTML="";return;}
+  rows.sort(function(a,b){return String(b.createdAt||"").localeCompare(String(a.createdAt||""));});
+  var td='padding:6px;border:1px solid #ccc;';
+  box.innerHTML=rows.map(function(x){
+   var items=Array.isArray(x.itemsDetail)?x.itemsDetail:[];
+   var trs=items.map(function(i){
+    return '<tr><td style="'+td+'">'+esc(i.name)+'</td><td style="'+td+'text-align:center">'+esc(i.qty)+'</td><td style="'+td+'text-align:center">'+esc(i.price)+'</td></tr>';
+   }).join("");
+   var got=fmt(x.receivedAt);
+   return '<div class="row" style="display:block;margin-bottom:12px;border:2px solid #0e6b52;border-radius:12px;padding:10px">'
+    +'<div style="text-align:center;font-weight:bold;color:#0e6b52;font-size:16px">الشفاء — تطبيقك</div>'
+    +'<div style="margin:6px 0"><b>العميل:</b> '+esc(x.patientName||"عميل جملة")+'</div>'
+    +'<table style="width:100%;border-collapse:collapse"><tr><th style="'+td+'">الصنف</th><th style="'+td+'">الكمية</th><th style="'+td+'">السعر</th></tr>'+trs+'</table>'
+    +'<div style="margin-top:6px"><b>الإجمالي:</b> '+Number(x.total||0).toLocaleString("ar")+' جنيه</div>'
+    +'<div><b>تاريخ الوصول:</b> '+(fmt(x.createdAt)||"—")+'</div>'
+    +'<div><b>تاريخ الاستلام:</b> '+(got||"............")+'</div>'
+    +(got?'':'<button class="btn full" style="margin-top:8px" onclick="markWsReceived(\''+esc(x.id)+'\')">✅ تم الاستلام</button>')
+    +'</div>';
+  }).join("");
+ }
+ window.markWsReceived=async function(id){
+  if(!confirm("تأكيد استلام الطلب؟"))return;
+  try{
+   await window.fbUpdateDoc("medicineOrders",id,{receivedAt:new Date().toISOString()});
+  }catch(e){
+   alert("تعذر الحفظ: "+(e.code||e.message));
+   return;
+  }
+  renderWsForPharmacy();
+ };
+ var orig=window.loadPharmacyOrders;
+ window.loadPharmacyOrders=async function(){
+  if(orig)await orig.apply(this,arguments);
+  try{await renderWsForPharmacy();}catch(e){console.warn(e);}
+ };
+})();
+</script>
