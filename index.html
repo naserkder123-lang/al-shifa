@@ -2746,9 +2746,9 @@ window.fbSaveDoc = async function(collectionName, id, data){
   if(collectionName==="pendingActivations" && !isRealAdmin() && data && data.uid!==uid) throw new Error("Unauthorized activation owner");
   if(collectionName==="patientReported" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized health data write");
   if(collectionName==="doctors" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized doctor directory write");
-  if(collectionName==="pharmacies" && id!==uid) throw new Error("Unauthorized pharmacy directory write");
-  if(collectionName==="wholesale" && id!==uid) throw new Error("Unauthorized wholesale directory write");
-  if(collectionName==="labs" && id!==uid) throw new Error("Unauthorized lab directory write");
+  if(collectionName==="pharmacies" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized pharmacy directory write");
+if(collectionName==="wholesale" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized wholesale directory write");
+if(collectionName==="labs" && !isRealAdmin() && id!==uid) throw new Error("Unauthorized lab directory write");
   await setDoc(doc(fbDb, collectionName, id), data, { merge: true });
 };
 
