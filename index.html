@@ -887,7 +887,16 @@ function renderWholesaleOrders(){
  if(countEl)countEl.textContent=wholesaleOrders.length;
  if(pendingEl)pendingEl.textContent=wholesaleOrders.filter(o=>o.status.includes('انتظار')||o.status.includes('توريد')).length;
 }
-function notify(){alert('لا توجد إشعارات جديدة')}
+function notify(){
+ var m=[];
+ try{
+  if(typeof wholesaleOrders!=='undefined'){
+   var n=wholesaleOrders.filter(function(o){return String(o.status).includes('انتظار')||String(o.status).includes('توريد');}).length;
+   if(n>0)m.push('طلبات جملة قيد التنفيذ: '+n);
+  }
+ }catch(e){}
+ alert(m.length?m.join('\n'):'لا توجد إشعارات جديدة');
+}
 function setRole(role,el){
  if(role==="admin" && !isRealAdmin()){ alert("لا يمكن فتح وضع المدير من تجربة الأدوار. يجب تسجيل الدخول بحساب مدير معتمد."); return; }
  document.querySelectorAll('.role button').forEach(x=>x.classList.remove('sel'));if(el)el.classList.add('sel');
