@@ -853,7 +853,7 @@ async function createWholesaleOrder(){
   const name=parts[0];
   const qty=parseFloat(parts[1].replace(/[^0-9.]/g,''));
   const price=parseFloat(parts[2].replace(/[^0-9.]/g,''));
-  if(!name||isNaN(qty)||qty<=0||isNaN(price)||price<=0){alert('تأكد من صحة الكمية والسعر في السطر: "'+line+'"');return;}
+  if(!name||isNaN(qty)||qty<=0||isNaN(price)||price<0){alert('تأكد من صحة الكمية في السطر: "'+line+'"');return;}
   const lineTotal=qty*price;
   grandTotal+=lineTotal;
   items.push({name,qty,price,lineTotal});
