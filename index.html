@@ -3195,7 +3195,7 @@ try{
 (function(){
   function roleBlocks(){
     const role=window.fbCurrentProfile&&window.fbCurrentProfile.role;
-    if(role&&role!=="patient"){
+    if(role&&role!=="patient"&&role!=="wholesale"){
       const names={doctor:"طبيب",pharmacy:"نقطة بيع",lab:"معمل",wholesale:"عميل جملة",admin:"مدير"};
       alert("هذه الشاشة مخصصة لحسابات المرضى فقط.\nأنت مسجّل دخول كـ"+(names[role]||role)+".");
       return true;
