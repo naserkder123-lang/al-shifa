@@ -2857,7 +2857,7 @@ window.fbAddDoc = async function(collectionName, data){
   if(String(collectionName).startsWith("paymentHistory/") && !isRealAdmin()) throw new Error("Admin required");
   if(collectionName==="medicalRecords" && (!data || data.doctorId!==uid || !(await canDoctorAccessPatient(data.patientId)))) throw new Error("Invalid medical record author or patient access");
   if(collectionName==="doctorAppointments" && (!data || data.patientId!==uid || role!=="patient")) throw new Error("Invalid appointment owner");
-  if(collectionName==="medicineOrders" && (!data || data.patientId!==uid || role!=="patient")) throw new Error("Invalid medicine order owner");
+  if(collectionName==="medicineOrders" && (!data || data.patientId!==uid || (role!=="patient" && role!=="wholesale"))) throw new Error("Invalid medicine order owner");
   if(collectionName==="labOrders" && (!data || data.patientId!==uid || role!=="patient")) throw new Error("Invalid lab order owner");
   if(collectionName==="labResults" && (!data || data.labId!==uid || role!=="lab")) throw new Error("Invalid lab result author");
   const ref = await addDoc(collection(fbDb, collectionName), data);
