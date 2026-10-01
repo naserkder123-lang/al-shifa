@@ -904,6 +904,7 @@ async function createWholesaleOrder(){
    prescriptionImage={name:f.name,type:f.type,size:f.size,attached:true};
  }
  const summary=items.length===1?items[0].name+" × "+items[0].qty:items.length+" أصناف";
+try{ const me=window.fbCurrentUser; if(!me||!window.fbAddDoc) throw new Error("سجل الدخول أولا"); await window.fbAddDoc("medicineOrders",{patientId:me.uid,patientName:(window.fbCurrentProfile&&window.fbCurrentProfile.name)||"عميل جملة",pharmacyId:pharmacy,orderType:"wholesale",itemsSummary:"طلب جملة: "+summary,itemsDetail:items,total:grandTotal,status:"pending",createdAt:(window.fbServerTimestamp?window.fbServerTimestamp():new Date().toISOString())}); }catch(e){ console.error(e); alert("تعذر إرسال الطلب للصيدلي: "+(e.code||e.message)); return; }
  wholesaleOrders.unshift({id:"#WS"+(1000+wholesaleOrders.length+1),pharmacy,items:summary,itemsDetail:items,total:grandTotal,status:"بانتظار التأكيد",createdAt:new Date().toISOString(),prescriptionImage});
  saveWholesaleOrders();
  renderWholesaleOrders();
