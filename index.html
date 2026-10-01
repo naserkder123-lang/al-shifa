@@ -392,7 +392,45 @@ body.dark .contact .btn{box-shadow:0 4px 10px #00000055}
 </div>
 
 <div class="modal" id="wholesaleOrderModal"><div class="sheet"><button class="close" onclick="closeModal('wholesaleOrderModal')">×</button><h3 class="tbar tbar-sm tbar-gold">طلب جملة جديد</h3>
-<div class="field"><label>الأصناف (كل صنف بسطر: الاسم × الكمية × السعر للوحدة)</label><textarea id="wholesaleItems" rows="4" placeholder="مثال:&#10;باراسيتامول × 100 × 500&#10;فيتامين سي × 50 × 800" style="width:100%;resize:vertical;font-family:inherit;font-size:inherit;padding:10px;border-radius:10px;border:1px solid #dbe6e9;background:#fff"></textarea><div id="wholesaleItemsSuggest" class="city-list"></div></div>
+<div class="field"><label>الأصناف (اكتب الصنف والكمية، والسعر للوحدة)</label>
+<table style="width:100%;border-collapse:collapse;table-layout:fixed">
+<tr><th style="width:44%">الصنف</th><th style="width:22%">الكمية</th><th style="width:34%">السعر</th></tr>
+<tbody id="wsRows"></tbody>
+</table>
+<button type="button" class="btn full" style="margin-top:8px" onclick="addWsRow()">➕ إضافة صنف</button>
+<textarea id="wholesaleItems" style="display:none"></textarea>
+</div>
+<script>
+function addWsRow(){
+ var tb=document.getElementById('wsRows');
+ var tr=document.createElement('tr');
+ var st='width:100%;box-sizing:border-box;padding:8px 4px;font-size:14px;margin:2px 0';
+ tr.innerHTML='<td><input class="wsN" style="'+st+'" placeholder="اسم الصنف" oninput="syncWsItems()"></td>'
+ +'<td><input class="wsQ" type="number" inputmode="numeric" min="1" style="'+st+'" oninput="syncWsItems()"></td>'
+ +'<td><input class="wsP" type="number" inputmode="decimal" min="0" style="'+st+'" placeholder="اكتبه" oninput="syncWsItems()"></td>';
+ tb.appendChild(tr);
+}
+function syncWsItems(){
+ var out=[];
+ document.querySelectorAll('#wsRows tr').forEach(function(tr){
+  var n=tr.querySelector('.wsN').value.trim();
+  var q=tr.querySelector('.wsQ').value.trim();
+  var p=tr.querySelector('.wsP').value.trim();
+  if(n&&q){out.push(n+' × '+q+' × '+(p||'0'));}
+ });
+ var t=document.getElementById('wholesaleItems');
+ t.value=out.join('\n');
+ window._wsLast=t.value;
+}
+for(var i=0;i<5;i++)addWsRow();
+setInterval(function(){
+ var t=document.getElementById('wholesaleItems');
+ if(t&&t.value===''&&window._wsLast){
+  document.querySelectorAll('#wsRows input').forEach(function(i){i.value='';});
+  window._wsLast='';
+ }
+},700);
+</script>
 <div class="field"><label>📎 إرسال صورة الروشتة (اختياري)</label><input type="file" id="wholesalePrescriptionFile" accept="image/*,.pdf"></div>
 <div class="field"><label>نقطة البيع المورّدة</label><select id="wholesaleOrderPharmacy"><option>صيدلية الشفاء</option><option>صيدلية الأمل</option></select></div>
 <div class="contact">
