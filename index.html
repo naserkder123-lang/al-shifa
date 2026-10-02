@@ -4121,3 +4121,78 @@ if(typeof __origShow==="function"){
  };
 })();
 </script>
+<script>
+(function(){
+ function find(){
+  var all=document.body.querySelectorAll("*"),best=null;
+  for(var i=0;i<all.length;i++){
+   var e=all[i];
+   if(/^(SCRIPT|STYLE)$/.test(e.tagName)||e.id==="helpBtn"||e.closest("#helpSheet"))continue;
+   var t=(e.textContent||"").trim();
+   if(t.indexOf("بك في الشفاء")>-1&&t.length<40)best=e;
+  }
+  return best;
+ }
+ function place(){
+  if(document.getElementById("helpBtn"))return true;
+  if(!window.openHelp)return false;
+  var b0=find();
+  if(!b0)return false;
+  var s=b0.closest("button,a,[onclick]")||b0;
+  if(!s.parentNode)return false;
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;direction:rtl;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap";
+  s.parentNode.insertBefore(wrap,s);
+  wrap.appendChild(s);
+  var b=s.cloneNode(true);
+  b.removeAttribute("id");
+  b.removeAttribute("onclick");
+  b.removeAttribute("href");
+  b.id="helpBtn";
+  b.textContent="📖 شرح التطبيق";
+  b.style.cursor="pointer";
+  b.onclick=function(e){e.preventDefault();window.openHelp();};
+  wrap.appendChild(b);
+  return true;
+ }
+ var n=0,iv=setInterval(function(){n++;if(place()||n>40)clearInterval(iv);},500);
+})();
+</script>
+<script>
+(function(){
+ function compress(file){
+  return new Promise(function(res,rej){
+   var r=new FileReader();
+   r.onerror=function(){rej(new Error("تعذر قراءة الصورة"));};
+   r.onload=function(){
+    var img=new Image();
+    img.onerror=function(){rej(new Error("صورة غير صالحة"));};
+    img.onload=function(){
+     var k=Math.min(1,800/Math.max(img.width,img.height));
+     var c=document.createElement("canvas");
+     c.width=Math.round(img.width*k);
+     c.height=Math.round(img.height*k);
+     c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+     res(c.toDataURL("image/jpeg",0.55));
+    };
+    img.src=r.result;
+   };
+   r.readAsDataURL(file);
+  });
+ }
+ function patch(){
+  var o=window.fbUploadFile;
+  if(!o||o.__inline)return;
+  var f=async function(file,path){
+   if(!file||!/^image\//.test(file.type||""))return o.apply(this,arguments);
+   var url=await compress(file);
+   alert("تم تجهيز الصورة ("+Math.round(url.length/1024)+" ك.ب)، جاري الإرسال...");
+   return {path:"inline",url:url,name:file.name,type:"image/jpeg",size:url.length};
+  };
+  f.__inline=true;
+  window.fbUploadFile=f;
+ }
+ patch();
+ setInterval(patch,1000);
+})();
+</script>
