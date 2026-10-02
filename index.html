@@ -3849,3 +3849,28 @@ if(typeof __origShow==="function"){
  window.addEventListener("load",function(){setTimeout(fillWsPharmacies,1500);});
 })();
 </script>
+<script>
+(function(){
+ var m=document.getElementById("wholesaleOrderModal");
+ async function fill(){
+  var s=document.getElementById("wholesaleOrderPharmacy");
+  if(!s)return;
+  if(!window.fbGetCollection){s.innerHTML='<option value="">لم يتم الاتصال بالإنترنت بعد</option>';return;}
+  try{
+   var list=await window.fbGetCollection("pharmacies");
+   if(!Array.isArray(list)||!list.length){s.innerHTML='<option value="">لا توجد صيدليات</option>';return;}
+   s.innerHTML=list.filter(function(x){return (x.uid||x.id)&&x.verified!==false;}).map(function(x){
+    var t=(x.name||"صيدلية")+(x.city?" — "+x.city:"")+(x.phone?" ("+String(x.phone).slice(-4)+")":"");
+    return '<option value="'+escapeHtml(x.uid||x.id)+'">'+escapeHtml(t)+'</option>';
+   }).join("");
+  }catch(e){
+   s.innerHTML='<option value="">تعذر التحميل: '+(e.code||e.message)+'</option>';
+  }
+ }
+ if(m){
+  new MutationObserver(function(){
+   if(m.classList.contains("show"))fill();
+  }).observe(m,{attributes:true,attributeFilter:["class"]});
+ }
+})();
+</script>
