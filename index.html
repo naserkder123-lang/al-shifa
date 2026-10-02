@@ -3994,3 +3994,130 @@ if(typeof __origShow==="function"){
  };
 })();
 </script>
+<script>
+(function(){
+ /* ===== نص الشرح: عدّل الأسطر دي كما تريد (العنوان ثم النص) ===== */
+ var HELP=[
+  ["١. أنشئ حسابك","اضغط تسجيل الدخول، وسجّل برقم هاتفك. اختر نوع حسابك: مريض، طبيب، صيدلية، معمل، أو عميل جملة."],
+  ["٢. للمريض","احجز موعداً مع طبيب، اطلب أدوية من صيدلية قريبة، وأرسل طلب فحص لمعمل. تابع طلباتك ونتائجك من تبويب الطلبات."],
+  ["٣. ملفك الصحي","ملفك الصحي محفوظ بأمان، ولا يراه طبيب إلا بإذنك. تقدر تمنح الإذن وتسحبه متى شئت."],
+  ["٤. للطبيب","استقبل الحجوزات وأكدها، وتابع مرضاك الذين سمحوا لك بالاطلاع على ملفهم."],
+  ["٥. للصيدلية والمعمل","استقبل طلبات المرضى وحدّث حالتها. المعمل ينشر النتيجة للمريض مباشرة في التطبيق."],
+  ["٦. لعميل الجملة","اكتب الأصناف والكميات واختر الصيدلية. الصيدلي يضع الأسعار ويؤكد الاستلام، وتظهر التواريخ في الطلب."],
+  ["٧. أرقام الطوارئ","أرقام الطوارئ (اشتباه وبائي، حوادث سير، بنوك الدم) مجانية للجميع، وتختار مدينتك فتظهر لك أرقامها."],
+  ["٨. الاشتراك","الحسابات المهنية تبدأ بفترة مجانية. للتجديد أرسل إشعار الدفع من التطبيق، وتُفعّل الإدارة حسابك."],
+  ["٩. التوثيق","الأطباء والصيدليات والمعامل يرفعون صورة الرخصة، وبعد مراجعة الإدارة تظهر علامة التوثيق."]
+ ];
+ /* ===== نهاية النص ===== */
+
+ function build(){
+  if(document.getElementById("helpSheet"))return;
+  var st=document.createElement("style");
+  st.textContent=
+   "#helpBack{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99998;display:none}"
+   +"#helpSheet{position:fixed;top:0;left:0;right:0;max-height:82vh;overflow:auto;background:#fff;color:#1f2d2a;"
+   +"z-index:99999;border-radius:0 0 18px 18px;padding:14px 16px 18px;direction:rtl;box-shadow:0 8px 24px rgba(0,0,0,.3);"
+   +"transform:translateY(-110%);transition:transform .3s ease}"
+   +"#helpSheet.open{transform:translateY(0)}"
+   +"#helpSheet h4{margin:10px 0 2px;color:#0e6b52;font-size:15px}"
+   +"#helpSheet p{margin:0 0 6px;font-size:14px;line-height:1.7}"
+   +"@media (prefers-color-scheme: dark){#helpSheet{background:#16211e;color:#e8f1ee}#helpSheet h4{color:#59d3ad}}";
+  document.head.appendChild(st);
+  var back=document.createElement("div");
+  back.id="helpBack";
+  back.onclick=closeHelp;
+  document.body.appendChild(back);
+  var sh=document.createElement("div");
+  sh.id="helpSheet";
+  sh.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'
+   +'<b style="font-size:17px">طريقة عمل تطبيق الشفاء</b>'
+   +'<button type="button" onclick="closeHelp()" style="border:none;background:#0e6b52;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px">✕</button></div>'
+   +HELP.map(function(h){return "<h4>"+h[0]+"</h4><p>"+h[1]+"</p>";}).join("");
+  document.body.appendChild(sh);
+ }
+ window.openHelp=function(){
+  build();
+  document.getElementById("helpBack").style.display="block";
+  setTimeout(function(){document.getElementById("helpSheet").classList.add("open");},10);
+ };
+ window.closeHelp=function(){
+  var s=document.getElementById("helpSheet"),b=document.getElementById("helpBack");
+  if(s)s.classList.remove("open");
+  if(b)setTimeout(function(){b.style.display="none";},300);
+ };
+ function place(){
+  if(document.getElementById("helpBtn"))return true;
+  var els=document.querySelectorAll("button,a,[onclick],.btn");
+  var start=null;
+  for(var i=0;i<els.length;i++){
+   var t=(els[i].textContent||"").trim();
+   if(t.indexOf("ابدأ من هنا")>-1&&t.length<40){start=els[i];break;}
+  }
+  if(!start||!start.parentNode)return false;
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;direction:rtl;gap:8px;align-items:stretch;justify-content:center;width:100%";
+  start.parentNode.insertBefore(wrap,start);
+  wrap.appendChild(start);
+  start.style.flex="1";
+  start.style.width="auto";
+  var b=document.createElement("button");
+  b.id="helpBtn";
+  b.type="button";
+  b.className=start.className;
+  b.style.cssText=start.getAttribute("style")||"";
+  b.style.flex="1";
+  b.style.width="auto";
+  b.textContent="📖 شرح التطبيق";
+  b.onclick=window.openHelp;
+  wrap.appendChild(b);
+  return true;
+ }
+ var tries=0;
+ var iv=setInterval(function(){
+  tries++;
+  if(place()||tries>20)clearInterval(iv);
+ },500);
+})();
+</script>
+<script>
+(function(){
+ window.notify=async function(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||!window.fbQueryWhere){alert("سجّل الدخول لعرض الإشعارات.");return;}
+  var msgs=[];
+  try{
+   var role=p.role;
+   if(role==="pharmacy"){
+    var o=await window.fbQueryWhere("medicineOrders","pharmacyId","==",u.uid);
+    var n=o.filter(function(x){return x.status==="pending";}).length;
+    var w=o.filter(function(x){return x.orderType==="wholesale"&&!x.receivedAt;}).length;
+    if(n)msgs.push("طلبات جديدة بانتظار الرد: "+n);
+    if(w)msgs.push("طلبات جملة لم يتم استلامها: "+w);
+   }else if(role==="doctor"){
+    var a=await window.fbQueryWhere("doctorAppointments","doctorId","==",u.uid);
+    var m=a.filter(function(x){return x.status==="pending";}).length;
+    if(m)msgs.push("حجوزات جديدة بانتظار التأكيد: "+m);
+   }else if(role==="lab"){
+    var l=await window.fbQueryWhere("labOrders","labId","==",u.uid);
+    var k=l.filter(function(x){return x.status==="pending";}).length;
+    if(k)msgs.push("طلبات فحص جديدة: "+k);
+   }else if(role==="patient"||role==="wholesale"){
+    var r1=await window.fbQueryWhere("medicineOrders","patientId","==",u.uid);
+    var rd=r1.filter(function(x){return x.status==="ready";}).length;
+    if(rd)msgs.push("طلبات جاهزة للاستلام: "+rd);
+    if(role==="patient"){
+     var r2=await window.fbQueryWhere("labResults","patientId","==",u.uid);
+     if(r2.length)msgs.push("نتائج تحاليل منشورة: "+r2.length);
+     var r3=await window.fbQueryWhere("doctorAppointments","patientId","==",u.uid);
+     var cf=r3.filter(function(x){return x.status==="confirmed";}).length;
+     if(cf)msgs.push("مواعيد مؤكدة: "+cf);
+    }
+   }
+  }catch(e){
+   alert("تعذر تحميل الإشعارات: "+(e.code||e.message));
+   return;
+  }
+  alert(msgs.length?msgs.join("\n"):"لا توجد إشعارات جديدة");
+ };
+})();
+</script>
