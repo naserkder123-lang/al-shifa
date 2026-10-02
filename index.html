@@ -3972,3 +3972,25 @@ if(typeof __origShow==="function"){
  };
 })();
 </script>
+<script>
+(function(){
+ var o=window.createLabOrder;
+ if(!o)return;
+ window.createLabOrder=async function(){
+  var done=false;
+  var t=setTimeout(function(){
+   if(!done)alert("الطلب لم يستجب بعد ١٥ ثانية. تأكد من الإنترنت، أو جرب بدون صورة التحويل.");
+  },15000);
+  try{
+   var s=document.getElementById("labOrderLab");
+   if(!s||!s.value){alert("اختر معملاً من القائمة.");return;}
+   await o.apply(this,arguments);
+  }catch(e){
+   alert("خطأ: "+(e.code||e.message));
+  }finally{
+   done=true;
+   clearTimeout(t);
+  }
+ };
+})();
+</script>
