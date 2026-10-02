@@ -3823,3 +3823,29 @@ if(typeof __origShow==="function"){
  };
 })();
 </script>
+<script>
+(function(){
+ async function fillWsPharmacies(){
+  var sel=document.getElementById("wholesaleOrderPharmacy");
+  if(!sel||!window.fbGetCollection)return;
+  try{
+   var list=await window.fbGetCollection("pharmacies");
+   if(!Array.isArray(list))return;
+   list=list.filter(function(x){return (x.uid||x.id)&&x.verified!==false;});
+   if(!list.length)return;
+   sel.innerHTML=list.map(function(x){
+    var id=x.uid||x.id;
+    var t=(x.name||"صيدلية")+(x.city?" — "+x.city:"")+(x.phone?" ("+String(x.phone).slice(-4)+")":"");
+    return '<option value="'+escapeHtml(id)+'">'+escapeHtml(t)+'</option>';
+   }).join("");
+  }catch(e){console.warn(e);}
+ }
+ var o=window.openWholesaleOrder;
+ window.openWholesaleOrder=function(){
+  var r=o?o.apply(this,arguments):undefined;
+  fillWsPharmacies();
+  return r;
+ };
+ window.addEventListener("load",function(){setTimeout(fillWsPharmacies,1500);});
+})();
+</script>
