@@ -4196,3 +4196,113 @@ if(typeof __origShow==="function"){
  setInterval(patch,1000);
 })();
 </script>
+<script>
+(function(){
+ function d9(s){
+  s=String(s||"").replace(/[٠-٩]/g,function(c){return String(c.charCodeAt(0)-1632);});
+  var m=s.match(/\d{9,13}/g);
+  return m?m[0].slice(-9):"";
+ }
+ function compress(file,max,q){
+  return new Promise(function(res,rej){
+   var r=new FileReader();
+   r.onerror=function(){rej(new Error("تعذر قراءة الصورة"));};
+   r.onload=function(){
+    var img=new Image();
+    img.onerror=function(){rej(new Error("صورة غير صالحة"));};
+    img.onload=function(){
+     var k=Math.min(1,max/Math.max(img.width,img.height));
+     var c=document.createElement("canvas");
+     c.width=Math.round(img.width*k);
+     c.height=Math.round(img.height*k);
+     c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+     res(c.toDataURL("image/jpeg",q));
+    };
+    img.src=r.result;
+   };
+   r.readAsDataURL(file);
+  });
+ }
+ async function upload(){
+  if(typeof isRealAdmin==="function"&&!isRealAdmin()){alert("هذا الإجراء للمدير فقط.");return;}
+  var k=d9(document.getElementById("epLetterPhone").value);
+  var f=document.getElementById("epLetterFile").files[0];
+  if(!k){alert("اكتب رقم الطوارئ أولاً.");return;}
+  if(!f){alert("اختر صورة الخطاب.");return;}
+  try{
+   var steps=[[900,0.6],[700,0.5],[500,0.45]],url="";
+   for(var i=0;i<steps.length;i++){
+    url=await compress(f,steps[i][0],steps[i][1]);
+    if(url.length<850000)break;
+   }
+   if(url.length>=850000){alert("الصورة كبيرة جداً، اختر صورة أصغر.");return;}
+   await window.fbSaveDoc("publicSettings","ep_"+k,{phone:document.getElementById("epLetterPhone").value.trim(),image:url,uploadedAt:new Date().toISOString()});
+   delete cache[k];
+   alert("تم رفع خطاب التفويض.");
+   document.getElementById("epLetterFile").value="";
+  }catch(e){
+   alert("تعذر الرفع: "+(e.code||e.message));
+  }
+ }
+ function addAdminBox(){
+  if(document.getElementById("epLetterBox"))return true;
+  var btn=document.querySelector('button[onclick*="saveEmergencyNumbers"]');
+  if(!btn||!btn.parentNode)return false;
+  var box=document.createElement("div");
+  box.id="epLetterBox";
+  box.style.cssText="margin:12px 0;padding:10px;border:1px dashed #999;border-radius:10px";
+  box.innerHTML='<label style="font-weight:bold">📄 صورة خطاب تفويض رقم طوارئ</label>'
+   +'<input id="epLetterPhone" inputmode="tel" placeholder="رقم الطوارئ (09XXXXXXXX)" style="width:100%;box-sizing:border-box;margin:6px 0;padding:8px">'
+   +'<input id="epLetterFile" type="file" accept="image/*" style="width:100%;margin:6px 0">'
+   +'<button type="button" class="btn full" id="epLetterBtn">📤 رفع الخطاب</button>';
+  btn.parentNode.insertBefore(box,btn);
+  document.getElementById("epLetterBtn").onclick=upload;
+  return true;
+ }
+ var cache={};
+ async function getLetter(k){
+  if(k in cache)return cache[k];
+  var v=null;
+  try{
+   if(window.fbGetDoc){
+    var r=await window.fbGetDoc("publicSettings","ep_"+k);
+    if(r&&r.image)v=r.image;
+   }
+  }catch(e){}
+  cache[k]=v;
+  return v;
+ }
+ function viewer(src){
+  var o=document.createElement("div");
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100000;display:flex;align-items:center;justify-content:center;padding:10px";
+  o.innerHTML='<img src="'+src+'" style="max-width:100%;max-height:92vh;object-fit:contain;border-radius:8px">';
+  o.onclick=function(){o.remove();};
+  document.body.appendChild(o);
+ }
+ async function decorate(){
+  var ids=["epidemicListResults","accidentListResults","bloodBanksListResults","otherEmergencyListResults"];
+  for(var a=0;a<ids.length;a++){
+   var el=document.getElementById(ids[a]);
+   if(!el)continue;
+   var rows=el.querySelectorAll(".row");
+   for(var b=0;b<rows.length;b++){
+    var row=rows[b];
+    if(row.dataset.lt)continue;
+    row.dataset.lt="1";
+    var k=d9(row.textContent);
+    if(!k)continue;
+    var img=await getLetter(k);
+    if(!img)continue;
+    var btn=document.createElement("button");
+    btn.type="button";
+    btn.className="btn alt";
+    btn.style.marginTop="6px";
+    btn.textContent="📄 خطاب التفويض";
+    (function(src){btn.onclick=function(){viewer(src);};})(img);
+    row.appendChild(btn);
+   }
+  }
+ }
+ setInterval(function(){addAdminBox();decorate();},2000);
+})();
+</script>
