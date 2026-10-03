@@ -4714,3 +4714,178 @@ if(typeof __origShow==="function"){
  setInterval(function(){addOther();merge();},3000);
 })();
 </script>
+<script>
+(function(){
+ var st=document.createElement("style");
+ st.textContent="@keyframes shUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}"
+  +"[data-sh]::before{content:'⬆️';display:inline-block;margin-inline-end:6px;animation:shUp 1.2s infinite}"
+  +"[data-sh]{cursor:default!important}";
+ document.head.appendChild(st);
+ setInterval(function(){
+  var hb=document.getElementById("helpBtn2");
+  if(hb)hb.removeAttribute("data-sh");
+  var cur=document.querySelector("[data-sh]");
+  if(cur&&document.body.contains(cur))return;
+  var all=document.body.querySelectorAll("h1,h2,h3,h4,div,span,button,a");
+  for(var i=0;i<all.length;i++){
+   var e=all[i];
+   if(e.id==="helpBtn2"||e.closest("#helpSheet")||e.closest("#paperOverlay")||e.closest("#mapOverlay"))continue;
+   if((e.textContent||"").trim()!=="ابدأ من هنا"||!e.offsetWidth)continue;
+   var inner=false;
+   for(var j=0;j<e.children.length;j++){
+    if((e.children[j].textContent||"").trim()==="ابدأ من هنا"){inner=true;break;}
+   }
+   if(!inner){e.setAttribute("data-sh","1");return;}
+  }
+ },1500);
+})();
+</script>
+<script>
+(function(){
+ window.notify=async function(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||!window.fbQueryWhere){alert("سجّل الدخول لعرض الإشعارات.");return;}
+  var msgs=[],tries=0,fails=0;
+  async function q(c,f){
+   tries++;
+   try{return await window.fbQueryWhere(c,f,"==",u.uid);}
+   catch(e){fails++;console.warn(c,e);return null;}
+  }
+  var role=p.role;
+  if(role==="pharmacy"){
+   var o=await q("medicineOrders","pharmacyId");
+   if(o){
+    var n=o.filter(function(x){return x.status==="pending";}).length;
+    var w=o.filter(function(x){return x.orderType==="wholesale"&&!x.receivedAt;}).length;
+    if(n)msgs.push("طلبات جديدة بانتظار الرد: "+n);
+    if(w)msgs.push("طلبات جملة لم يتم استلامها: "+w);
+   }
+  }else if(role==="doctor"){
+   var a=await q("doctorAppointments","doctorId");
+   if(a){
+    var m=a.filter(function(x){return x.status==="pending";}).length;
+    if(m)msgs.push("حجوزات جديدة بانتظار التأكيد: "+m);
+   }
+  }else if(role==="lab"){
+   var l=await q("labOrders","labId");
+   if(l){
+    var k=l.filter(function(x){return x.status==="pending";}).length;
+    if(k)msgs.push("طلبات فحص جديدة: "+k);
+   }
+  }else if(role==="patient"||role==="wholesale"){
+   var r1=await q("medicineOrders","patientId");
+   if(r1){
+    var rd=r1.filter(function(x){return x.status==="ready";}).length;
+    if(rd)msgs.push("طلبات جاهزة للاستلام: "+rd);
+   }
+   if(role==="patient"){
+    var r2=await q("labResults","patientId");
+    if(r2&&r2.length)msgs.push("نتائج تحاليل منشورة: "+r2.length);
+    var r3=await q("doctorAppointments","patientId");
+    if(r3){
+     var cf=r3.filter(function(x){return x.status==="confirmed";}).length;
+     if(cf)msgs.push("مواعيد مؤكدة: "+cf);
+    }
+   }
+  }
+  if(tries&&fails===tries){alert("الإشعارات غير متاحة لهذا الحساب حالياً.");return;}
+  alert(msgs.length?msgs.join("\n"):"لا توجد إشعارات جديدة");
+ };
+})();
+</script>
+<script>
+(function(){
+ var PROJECT="al-shifa-6b8d7";
+ var ROLES={patient:"مريض",doctor:"طبيب",pharmacy:"صيدلية",lab:"معمل",wholesale:"عميل جملة",admin:"مدير"};
+ var COLS=["patients","doctors","pharmacies","labs","laboratories","wholesale","licenseSubmissions","patientReported","users"];
+ var users=[];
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ async function delDoc(col,id,token){
+  var url="https://firestore.googleapis.com/v1/projects/"+PROJECT+"/databases/(default)/documents/"+col+"/"+encodeURIComponent(id);
+  var r=await fetch(url,{method:"DELETE",headers:{Authorization:"Bearer "+token}});
+  if(!r.ok&&r.status!==404){
+   var t="";
+   try{t=(await r.json()).error.message;}catch(e){}
+   throw new Error(col+" "+r.status+" "+t);
+  }
+ }
+ async function removeUser(id,u){
+  if(typeof isRealAdmin==="function"&&!isRealAdmin()){alert("للمدير فقط.");return;}
+  var warn=u.role==="admin"?"\n⚠️ هذا حساب مدير!":"";
+  if(!confirm("حذف "+(u.name||"هذا الحساب")+" ("+(ROLES[u.role]||"")+")؟"+warn+"\nسيُحذف ملفه وبياناته من التطبيق ولا يمكن التراجع."))return;
+  if(!confirm("تأكيد أخير: حذف نهائي؟"))return;
+  try{
+   var token=await window.fbCurrentUser.getIdToken();
+   for(var i=0;i<COLS.length;i++)await delDoc(COLS[i],id,token);
+   try{
+    await window.fbAddDoc("auditLogs",{adminUid:window.fbCurrentUser.uid,action:"حذف مستخدم",target:id,at:new Date().toISOString()});
+   }catch(e){}
+   users=users.filter(function(x){return (x.uid||x.id)!==id;});
+   render();
+   ["loadDoctorsFromFirestore","loadPharmaciesFromFirestore","loadLabsFromFirestore","loadWholesaleFromFirestore"].forEach(function(n){
+    try{if(typeof window[n]==="function")window[n]();}catch(e){}
+   });
+   alert("تم حذف بيانات المستخدم. لحذف رقم الدخول نفسه افتح Firebase ← Authentication ← Users.");
+  }catch(e){
+   alert("تعذر الحذف: "+(e.message||e.code));
+  }
+ }
+ function render(){
+  var box=document.getElementById("usrList");
+  if(!box)return;
+  var q=(document.getElementById("usrQ").value||"").trim().toLowerCase();
+  var me=window.fbCurrentUser&&window.fbCurrentUser.uid;
+  var list=users.filter(function(u){
+   var s=((u.name||"")+" "+(u.phone||"")+" "+(u.city||"")+" "+(ROLES[u.role]||u.role||"")).toLowerCase();
+   return !q||s.indexOf(q)>-1;
+  }).slice(0,40);
+  box.innerHTML=list.length?"":'<div class="notice">لا نتائج.</div>';
+  list.forEach(function(u){
+   var id=u.uid||u.id;
+   var row=document.createElement("div");
+   row.className="row";
+   row.innerHTML='<div><b>'+esc(u.name||"بدون اسم")+'</b><div class="small">'+esc(ROLES[u.role]||u.role||"")+' · '+esc(u.phone||"")+' · '+esc(u.city||"")+'</div></div>';
+   if(id!==me){
+    var b=document.createElement("button");
+    b.type="button";
+    b.className="btn danger";
+    b.textContent="🗑️ حذف";
+    b.onclick=function(){removeUser(id,u);};
+    row.appendChild(b);
+   }
+   box.appendChild(row);
+  });
+ }
+ async function load(){
+  var box=document.getElementById("usrList");
+  box.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+   users=await window.fbGetCollection("users");
+   render();
+  }catch(e){
+   box.innerHTML='<div class="notice">تعذر التحميل: '+esc(e.code||e.message)+'</div>';
+  }
+ }
+ function build(){
+  if(document.getElementById("usrBox"))return;
+  var p=document.getElementById("adminPanel");
+  if(!p)return;
+  var s=document.createElement("div");
+  s.id="usrBox";
+  s.className="section";
+  s.style.cssText="display:block;margin-top:16px";
+  s.innerHTML='<h3 class="tbar tbar-lg tbar-red">👥 إدارة المستخدمين</h3>'
+   +'<div class="notice">ابحث بالاسم أو الهاتف ثم احذف. الحذف يزيل الملف والبيانات من التطبيق. رقم الدخول نفسه يُحذف من لوحة Firebase.</div>'
+   +'<input id="usrQ" placeholder="بحث بالاسم أو الهاتف..." style="width:100%;box-sizing:border-box;padding:10px;margin:8px 0">'
+   +'<button type="button" class="btn full" id="usrLoad">🔄 تحميل المستخدمين</button>'
+   +'<div id="usrList" class="list" style="margin-top:10px"></div>';
+  p.appendChild(s);
+  document.getElementById("usrLoad").onclick=function(){
+   if(typeof isRealAdmin==="function"&&!isRealAdmin()){alert("للمدير فقط.");return;}
+   load();
+  };
+  document.getElementById("usrQ").oninput=render;
+ }
+ setInterval(build,2000);
+})();
+</script>
