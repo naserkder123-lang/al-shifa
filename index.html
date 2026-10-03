@@ -4479,3 +4479,76 @@ if(typeof __origShow==="function"){
  },1000);
 })();
 </script>
+<script>
+(function(){
+ var UID=/^[A-Za-z0-9]{20,}$/;
+ var busy=false;
+ function clean(s){
+  if(busy)return;
+  busy=true;
+  try{
+   Array.prototype.slice.call(s.options).forEach(function(o){
+    if(o.value&&(!UID.test(o.value)||o.text.trim()==="صيدلية"))o.remove();
+   });
+   var f=s.options[0];
+   if(!f||f.value!==""){
+    var p=document.createElement("option");
+    p.value="";
+    p.textContent="— اختر الصيدلية —";
+    s.insertBefore(p,s.firstChild);
+    s.selectedIndex=0;
+   }
+  }finally{busy=false;}
+ }
+ var n=0,iv=setInterval(function(){
+  n++;
+  var s=document.getElementById("wholesaleOrderPharmacy");
+  if(s){
+   new MutationObserver(function(){clean(s);}).observe(s,{childList:true});
+   clean(s);
+   clearInterval(iv);
+  }else if(n>40)clearInterval(iv);
+ },500);
+
+ var o=window.createWholesaleOrder;
+ if(typeof o==="function"&&!o.__w){
+  var f=async function(){
+   var s=document.getElementById("wholesaleOrderPharmacy");
+   var v=s?String(s.value||""):"";
+   if(!UID.test(v)){
+    alert("اختر صيدلية حقيقية من القائمة. لو القائمة فاضية، تأكد من الإنترنت وأغلق النافذة وافتحها من جديد.");
+    return;
+   }
+   var oa=window.alert;
+   window.alert=function(m){
+    if(typeof m==="string"&&m.indexOf("تم إرسال طلب الجملة")>-1){
+     m=m.replace(/\s*—\s*الإجمالي:[^]*?جنيه/,"")+"\nالصيدلي سيضع الأسعار.";
+    }
+    return oa.call(window,m);
+   };
+   try{return await o.apply(this,arguments);}
+   finally{window.alert=oa;}
+  };
+  f.__w=true;
+  window.createWholesaleOrder=f;
+ }
+
+ var k=0,iv2=setInterval(function(){
+  k++;
+  var all=document.querySelectorAll("button,a,[onclick]");
+  for(var i=0;i<all.length;i++){
+   var b=all[i];
+   if(b.dataset.bellfix)continue;
+   if((b.textContent||"").trim()!=="🔔")continue;
+   var c=b.cloneNode(true);
+   c.dataset.bellfix="1";
+   c.removeAttribute("onclick");
+   c.onclick=function(e){e.preventDefault();e.stopPropagation();if(window.notify)window.notify();};
+   b.parentNode.replaceChild(c,b);
+   clearInterval(iv2);
+   return;
+  }
+  if(k>40)clearInterval(iv2);
+ },500);
+})();
+</script>
