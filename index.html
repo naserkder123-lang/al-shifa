@@ -4552,3 +4552,165 @@ if(typeof __origShow==="function"){
  },500);
 })();
 </script>
+<script>
+(function(){
+ /* ٤: حذف عبارة طلبات توثيق الرخصة من لوحة الإدارة */
+ setInterval(function(){
+  var p=document.getElementById("adminPanel");
+  if(!p)return;
+  p.querySelectorAll("div,p,span").forEach(function(e){
+   var t=(e.textContent||"").trim();
+   if(e.children.length===0&&t.indexOf("طلبات توثيق الرخص")===0&&t.length<30)e.remove();
+  });
+ },1500);
+})();
+
+(function(){
+ /* ٧: مربع الطوارئ بحجم مربع تسجيل الدخول */
+ function txt(e){return (e.textContent||"").trim();}
+ function vis(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0;}
+ function innermost(test){
+  var all=document.body.querySelectorAll("*");
+  for(var i=0;i<all.length;i++){
+   var e=all[i];
+   if(/^(SCRIPT|STYLE)$/.test(e.tagName)||!vis(e)||!test(txt(e)))continue;
+   var deeper=false;
+   for(var j=0;j<e.children.length;j++){if(test(txt(e.children[j]))){deeper=true;break;}}
+   if(!deeper)return e;
+  }
+  return null;
+ }
+ function outer(e,ok){
+  while(e.parentNode&&e.parentNode!==document.body&&ok(e.parentNode))e=e.parentNode;
+  return e;
+ }
+ setInterval(function(){
+  var done=document.querySelector("[data-em-fit]");
+  if(done&&document.body.contains(done))return;
+  var l0=innermost(function(t){return t.length<25&&/تسجيل الدخول$/.test(t);});
+  var e0=innermost(function(t){return t.indexOf("أرقام الطوارئ")>-1&&t.length<90;});
+  if(!l0||!e0)return;
+  var login=outer(l0,function(p){return txt(p)===txt(l0);});
+  var emg=outer(e0,function(p){var t=txt(p);return t.length<90&&t.indexOf("تسجيل الدخول")<0;});
+  var H=login.getBoundingClientRect().height;
+  var h0=emg.getBoundingClientRect().height;
+  if(H<30||h0<=H+4||h0>400)return;
+  emg.setAttribute("data-em-fit","1");
+  var z=Math.max(0.5,Math.min(1,H/h0));
+  emg.style.zoom=z;
+  var h1=emg.getBoundingClientRect().height;
+  if(h1>H*1.12)emg.style.zoom=Math.max(0.5,z*H/h1);
+ },1500);
+})();
+
+(function(){
+ /* ٨: زر الشرح قصاد ابدأ من هنا */
+ function findTitle(){
+  var all=document.body.querySelectorAll("*");
+  for(var i=0;i<all.length;i++){
+   var e=all[i];
+   if(/^(SCRIPT|STYLE)$/.test(e.tagName)||e.closest("#helpSheet"))continue;
+   if((e.textContent||"").trim()!=="ابدأ من هنا"||!e.offsetWidth)continue;
+   var inner=false;
+   for(var j=0;j<e.children.length;j++){
+    if((e.children[j].textContent||"").trim()==="ابدأ من هنا"){inner=true;break;}
+   }
+   if(!inner)return e;
+  }
+  return null;
+ }
+ setInterval(function(){
+  var t=findTitle();
+  if(!t||!t.parentNode)return;
+  var b=document.getElementById("helpBtn2");
+  if(!b){
+   b=t.cloneNode(false);
+   b.id="helpBtn2";
+   b.dataset.mine="1";
+   b.onclick=function(e){e.preventDefault();if(window.openHelp)window.openHelp();else alert("الشرح غير متوفر.");};
+  }
+  var row=t.parentNode;
+  if(row.id!=="helpRow3"){
+   var w=document.createElement("div");
+   w.id="helpRow3";
+   w.style.cssText="display:flex;direction:rtl;justify-content:space-between;align-items:center;gap:8px;width:100%";
+   t.parentNode.insertBefore(w,t);
+   w.appendChild(t);
+   row=w;
+  }
+  if(b.parentNode!==row){
+   b.className=t.className;
+   b.style.cssText=t.getAttribute("style")||"";
+   b.style.cursor="pointer";
+   b.style.margin="0";
+   b.textContent="📖 شرح التطبيق";
+   row.appendChild(b);
+  }
+  document.querySelectorAll("*").forEach(function(e){
+   if(e!==b&&e.children.length===0&&(e.textContent||"").trim()==="📖 شرح التطبيق")e.remove();
+  });
+ },1500);
+})();
+
+(function(){
+ /* ٢: خيار أخرى للمدن + دمج مدن الدليل */
+ var IDS=["wholesaleCity","regPharmacyCity","bbCity","oeCity","epCity","acCity"];
+ var OTHER="__other__";
+ function addCity(c){
+  try{
+   if(typeof cities==="undefined")return;
+   if(cities.indexOf(c)<0){cities.push(c);localStorage.setItem("alshifaCities",JSON.stringify(cities));}
+   if(typeof populateCities==="function")populateCities();
+  }catch(e){console.warn(e);}
+ }
+ function addOther(){
+  IDS.forEach(function(id){
+   var s=document.getElementById(id);
+   if(!s||s.tagName!=="SELECT")return;
+   if(!s.querySelector('option[value="'+OTHER+'"]')){
+    var o=document.createElement("option");
+    o.value=OTHER;
+    o.textContent="➕ أخرى (اكتب مدينة جديدة)";
+    s.appendChild(o);
+   }
+   if(!s.dataset.oth){
+    s.dataset.oth="1";
+    s.addEventListener("change",function(){
+     if(s.value!==OTHER)return;
+     var c=(prompt("اكتب اسم المدينة الجديدة:")||"").trim();
+     if(!c){s.selectedIndex=0;return;}
+     addCity(c);
+     s.value=c;
+    });
+   }
+  });
+ }
+ var pc=window.populateCities;
+ if(typeof pc==="function"&&!pc.__o){
+  var w=function(){var r=pc.apply(this,arguments);addOther();return r;};
+  w.__o=true;
+  window.populateCities=w;
+ }
+ function merge(){
+  try{
+   if(typeof cities==="undefined")return;
+   var dirs=[
+    typeof directoryDoctors!=="undefined"?directoryDoctors:[],
+    typeof directoryPharmacies!=="undefined"?directoryPharmacies:[],
+    typeof directoryLabs!=="undefined"?directoryLabs:[],
+    typeof directoryWholesale!=="undefined"?directoryWholesale:[]
+   ];
+   var added=false;
+   dirs.forEach(function(d){(d||[]).forEach(function(x){
+    var c=x&&x.city?String(x.city).trim():"";
+    if(c&&c!=="undefined"&&cities.indexOf(c)<0){cities.push(c);added=true;}
+   });});
+   if(added){
+    localStorage.setItem("alshifaCities",JSON.stringify(cities));
+    if(typeof populateCities==="function")populateCities();
+   }
+  }catch(e){}
+ }
+ setInterval(function(){addOther();merge();},3000);
+})();
+</script>
