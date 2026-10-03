@@ -4306,3 +4306,176 @@ if(typeof __origShow==="function"){
  setInterval(function(){addAdminBox();decorate();},2000);
 })();
 </script>
+<script>
+(function(){
+ var last=Date.now(),LIMIT=15*60*1000;
+ ["click","touchstart","keydown","scroll"].forEach(function(ev){
+  window.addEventListener(ev,function(){last=Date.now();},{passive:true});
+ });
+ setInterval(async function(){
+  try{
+   if(typeof isRealAdmin!=="function"||!isRealAdmin())return;
+   if(Date.now()-last<LIMIT)return;
+   last=Date.now();
+   if(window.fbSignOut)await window.fbSignOut();
+   alert("تم تسجيل خروج المدير تلقائياً لعدم النشاط.");
+   window.location.reload();
+  }catch(e){console.warn(e);}
+ },30000);
+
+ async function log(action,target){
+  try{
+   var u=window.fbCurrentUser;
+   if(!u||!window.fbAddDoc)return;
+   await window.fbAddDoc("auditLogs",{adminUid:u.uid,action:action,target:String(target||""),at:new Date().toISOString()});
+  }catch(e){console.warn(e);}
+ }
+ function wrap(name,label){
+  var o=window[name];
+  if(typeof o!=="function"||o.__logged)return;
+  var f=async function(){
+   var t=arguments[0];
+   var r=await o.apply(this,arguments);
+   log(label,t);
+   return r;
+  };
+  f.__logged=true;
+  window[name]=f;
+ }
+ function hookViewer(){
+  var b=document.querySelector('button[onclick*="Audit Log"]');
+  if(!b||b.dataset.hooked)return;
+  b.dataset.hooked="1";
+  b.removeAttribute("onclick");
+  b.onclick=async function(){
+   if(typeof isRealAdmin==="function"&&!isRealAdmin()){alert("للمدير فقط.");return;}
+   try{
+    var rows=await window.fbGetCollection("auditLogs");
+    rows.sort(function(a,b){return String(b.at||"").localeCompare(String(a.at||""));});
+    alert(rows.length?rows.slice(0,15).map(function(r){
+     return new Date(r.at).toLocaleString("ar-EG")+" — "+r.action+(r.target?" ("+String(r.target).slice(0,8)+")":"");
+    }).join("\n"):"لا توجد سجلات بعد.");
+   }catch(e){alert("تعذر تحميل السجل: "+(e.code||e.message));}
+  };
+ }
+ function wrapAll(){
+  wrap("approveDoctorVerification","قبول توثيق طبيب");
+  wrap("rejectDoctorVerification","رفض توثيق طبيب");
+  wrap("approvePharmacyVerification","قبول توثيق صيدلية");
+  wrap("rejectPharmacyVerification","رفض توثيق صيدلية");
+  wrap("approveLabVerification","قبول توثيق معمل");
+  wrap("rejectLabVerification","رفض توثيق معمل");
+  wrap("saveEmergencyNumbers","حفظ أرقام الطوارئ");
+  hookViewer();
+ }
+ wrapAll();
+ setInterval(wrapAll,2000);
+})();
+</script>
+<script>
+(function(){
+ var POLICY=[
+  ["البيانات التي نجمعها","رقم الهاتف والاسم والمدينة ونوع الحساب، والطلبات والحجوزات، وملفك الصحي إن أضفته، وصورة الرخصة للأطباء والصيدليات والمعامل."],
+  ["من يرى بياناتك","ملفك الصحي لا يراه طبيب إلا بإذنك، وتقدر تسحب الإذن في أي وقت. الصيدلية والمعمل يريان الطلبات الموجهة لهم فقط. الإدارة تراجع صور الرخص لأغراض التوثيق."],
+  ["أين تُحفظ البيانات","على خوادم Google Firebase بحماية قواعد وصول، ولا تُباع لأي جهة."],
+  ["حقوقك","تقدر تطلب تعديل بياناتك أو حذف حسابك بالتواصل مع إدارة التطبيق."],
+  ["تنبيه طبي","التطبيق وسيط لتنظيم الحجز والطلبات، ولا يغني عن استشارة الطبيب المختص. في الطوارئ اتصل بأرقام الطوارئ فوراً."]
+ ];
+ var ticks=0,shown=false,deferred=null;
+
+ function openPrivacy(consent,key){
+  var old=document.getElementById("privBox2");
+  if(old)old.remove();
+  var o=document.createElement("div");
+  o.id="privBox2";
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100001;display:flex;align-items:center;justify-content:center;padding:14px;direction:rtl";
+  var card=document.createElement("div");
+  card.style.cssText="background:#fff;color:#1f2d2a;border-radius:16px;max-width:520px;width:100%;max-height:86vh;overflow:auto;padding:16px";
+  if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches){card.style.background="#16211e";card.style.color="#e8f1ee";}
+  card.innerHTML='<b style="font-size:17px">🔒 سياسة الخصوصية</b>'+POLICY.map(function(h){
+   return '<h4 style="margin:10px 0 2px;color:#0e6b52">'+h[0]+'</h4><p style="margin:0 0 6px;font-size:14px;line-height:1.7">'+h[1]+'</p>';
+  }).join("");
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="btn full";
+  b.style.marginTop="12px";
+  if(consent){
+   b.textContent="✅ أوافق وأتابع";
+   b.onclick=function(){try{localStorage.setItem(key,new Date().toISOString());}catch(e){}o.remove();};
+  }else{
+   b.textContent="إغلاق";
+   b.onclick=function(){o.remove();};
+   o.onclick=function(e){if(e.target===o)o.remove();};
+  }
+  card.appendChild(b);
+  o.appendChild(card);
+  document.body.appendChild(o);
+ }
+
+ function ensureRow(){
+  var row=document.getElementById("extraRow2");
+  if(row&&document.body.contains(row))return row;
+  var anchor=document.getElementById("helpRow2");
+  if(!anchor&&ticks<20)return null;
+  row=document.createElement("div");
+  row.id="extraRow2";
+  row.style.cssText="display:flex;direction:rtl;justify-content:center;gap:14px;flex-wrap:wrap;margin:6px 0;font-size:13px";
+  if(anchor&&anchor.parentNode){
+   anchor.parentNode.insertBefore(row,anchor.nextSibling);
+  }else{
+   row.style.cssText+=";position:fixed;bottom:74px;left:8px;z-index:50;background:rgba(255,255,255,.92);padding:4px 10px;border-radius:10px";
+   document.body.appendChild(row);
+  }
+  var a=document.createElement("a");
+  a.href="#";
+  a.textContent="🔒 سياسة الخصوصية";
+  a.style.cssText="color:#0e6b52;text-decoration:underline";
+  a.onclick=function(e){e.preventDefault();openPrivacy(false);};
+  row.appendChild(a);
+  return row;
+ }
+
+ function standalone(){
+  return (window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||navigator.standalone;
+ }
+ window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;});
+ window.addEventListener("appinstalled",function(){
+  var b=document.getElementById("installBtn2");
+  if(b)b.remove();
+  deferred=null;
+ });
+ function showInstall(){
+  if(!deferred||standalone()||document.getElementById("installBtn2"))return;
+  var row=ensureRow();
+  if(!row)return;
+  var b=document.createElement("a");
+  b.id="installBtn2";
+  b.href="#";
+  b.textContent="📲 ثبّت التطبيق";
+  b.style.cssText="color:#0e6b52;text-decoration:underline";
+  b.onclick=async function(e){
+   e.preventDefault();
+   try{deferred.prompt();await deferred.userChoice;}catch(x){}
+   deferred=null;
+   b.remove();
+  };
+  row.appendChild(b);
+ }
+
+ function checkConsent(){
+  var p=window.fbCurrentProfile,u=window.fbCurrentUser;
+  if(shown||!p||!u||p.role!=="patient")return;
+  var key="alshifaConsent_"+u.uid;
+  try{if(localStorage.getItem(key))return;}catch(e){return;}
+  shown=true;
+  openPrivacy(true,key);
+ }
+
+ setInterval(function(){
+  ticks++;
+  ensureRow();
+  showInstall();
+  checkConsent();
+ },1000);
+})();
+</script>
