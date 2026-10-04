@@ -5103,3 +5103,70 @@ if(typeof __origShow==="function"){
  setInterval(addFooters,1500);
 })();
 </script>
+<script>
+(function(){
+ var done=false,tries=0;
+ function build(){
+  if(done||document.getElementById("hmTabs")){done=true;return;}
+  var la=document.getElementById("patientAppointments");
+  var lo=document.getElementById("patientOrders");
+  var bs=document.getElementById("patientSubscriptionBox");
+  if(!la||!lo||!bs)return;
+  var par=la.parentNode;
+  if(lo.parentNode!==par||bs.parentNode!==par)return;
+  var kids=Array.prototype.slice.call(par.children);
+  var iA=kids.indexOf(la),iO=kids.indexOf(lo),iB=kids.indexOf(bs);
+  var hA=kids[iA-1],hO=kids[iO-1],iH=-1;
+  for(var i=iB-1;i>iO;i--){if(kids[i].classList.contains("section")){iH=i;break;}}
+  if(!hA||!hO||iH<0||!hA.classList.contains("section")||!hO.classList.contains("section"))return;
+  var hS=kids[iH];
+  var G=[
+   {name:"مواعيدك القادمة",head:hA,items:[la],view:"appointments"},
+   {name:"آخر الطلبات",head:hO,items:[lo],view:"orders"},
+   {name:"اشتراكي",head:hS,items:kids.slice(iH+1,iB+1),view:""}
+  ];
+  var row=document.createElement("div");
+  row.id="hmTabs";
+  row.style.cssText="display:flex;direction:rtl;gap:6px;margin:14px 0 8px";
+  var more=document.createElement("div");
+  more.id="hmMore";
+  more.style.cssText="display:none;text-align:left;margin:2px 4px 6px";
+  var mb=document.createElement("button");
+  mb.type="button";
+  mb.className="link";
+  mb.textContent="عرض الكل";
+  more.appendChild(mb);
+  par.insertBefore(row,hA);
+  par.insertBefore(more,hA);
+  var active=-1,tabs=[];
+  function paint(){
+   G.forEach(function(g,i){
+    g.items.forEach(function(e){e.style.display=(i===active)?"":"none";});
+    var t=tabs[i];
+    if(i===active){t.style.background="linear-gradient(135deg,#12a382,#0b6b57)";t.style.color="#fff";}
+    else{t.style.background="";t.style.color="";}
+   });
+   var v=active>=0?G[active].view:"";
+   more.style.display=v?"block":"none";
+   mb.onclick=function(){if(v&&window.show)window.show(v);};
+  }
+  G.forEach(function(g,i){
+   g.head.style.display="none";
+   var t=document.createElement("h3");
+   t.className="tbar tbar-sm tbar-teal";
+   t.textContent=g.name;
+   t.style.cssText="flex:1;margin:0;text-align:center;font-size:12px;padding:10px 4px;cursor:pointer;white-space:normal;line-height:1.3";
+   t.onclick=function(){active=(active===i)?-1:i;paint();};
+   tabs.push(t);
+   row.appendChild(t);
+  });
+  paint();
+  done=true;
+ }
+ var iv=setInterval(function(){
+  tries++;
+  build();
+  if(done||tries>60)clearInterval(iv);
+ },1000);
+})();
+</script>
