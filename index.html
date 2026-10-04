@@ -4983,3 +4983,123 @@ if(typeof __origShow==="function"){
  },1000);
 })();
 </script>    </script>
+<script>
+(function(){
+ var UID=/^[A-Za-z0-9]{20,}$/;
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ function getCache(){try{return JSON.parse(localStorage.getItem("alshifaPharmNames")||"{}");}catch(e){return {};}}
+ function pharmName(u){
+  var c=getCache();
+  if(c[u])return c[u];
+  try{
+   var arr=(typeof directoryPharmacies!=="undefined")?directoryPharmacies:[];
+   for(var i=0;i<arr.length;i++){if((arr[i].uid||arr[i].id)===u&&arr[i].name)return arr[i].name;}
+  }catch(e){}
+  return null;
+ }
+ async function fill(){
+  var s=document.getElementById("wholesaleOrderPharmacy");
+  if(!s||!window.fbGetCollection)return;
+  var docs=[],us=[],extra="";
+  try{docs=await window.fbGetCollection("pharmacies");}catch(e){}
+  try{us=await window.fbGetCollection("users");}catch(e){extra=" (تعذر قراءة قائمة المستخدمين)";}
+  var byUser={};
+  (us||[]).forEach(function(u){if(u.role==="pharmacy"){var id=u.uid||u.id;if(id)byUser[id]=u;}});
+  var map={};
+  (docs||[]).forEach(function(x){
+   var id=x.uid||x.id;
+   if(!id)return;
+   var u=byUser[id]||{};
+   map[id]=Object.assign({},x,{name:x.name||u.name,city:x.city||u.city,phone:x.phone||u.phone});
+  });
+  Object.keys(byUser).forEach(function(id){
+   if(!map[id])map[id]={uid:id,name:byUser[id].name,city:byUser[id].city,phone:byUser[id].phone};
+  });
+  var list=[],hidden=0;
+  Object.keys(map).forEach(function(id){
+   var x=map[id];
+   if(x.verified===false||x.verificationStatus==="pending"||x.verificationStatus==="rejected"){hidden++;return;}
+   x._id=id;
+   list.push(x);
+  });
+  list.sort(function(a,b){return String(a.name||"").localeCompare(String(b.name||""));});
+  var keep=s.value;
+  s.innerHTML='<option value="">— اختر الصيدلية —</option>'+list.map(function(x){
+   var t=(x.name||"صيدلية")+(x.city?" — "+x.city:"")+(x.phone?" ("+String(x.phone).slice(-4)+")":"");
+   return '<option value="'+esc(x._id)+'">'+esc(t)+'</option>';
+  }).join("");
+  if(keep&&UID.test(keep))s.value=keep;
+  var c=getCache();
+  list.forEach(function(x){if(x.name)c[x._id]=x.name;});
+  try{localStorage.setItem("alshifaPharmNames",JSON.stringify(c));}catch(e){}
+  var n=document.getElementById("wsPharmNote");
+  if(!n){
+   n=document.createElement("div");
+   n.id="wsPharmNote";
+   n.style.cssText="font-size:12px;color:#888;margin-top:4px";
+   s.parentNode.insertBefore(n,s.nextSibling);
+  }
+  n.textContent="الصيدليات المتاحة: "+list.length+(hidden?" — مخفية لأنها غير موثقة: "+hidden:"")+extra;
+ }
+ var m=document.getElementById("wholesaleOrderModal");
+ if(m){
+  new MutationObserver(function(){
+   if(m.classList.contains("show")){
+    setTimeout(fill,1200);
+    setTimeout(fill,2500);
+    setTimeout(fill,4000);
+   }
+  }).observe(m,{attributes:true,attributeFilter:["class"]});
+ }
+ setInterval(function(){
+  var cl=document.getElementById("wholesaleOrderList");
+  if(!cl||typeof wholesaleOrders==="undefined")return;
+  var seen={};
+  wholesaleOrders.forEach(function(o){
+   var u=o&&o.pharmacy;
+   if(!u||seen[u]||!UID.test(u))return;
+   seen[u]=1;
+   var n=pharmName(u);
+   if(!n)return;
+   var w=document.createTreeWalker(cl,NodeFilter.SHOW_TEXT,null);
+   var t;
+   while((t=w.nextNode())){
+    if(t.nodeValue.indexOf(u)>-1)t.nodeValue=t.nodeValue.split(u).join(n);
+   }
+  });
+ },1000);
+})();
+</script>
+<script>
+(function(){
+ function addFooters(){
+  var ids=["patient","doctorPanel","pharmacyPanel","labPanel","adminPanel"];
+  var views=ids.map(function(i){return document.getElementById(i);});
+  var w=document.getElementById("wholesaleOrderList");
+  if(w&&w.closest)views.push(w.closest(".view"));
+  views.forEach(function(v){
+   if(!v||v.querySelector(".pvFoot"))return;
+   var d=document.createElement("div");
+   d.className="pvFoot";
+   d.style.cssText="text-align:center;margin:18px 0 8px;font-size:13px";
+   var a=document.createElement("a");
+   a.href="#";
+   a.textContent="🔒 سياسة الخصوصية";
+   a.style.cssText="color:#0e6b52;text-decoration:underline";
+   a.onclick=function(e){
+    e.preventDefault();
+    var o=document.querySelector("#extraRow2 a");
+    if(o)o.click();else alert("سياسة الخصوصية ستكون متاحة بعد لحظات، حاول مرة أخرى.");
+   };
+   d.appendChild(a);
+   v.appendChild(d);
+  });
+  var r=document.getElementById("extraRow2");
+  if(r){
+   var f=r.querySelector("a");
+   if(f&&f.textContent.indexOf("سياسة")>-1)f.style.display="none";
+  }
+ }
+ setInterval(addFooters,1500);
+})();
+</script>
