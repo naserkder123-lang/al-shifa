@@ -4970,4 +4970,16 @@ if(typeof __origShow==="function"){
  }
  setInterval(paint,700);
 })();
-     </script>
+ <script>
+(function(){
+ setInterval(function(){
+  var row=document.getElementById("extraRow2");
+  var home=document.getElementById("patient");
+  if(!row||!home)return;
+  if(row.parentNode!==home){
+   row.style.cssText="display:flex;direction:rtl;justify-content:center;gap:14px;flex-wrap:wrap;margin:14px 0 8px;font-size:13px";
+   home.appendChild(row);
+  }
+ },1000);
+})();
+</script>    </script>
