@@ -5170,3 +5170,219 @@ if(typeof __origShow==="function"){
  },1000);
 })();
 </script>
+<script>
+(function(){
+ var PROJECT="al-shifa-6b8d7";
+ var BASE="https://firestore.googleapis.com/v1/projects/"+PROJECT+"/databases/(default)/documents";
+ var TITLE="text-align:center;font-weight:bold;font-size:19px;color:#fff;padding:12px;background:linear-gradient(135deg,#12a382,#0b6b57);box-shadow:0 4px 0 #074a3c;margin-bottom:12px";
+ var TAG="padding:6px 12px;font-size:16px;font-weight:bold;color:#fff;border-radius:12px;background:linear-gradient(135deg,#e2a53a,#a66b00);box-shadow:0 4px 0 #8a5b00";
+ var TH="background:linear-gradient(135deg,#4f7fe8,#2f5bd1);color:#fff;padding:10px 6px;border:1px solid #1c3f9e;font-size:14px";
+ var TD="padding:6px;border:1px solid #bbb;";
+ var TOT="background:linear-gradient(135deg,#8b6ad6,#6b46c1);color:#fff;padding:9px 12px;border-radius:10px;margin:10px 12px 6px;box-shadow:0 4px 0 #54359a;font-size:16px;font-weight:bold";
+ var CARD="display:block;margin-bottom:18px;padding:0 0 12px;overflow:hidden;border:2px solid #0e6b52;border-radius:16px;box-shadow:0 6px 0 #0a4f3d,0 12px 20px rgba(0,0,0,.25)";
+ var TABLE="width:calc(100% - 24px);margin:0 12px;border-collapse:collapse;box-shadow:0 4px 0 #1c3f9e,0 8px 14px rgba(0,0,0,.2)";
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ function fmt(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return "";
+  return d.toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});
+ }
+ function num(n){return Number(n||0).toLocaleString("ar");}
+ function iso(){return new Date().toISOString();}
+
+ /* ===== 1) خانة المركز الصحي في نافذة العميل ===== */
+ function addFacility(){
+  if(document.getElementById("wsFacility"))return;
+  var r=document.getElementById("wsRows");
+  var f=r&&r.closest?r.closest(".field"):null;
+  if(!f||!f.parentNode)return;
+  var d=document.createElement("div");
+  d.className="field";
+  d.innerHTML='<label>🏥 اسم المركز الصحي أو المستشفى</label><input id="wsFacility" placeholder="مثال: مستشفى ود مدني التعليمي" style="width:100%;box-sizing:border-box;padding:10px">';
+  f.parentNode.insertBefore(d,f);
+ }
+ var oc=window.createWholesaleOrder;
+ if(typeof oc==="function"&&!oc.__fac){
+  var nf=async function(){
+   var f=document.getElementById("wsFacility");
+   if(f&&!f.value.trim()){alert("اكتب اسم المركز الصحي أو المستشفى.");return;}
+   var r=await oc.apply(this,arguments);
+   var m=document.getElementById("wholesaleOrderModal");
+   if(f&&m&&!m.classList.contains("show"))f.value="";
+   return r;
+  };
+  nf.__fac=true;
+  window.createWholesaleOrder=nf;
+ }
+ function wrapAdd(){
+  var a=window.fbAddDoc;
+  if(!a||a.__fac)return;
+  var w=async function(c,data){
+   if(c==="medicineOrders"&&data&&data.orderType==="wholesale"){
+    var f=document.getElementById("wsFacility");
+    if(f&&f.value.trim())data.facilityName=f.value.trim();
+   }
+   return a.apply(this,arguments);
+  };
+  w.__fac=true;
+  window.fbAddDoc=w;
+ }
+
+ /* ===== 2) بناء البطاقة (للصيدلي وللعميل) ===== */
+ function card(x,n,mode,pname){
+  var id=esc(x.id);
+  var items=Array.isArray(x.itemsDetail)?x.itemsDetail:[];
+  var trs=items.map(function(i){
+   var q=Number(i.qty)||0,pr=Number(i.price)||0;
+   var priceCell=mode==="pharm"
+    ?'<input type="number" inputmode="decimal" min="0" placeholder="السعر" data-woid="'+id+'" data-q="'+esc(q)+'" data-n="'+esc(i.name)+'" value="'+(pr>0?esc(pr):"")+'" oninput="ws2Calc(\''+id+'\')" style="width:100%;box-sizing:border-box;padding:6px">'
+    :(pr>0?num(pr):"—");
+   return '<tr><td style="'+TD+'">'+esc(i.name)+'</td><td style="'+TD+'text-align:center">'+esc(i.qty)+'</td><td style="'+TD+'text-align:center">'+priceCell+'</td><td class="ws2L" style="'+TD+'text-align:center;font-weight:bold">'+num(q*pr)+'</td></tr>';
+  }).join("");
+  var got=fmt(x.receivedAt);
+  var arr=Number(x.arrears)||0;
+  var h='<div class="row" style="'+CARD+'">'
+   +'<div style="'+TITLE+'">الشفاء — تطبيقك</div>'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 12px 10px">'
+   +'<span style="'+TAG+'">🧾 طلبية رقم '+n+'</span>'
+   +'<span style="font-size:13px">📅 تاريخ الوصول: <b>'+(fmt(x.createdAt)||"—")+'</b></span></div>';
+  if(mode==="client")h+='<div style="margin:0 12px 6px"><b>الصيدلية:</b> '+esc(pname||"صيدلية")+'</div>';
+  else h+='<div style="margin:0 12px 6px"><b>العميل:</b> '+esc(x.patientName||"عميل جملة")+'</div>';
+  h+='<div style="margin:0 12px 10px"><b>المركز الصحي / المستشفى:</b> '+esc(x.facilityName||"—")+'</div>'
+   +'<table style="'+TABLE+'"><tr><th style="'+TH+'">الصنف</th><th style="'+TH+'">الكمية</th><th style="'+TH+'">سعر الوحدة</th><th style="'+TH+'">إجمالي الصنف</th></tr>'+trs+'</table>'
+   +'<div style="'+TOT+'">الإجمالي: <span id="ws2Tot_'+id+'">'+num(x.total)+'</span> جنيه</div>';
+  if(mode==="pharm"){
+   h+='<div style="margin:8px 12px;padding:8px;border:1px dashed #c0392b;border-radius:10px"><b style="color:#c0392b">عليك مديونية:</b> '
+    +'<input id="ws2Arr_'+id+'" type="number" inputmode="decimal" min="0" data-old="'+arr+'" value="'+(arr>0?arr:"")+'" placeholder="المبلغ" style="width:110px;padding:6px"> جنيه '
+    +'<button type="button" class="btn" onclick="ws2SaveArr(\''+id+'\')">حفظ</button>'
+    +(arr>0?'<div style="font-size:12px;margin-top:4px">'+(x.arrearsConfirmed?'✅ أكدها العميل '+esc(fmt(x.arrearsConfirmedAt)):'⏳ بانتظار تأكيد العميل')+'</div>':'')
+    +'</div>';
+  }else if(arr>0){
+   h+='<div style="margin:8px 12px;padding:8px;border:1px dashed #c0392b;border-radius:10px"><b style="color:#c0392b">⚠️ عليك مديونية: '+num(arr)+' جنيه</b>'
+    +(x.arrearsConfirmed?'<div style="font-size:12px;margin-top:4px">✅ أكدتها '+esc(fmt(x.arrearsConfirmedAt))+'</div>'
+     :'<div style="margin-top:6px"><button type="button" class="btn" onclick="ws2ConfirmArr(\''+id+'\')">✅ أؤكد المديونية</button></div>')
+    +'</div>';
+  }
+  h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 12px 0">'
+   +'<span style="font-size:12px;padding:4px 8px;border:1px solid #9bbfb2;border-radius:8px;background:rgba(14,107,87,.08)">📥 الاستلام: '+(got||"........")+'</span>';
+  if(mode==="pharm"){
+   h+='<button type="button" class="btn" onclick="ws2Save(\''+id+'\')">💾 حفظ الأسعار</button>'
+    +(got?'':'<button type="button" class="btn" onclick="ws2Recv(\''+id+'\')">✅ تم الاستلام</button>');
+  }
+  return h+'</div></div>';
+ }
+ function byTime(a,b){return String(a.createdAt||"").localeCompare(String(b.createdAt||""));}
+
+ /* ===== 3) جهة الصيدلي ===== */
+ var pBusy=false;
+ async function renderPharm(force){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||p.role!=="pharmacy"||!window.fbQueryWhere||pBusy)return;
+  var list=document.getElementById("pharmacyOrdersList");
+  if(!list)return;
+  var box=document.getElementById("wsPharmBox2");
+  var ae=document.activeElement;
+  if(!force&&box&&ae&&ae.tagName==="INPUT"&&box.contains(ae))return;
+  pBusy=true;
+  try{
+   var old=document.getElementById("wsPharmBox");
+   if(old)old.style.display="none";
+   var rows=await window.fbQueryWhere("medicineOrders","pharmacyId","==",u.uid);
+   rows=rows.filter(function(x){return x.orderType==="wholesale";}).sort(byTime);
+   if(!box){
+    box=document.createElement("div");
+    box.id="wsPharmBox2";
+    list.parentNode.insertBefore(box,list);
+   }
+   var nums={};
+   rows.forEach(function(x,i){nums[x.id]=i+1;});
+   box.innerHTML=rows.slice().reverse().map(function(x){return card(x,nums[x.id],"pharm");}).join("");
+  }catch(e){console.warn(e);}
+  finally{pBusy=false;}
+ }
+ window.ws2Calc=function(id){
+  var t=0;
+  document.querySelectorAll('input[data-woid="'+id+'"]').forEach(function(i){
+   var q=parseFloat(i.getAttribute("data-q"))||0,p=parseFloat(i.value)||0;
+   t+=q*p;
+   var td=i.closest("tr").querySelector(".ws2L");
+   if(td)td.textContent=num(q*p);
+  });
+  var el=document.getElementById("ws2Tot_"+id);
+  if(el)el.textContent=num(t);
+ };
+ window.ws2Save=async function(id){
+  var items=[],total=0;
+  document.querySelectorAll('input[data-woid="'+id+'"]').forEach(function(i){
+   var q=parseFloat(i.getAttribute("data-q"))||0,p=parseFloat(i.value)||0;
+   total+=q*p;
+   items.push({name:i.getAttribute("data-n"),qty:q,price:p,lineTotal:q*p});
+  });
+  try{
+   await window.fbUpdateDoc("medicineOrders",id,{itemsDetail:items,total:total,pricedAt:iso()});
+   alert("تم حفظ الأسعار");
+  }catch(e){alert("تعذر الحفظ: "+(e.code||e.message));return;}
+  renderPharm(true);
+ };
+ window.ws2Recv=async function(id){
+  if(!confirm("تأكيد استلام الطلب؟"))return;
+  try{await window.fbUpdateDoc("medicineOrders",id,{receivedAt:iso()});}
+  catch(e){alert("تعذر الحفظ: "+(e.code||e.message));return;}
+  renderPharm(true);
+ };
+ window.ws2SaveArr=async function(id){
+  var inp=document.getElementById("ws2Arr_"+id);
+  if(!inp)return;
+  var v=parseFloat(inp.value),old=parseFloat(inp.getAttribute("data-old"))||0;
+  if(isNaN(v)||v<0){alert("اكتب مبلغاً صحيحاً.");return;}
+  if(v===old){alert("المبلغ لم يتغير.");return;}
+  try{
+   await window.fbUpdateDoc("medicineOrders",id,{arrears:v,arrearsAt:iso(),arrearsConfirmed:false,arrearsConfirmedAt:null});
+   alert("تم حفظ المديونية، وتظهر للعميل ليؤكدها.");
+  }catch(e){alert("تعذر الحفظ: "+(e.code||e.message));return;}
+  renderPharm(true);
+ };
+ var pw=window.loadPharmacyOrders;
+ if(typeof pw==="function"&&!pw.__w2){
+  var pf=async function(){
+   var r=pw.apply(this,arguments);
+   try{await r;}catch(e){}
+   try{await renderPharm(false);}catch(e){}
+   return r;
+  };
+  pf.__w2=true;
+  window.loadPharmacyOrders=pf;
+ }
+
+ /* ===== 4) جهة العميل ===== */
+ var names={},lastC=0,cBusy=false;
+ function fv(v){
+  if(v.stringValue!==undefined)return v.stringValue;
+  if(v.integerValue!==undefined)return Number(v.integerValue);
+  if(v.doubleValue!==undefined)return v.doubleValue;
+  if(v.booleanValue!==undefined)return v.booleanValue;
+  if(v.timestampValue!==undefined)return v.timestampValue;
+  if(v.arrayValue)return (v.arrayValue.values||[]).map(fv);
+  if(v.mapValue){var o={},f=v.mapValue.fields||{};for(var k in f)o[k]=fv(f[k]);return o;}
+  return null;
+ }
+ async function restOrders(){
+  var u=window.fbCurrentUser,t=await u.getIdToken();
+  var r=await fetch(BASE+":runQuery",{method:"POST",headers:{"Authorization":"Bearer "+t,"Content-Type":"application/json"},
+   body:JSON.stringify({structuredQuery:{from:[{collectionId:"medicineOrders"}],where:{fieldFilter:{field:{fieldPath:"patientId"},op:"EQUAL",value:{stringValue:u.uid}}}}})});
+  var j=await r.json();
+  var err=Array.isArray(j)?(j[0]&&j[0].error):j.error;
+  if(!r.ok||err)throw new Error(err?err.message:"HTTP "+r.status);
+  var out=[];
+  j.forEach(function(e){
+   if(!e.document)return;
+   var o={},f=e.document.fields||{};
+   for(var k in f)o[k]=fv(f[k]);
+   o.id=e.document.name.split("/").pop();
+   out.push(o);
+  });
+  return out;
+ }
+ async function myOrders(){
+  try{return await window.fbQueryWhere("medicineOrders","patientId","==",window.fbCurrentUser.u
