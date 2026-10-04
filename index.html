@@ -4889,3 +4889,85 @@ if(typeof __origShow==="function"){
  setInterval(build,2000);
 })();
 </script>
+<script>
+(function(){
+ function paint(){
+  var box=document.getElementById("wsPharmBox");
+  if(box){
+   var cards=Array.prototype.filter.call(box.children,function(c){return c.classList.contains("row");});
+   var n=cards.length;
+   cards.forEach(function(c,i){
+    var num=n-i;
+    var txt="🧾 طلبية رقم "+num;
+    var tag=c.querySelector(".ws3dNum");
+    if(c.dataset.d3){
+     if(tag&&tag.textContent!==txt)tag.textContent=txt;
+     return;
+    }
+    c.dataset.d3="1";
+    c.style.padding="0 0 12px";
+    c.style.overflow="hidden";
+    c.style.borderRadius="16px";
+    c.style.border="2px solid #0e6b52";
+    c.style.boxShadow="0 6px 0 #0a4f3d,0 12px 20px rgba(0,0,0,.25)";
+    c.style.marginBottom="18px";
+    var kids=Array.prototype.slice.call(c.children);
+    var title=kids[0];
+    if(title){
+     title.style.cssText="text-align:center;font-weight:bold;font-size:19px;color:#fff;padding:12px;background:linear-gradient(135deg,#12a382,#0b6b57);box-shadow:0 4px 0 #074a3c;margin-bottom:12px";
+    }
+    var t=document.createElement("div");
+    t.className="ws3dNum";
+    t.style.cssText="margin:0 12px 10px;padding:8px;text-align:center;font-size:17px;font-weight:bold;color:#fff;border-radius:12px;background:linear-gradient(135deg,#e2a53a,#a66b00);box-shadow:0 4px 0 #8a5b00";
+    t.textContent=txt;
+    if(title&&title.nextSibling)c.insertBefore(t,title.nextSibling);else c.appendChild(t);
+    kids.forEach(function(k){
+     if(k===title||k.tagName==="TABLE")return;
+     if(k.tagName==="BUTTON"){
+      k.style.margin="8px 12px 0";
+      k.style.width="calc(100% - 24px)";
+      return;
+     }
+     k.style.marginLeft="12px";
+     k.style.marginRight="12px";
+     if(k.querySelector&&k.querySelector('[id^="wsTot_"]')){
+      k.style.cssText+=";background:linear-gradient(135deg,#8b6ad6,#6b46c1);color:#fff;padding:9px 12px;border-radius:10px;margin:10px 12px 6px;box-shadow:0 4px 0 #54359a;font-size:16px;font-weight:bold";
+     }
+    });
+   });
+   box.querySelectorAll("table").forEach(function(tb){
+    if(tb.dataset.d3)return;
+    tb.dataset.d3="1";
+    tb.style.cssText+=";width:calc(100% - 24px);margin:0 12px;box-shadow:0 4px 0 #1c3f9e,0 8px 14px rgba(0,0,0,.2)";
+   });
+   box.querySelectorAll("th").forEach(function(h){
+    if(h.dataset.d3)return;
+    h.dataset.d3="1";
+    h.style.cssText+=";background:linear-gradient(135deg,#4f7fe8,#2f5bd1);color:#fff;padding:10px 6px;border:1px solid #1c3f9e;font-size:14px";
+   });
+  }
+  var cl=document.getElementById("wholesaleOrderList");
+  if(cl){
+   var rows=Array.prototype.filter.call(cl.children,function(r){return r.classList.contains("row");});
+   var m=rows.length;
+   rows.forEach(function(r,i){
+    var b=r.querySelector("b");
+    if(!b)return;
+    var txt2="🧾 طلبية رقم "+(m-i);
+    if(r.dataset.d3){
+     if(b.textContent!==txt2)b.textContent=txt2;
+     return;
+    }
+    r.dataset.d3="1";
+    r.style.boxShadow="0 5px 0 #1c3f9e,0 10px 16px rgba(0,0,0,.2)";
+    r.style.border="2px solid #2f5bd1";
+    r.style.borderRadius="14px";
+    r.style.marginBottom="14px";
+    b.style.cssText="display:inline-block;background:linear-gradient(135deg,#e2a53a,#a66b00);color:#fff;padding:5px 12px;border-radius:10px;font-size:15px;box-shadow:0 3px 0 #8a5b00";
+    b.textContent=txt2;
+   });
+  }
+ }
+ setInterval(paint,700);
+})();
+     </script>
