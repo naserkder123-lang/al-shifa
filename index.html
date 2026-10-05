@@ -5566,22 +5566,29 @@ if(typeof __origShow==="function"){
  };
  window.ws2Recv=async function(id){
   if(!confirm("تأكيد استلام الطلب؟"))return;
-  try{await window.fbUpdateDoc("medicineOrders",id,{receivedAt:iso()});}
-  catch(e){alert("تعذر الحفظ: "+(e.code||e.message));return;}
+  try{
+    await window.fbUpdateDoc("medicineOrders",id,{receivedAt:iso()});
+  }catch(e){
+    alert("تعذر الحفظ: "+(e.code||e.message));
+    return;
+  }
   renderPharm(true);
- };
- window.ws2SaveArr=async function(id){
+};
+window.ws2SaveArr=async function(id){
   var inp=document.getElementById("ws2Arr_"+id);
   if(!inp)return;
   var v=parseFloat(inp.value),old=parseFloat(inp.getAttribute("data-old"))||0;
   if(isNaN(v)||v<0){alert("اكتب مبلغاً صحيحاً.");return;}
   if(v===old){alert("المبلغ لم يتغير.");return;}
   try{
-   await window.fbUpdateDoc("medicineOrders",id,{arrears:v,arrearsAt:iso(),arrearsConfirmed:false,arrearsConfirmedAt:null});
-   alert("تم حفظ المديونية، وتظهر للعميل ليؤكدها.");
-  }catch(e){alert("تعذر الحفظ: "+(e.code||e.message));return;}
+    await window.fbUpdateDoc("medicineOrders",id,{arrears:v,arrearsAt:iso(),arrearsConfirmed:false,arrearsConfirmedAt:null});
+    alert("تم حفظ المديونية، وتظهر للعميل ليؤكدها.");
+  }catch(e){
+    alert("تعذر الحفظ: "+(e.code||e.message));
+    return;
+  }
   renderPharm(true);
- };
+};
  var pw=window.loadPharmacyOrders;
  if(typeof pw==="function"&&!pw.__w2){
   var pf=async function(){
