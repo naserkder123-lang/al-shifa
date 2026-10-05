@@ -1,156 +1,28 @@
-const CACHE_NAME = 'alshifa-cache-v13';
-
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
-
-
-// تثبيت Service Worker
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-      .catch((error) => {
-        console.error('Alshifa cache installation failed:', error);
-        throw error;
-      })
-  );
+const CACHE="alshifa-v12";
+self.addEventListener("install",function(e){self.skipWaiting();});
+self.addEventListener("activate",function(e){
+ e.waitUntil((async function(){
+  var ks=await caches.keys();
+  await Promise.all(ks.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));
+  await self.clients.claim();
+ })());
 });
-
-// تفعيل Service Worker وحذف الكاش القديم
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME)
-            .map((name) => caches.delete(name))
-        );
-      })
-      .then(() => self.clients.claim())
-  );
-});
-
-// التعامل مع طلبات الشبكة
-self.addEventListener('fetch', (event) => {
-  const request = event.request;
-
-  // التعامل مع طلبات GET فقط
-  if (request.method !== 'GET') {
-    return;
+self.addEventListener("fetch",function(e){
+ var req=e.request;
+ if(req.method!=="GET")return;
+ var url=new URL(req.url);
+ if(url.origin!==location.origin)return;
+ e.respondWith((async function(){
+  try{
+   var res=await fetch(req,{cache:"no-store"});
+   if(res&&res.status===200){
+    try{var c=await caches.open(CACHE);await c.put(req,res.clone());}catch(x){}
+   }
+   return res;
+  }catch(err){
+   var hit=await caches.match(req);
+   if(hit)return hit;
+   throw err;
   }
-
-  let requestURL;
-
-  try {
-    requestURL = new URL(request.url);
-  } catch (error) {
-    return;
-  }
-
-  // السماح فقط بطلبات HTTP و HTTPS
-  if (
-    requestURL.protocol !== 'http:' &&
-    requestURL.protocol !== 'https:'
-  ) {
-    return;
-  }
-
-  // عدم التدخل في الطلبات الخارجية مثل Firebase
-  if (requestURL.origin !== self.location.origin) {
-    return;
-  }
-
-  const pathname = requestURL.pathname.toLowerCase();
-
-  // عدم تخزين أو اعتراض طلبات تسجيل الدخول والمصادقة وواجهات API
-  if (
-    pathname.startsWith('/api/') ||
-    pathname.includes('/login') ||
-    pathname.includes('/signin') ||
-    pathname.includes('/auth') ||
-    pathname.includes('/logout') ||
-    pathname.includes('/session')
-  ) {
-    return;
-  }
-
-  // صفحات التطبيق: الشبكة أولًا ثم الكاش عند عدم توفر الشبكة
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response && response.ok) {
-            const responseClone = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => cache.put(request, responseClone))
-              .catch(() => {});
-
-            return response;
-          }
-
-          return caches.match('./index.html');
-        })
-        .catch(() => {
-          return caches.match(request)
-            .then((cachedPage) => {
-              return cachedPage || caches.match('./index.html');
-            });
-        })
-    );
-
-    return;
-  }
-
-  // تخزين الملفات الثابتة فقط
-  const isStaticFile =
-    /\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|json)$/i
-      .test(requestURL.pathname);
-
-  if (!isStaticFile) {
-    return;
-  }
-
-  // الملفات الثابتة: الكاش أولًا ثم الشبكة
-  event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(request)
-          .then((response) => {
-            if (!response || !response.ok) {
-              return response;
-            }
-
-            const responseClone = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(request, responseClone);
-              })
-              .catch(() => {});
-
-            return response;
-          })
-          .catch(() => {
-            return new Response('المحتوى غير متاح دون اتصال', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: {
-                'Content-Type': 'text/plain; charset=utf-8'
-              }
-            });
-          });
-      })
-  );
+ })());
 });
