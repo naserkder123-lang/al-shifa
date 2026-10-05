@@ -5657,21 +5657,17 @@ if(typeof __origShow==="function"){
   }finally{cBusy=false;lastC=Date.now();}
  }
  window.ws2ConfirmArr=async function(id){
-  if(!confirm("هل تؤكد المديونية المسجلة عليك؟"))return;
+  if(!confirm("هل توكد المديونية المسجلة عليك؟"))return;
   var fields={arrearsConfirmed:true,arrearsConfirmedAt:iso()};
   try{
-   try{await window.fbUpdateDoc("medicineOrders",id,fields);}
-   catch(e1){
-    var t=await window.fbCurrentUser.getIdToken();
-    var mask=Object.keys(fields).map(function(k){return "updateMask.fieldPaths="+k;}).join("&");
-    var r=await fetch(BASE+"/medicineOrders/"+encodeURIComponent(id)+"?"+mask,{method:"PATCH",headers:{"Authorization":"Bearer "+t,"Content-Type":"application/json"},
-     body:JSON.stringify({fields:{arrearsConfirmed:{booleanValue:true},arrearsConfirmedAt:{stringValue:fields.arrearsConfirmedAt}}})});
-    if(!r.ok){var j={};try{j=await r.json();}catch(e2){}throw new Error((j.error&&j.error.message)||("HTTP "+r.status));}
-   }
-   alert("تم تأكيد المديونية.");
-  }catch(e){alert("تعذر التأكيد: "+(e.code||e.message));return;}
+    await window.fbUpdateDoc("medicineOrders",id,fields);
+  }catch(e){
+    alert("تعذر التأكيد: "+(e.code||e.message));
+    return;
+  }
+  alert("تم تأكيد المديونية.");
   renderClient(true);
- };
+};
 
  setInterval(function(){
   wrapAdd();
