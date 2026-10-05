@@ -5408,7 +5408,7 @@ if(typeof __origShow==="function"){
   return out;
  }
  async function myOrders(){
-  try{return await window.fbQueryWhere("medicineOrders","patientId","==",window.fbCurrentUser.u
+  try{return await window.fbQueryWhere("medicineOrders","patientId","==",window.fbCurrentUser.uid);}catch(e){return await restOrders();}}})();
 <script>
 (function(){
  var PROJECT="al-shifa-6b8d7";
