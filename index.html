@@ -5409,7 +5409,7 @@ if(typeof __origShow==="function"){
  }
  async function myOrders(){
   try{return await window.fbQueryWhere("medicineOrders","patientId","==",window.fbCurrentUser.uid);}catch(e){return await restOrders();}}})();
-<script>
+
 (function(){
  var PROJECT="al-shifa-6b8d7";
  var BASE="https://firestore.googleapis.com/v1/projects/"+PROJECT+"/databases/(default)/documents";
