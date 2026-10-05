@@ -1,7 +1,30 @@
 <!-- نسخة الشفاء2 - آخر تحديث: 19 أغسطس 2026 - نظام صلاحيات الملف  (accessGrants) -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
+<head> <script>
+window.addEventListener('error',function(e){
+ if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+ var msg='JS ERROR: '+e.message+'\nLine: '+(e.lineno||'?');
+ if(e.lineno&&!window.__srcShown){
+  window.__srcShown=true;
+  fetch(location.pathname,{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+   var L=t.split('\n'),a=Math.max(0,e.lineno-4),o=[];
+   for(var i=a;i<Math.min(L.length,e.lineno+3);i++)o.push((i+1)+': '+L[i].slice(0,120));
+   alert(msg+'\n\n'+o.join('\n'));
+  }).catch(function(){alert(msg);});
+ }else{alert(msg);}
+});
+window.addEventListener('load',function(){
+ setTimeout(function(){
+  try{
+   if(sessionStorage.getItem('diagShown'))return;
+   sessionStorage.setItem('diagShown','1');
+   var ok=function(v){return v?'✅':'❌';};
+   alert('تشخيص الكتل:\nالطلبيات: '+ok(typeof window.ws2Calc==='function')+'\nشرح التطبيق: '+ok(typeof window.openHelp==='function')+'\nالخريطة: '+ok(typeof window.openMap==='function')+'\nمربعات الرئيسية: '+ok(document.getElementById('hmTabs'))+'\nسياسة الخصوصية: '+ok(document.getElementById('extraRow2')||document.querySelector('.pvFoot')));
+  }catch(x){}
+ },6000);
+});
+</script>
  <script>
 window.addEventListener('error', function(e){
   alert('JS ERROR: ' + e.message + '\nFile: ' + (e.filename||'?') + ' Line: ' + (e.lineno||'?'));
