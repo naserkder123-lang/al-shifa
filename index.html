@@ -6088,3 +6088,8 @@ function draw(o,n,who,mode){
  setInterval(addBtns,1500);
 })();
 </script>
+<style>
+#wsPharmBox2 .ws2Share .btn:nth-child(2),#wsCliBox2 .ws2Share .btn:nth-child(2){display:none!important}
+#wsPharmBox2 div[style*="flex-wrap:wrap"]:has(>button.btn),#wsCliBox2 div[style*="flex-wrap:wrap"]:has(>button.btn){display:grid!important;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px!important}
+#wsPharmBox2 div[style*="flex-wrap:wrap"]>.btn,#wsCliBox2 div[style*="flex-wrap:wrap"]>.btn{width:100%;min-height:46px;font-size:14px;margin:0}
+</style>
