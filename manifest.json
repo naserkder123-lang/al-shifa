@@ -1,48 +1,22 @@
 {
   "name": "الشفاء | منصة الرعاية الصحية",
   "short_name": "الشفاء",
-  "description": "منصة الرعاية الصحية الذكية لحجز الأطباء وطلب الأدوية وإدارة الملف الصحي.",
+  "description": "منصة الرعاية الصحية الذكية لحجز الأطباء وطلب الأدوية وإدارة الملف الصحي",
   "start_url": "./",
   "scope": "./",
   "id": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#f6fafb",
   "theme_color": "#0b6b57",
   "dir": "rtl",
   "lang": "ar",
-  "categories": [
-    "medical",
-    "health"
-  ],
+  "categories": ["medical", "health"],
   "icons": [
-    {
-      "src": "./icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-192-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "./icons/icon-512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "./icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+    {"src": "./icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }
