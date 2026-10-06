@@ -2492,7 +2492,58 @@ async function loadContactInfoFromFirestore(tries){
     renderTrials();
   }catch(e){console.error(e);}
 }
-loadContactInfoFromFirestore();
+loadContactInfoFromFirestore();/* ===== طلبات الجملة من Firestore + قائمة الصيدليات الحقيقية ===== */
+async function loadWholesalePharmacies(){
+  const sel=document.getElementById('wholesaleOrderPharmacy');
+  if(!sel||!window.fbGetCollection) return;
+  try{
+    const all=await window.fbGetCollection("pharmacies");
+    const ok=all.filter(p=>p.verified===true);
+    window._whPharmMap={};
+    ok.forEach(p=>{window._whPharmMap[p.id]=p.name||"صيدلية";});
+    if(!ok.length){
+      sel.innerHTML='<option value="">لا توجد صيدليات موثّقة بعد</option>';
+      return;
+    }
+    sel.innerHTML=ok.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml((p.name||"صيدلية")+(p.city?" — "+p.city:""))+'</option>').join("");
+  }catch(e){console.warn(e);}
+}
+function openWholesaleOrder(){
+  document.getElementById('wholesaleOrderModal').classList.add('show');
+  loadWholesalePharmacies();
+}
+async function renderWholesaleOrders(){
+  const list=document.getElementById('wholesaleOrderList');
+  const countEl=document.getElementById('wholesaleOrderCount');
+  const pendingEl=document.getElementById('wholesaleOrderPending');
+  if(!list) return;
+  let rows=[];
+  let fromServer=false;
+  try{
+    const u=window.fbCurrentUser;
+    if(u && window.fbQueryWhere){
+      const all=await window.fbQueryWhere("medicineOrders","patientId","==",u.uid);
+      rows=all.filter(o=>o.orderType==="wholesale").map(o=>({
+        id:"#WS"+String(o.id).slice(0,6),
+        pharmacy:(window._whPharmMap&&window._whPharmMap[o.pharmacyId])||"صيدلية",
+        status:o.status==="pending"?"بانتظار التأكيد":String(o.status||""),
+        total:o.total||0,
+        items:o.itemsSummary||""
+      }));
+      fromServer=true;
+    }
+  }catch(e){console.warn(e);}
+  if(!fromServer && typeof wholesaleOrders!=="undefined"){
+    rows=wholesaleOrders.map(o=>({id:o.id,pharmacy:o.pharmacy,status:String(o.status||""),total:o.total||0,items:o.items||""}));
+  }
+  if(!rows.length){
+    list.innerHTML='<div class="notice">لا توجد طلبات جملة بعد.</div>';
+  }else{
+    list.innerHTML=rows.map(o=>'<div class="row"><div><b>'+escapeHtml(o.id)+'</b><div class="small">'+escapeHtml(o.pharmacy)+' · '+escapeHtml(o.items)+'</div></div><div class="small">'+escapeHtml(o.status)+' · '+Number(o.total).toLocaleString('ar-EG')+' جنيه</div></div>').join("");
+  }
+  if(countEl) countEl.textContent=rows.length;
+  if(pendingEl) pendingEl.textContent=rows.filter(o=>o.status.includes('انتظار')||o.status.includes('pending')).length;
+     }
 </script>
 <script>
 /* =====================================================================
