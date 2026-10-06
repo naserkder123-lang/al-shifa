@@ -2451,6 +2451,48 @@ renderOtherEmergencyAdminList();
 renderOtherEmergencyList();
 attachMedicineAutocomplete('medicine','medicineSuggest');
 attachMedicineAutocomplete('wholesaleItems','wholesaleItemsSuggest');
+ /* ===== بيانات الدفع في Firestore ===== */
+async function saveContactInfo(){
+  const s=getSettings();
+  const phoneEl=document.getElementById("adminPhoneInput");
+  const bankEl=document.getElementById("bankNameInput");
+  const accEl=document.getElementById("bankAccountInput");
+  if(phoneEl && phoneEl.value.trim()) s.adminPhone=phoneEl.value.trim();
+  if(bankEl && bankEl.value.trim()) s.bankName=bankEl.value.trim();
+  if(accEl && accEl.value.trim()) s.bankAccount=accEl.value.trim();
+  localStorage.setItem("alshifaSettings",JSON.stringify(s));
+  renderTrials();
+  try{
+    if(!window.fbSaveDoc) throw new Error("no firebase");
+    await window.fbSaveDoc("publicSettings","contact",{adminPhone:s.adminPhone||"",bankName:s.bankName||"",bankAccount:s.bankAccount||"",updatedAt:new Date().toISOString()});
+    alert("تم حفظ معلومات الدفع ورفعها — تظهر الآن لكل المستخدمين عند التفعيل.");
+  }catch(e){
+    console.error(e);
+    alert("تم الحفظ على جهازك فقط ولم يُرفع لـ Firebase. تأكد أنك داخل بحساب المدير ومتصل بالإنترنت ثم أعد الحفظ.");
+  }
+}
+async function loadContactInfoFromFirestore(tries){
+  tries=tries||0;
+  if(!window.fbGetDoc){
+    if(tries<15) setTimeout(function(){loadContactInfoFromFirestore(tries+1);},1000);
+    return;
+  }
+  try{
+    const d=await window.fbGetDoc("publicSettings","contact");
+    if(!d) return;
+    const s=getSettings();
+    if(d.adminPhone) s.adminPhone=d.adminPhone;
+    if(d.bankName) s.bankName=d.bankName;
+    if(d.bankAccount) s.bankAccount=d.bankAccount;
+    localStorage.setItem("alshifaSettings",JSON.stringify(s));
+    const p=document.getElementById("adminPhoneInput"); if(p) p.value=s.adminPhone||"";
+    const b=document.getElementById("bankNameInput"); if(b) b.value=s.bankName||"";
+    const a=document.getElementById("bankAccountInput"); if(a) a.value=s.bankAccount||"";
+    renderActivationBlocks();
+    renderTrials();
+  }catch(e){console.error(e);}
+}
+loadContactInfoFromFirestore();
 </script>
 <script>
 /* =====================================================================
