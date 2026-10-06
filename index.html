@@ -737,7 +737,7 @@ setInterval(function(){
   <div id="loginStep1">
     <div class="field"><label>رقم الهاتف</label><input id="loginPhone" inputmode="tel" placeholder="09XXXXXXXX"></div>
     <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="6 أحرف على الأقل"></div>
-    style="display:none">
+     <div id="otpStep" style="display:none">
       <button class="btn full" id="sendOtpBtn" type="button" onclick="sendPhoneOtp()">📲 إرسال رمز التحقق SMS</button>
       <div class="field" id="otpField" style="display:none;margin-top:10px"><label>رمز التحقق OTP</label><input id="loginOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="أدخل الرمز المرسل إلى هاتفك"></div>
       <button class="btn full" id="confirmOtpBtn" type="button" style="display:none" onclick="confirmPhoneOtp()">✅ تأكيد الرمز</button>
