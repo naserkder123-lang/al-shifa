@@ -5922,6 +5922,87 @@ window.ws2SaveArr=async function(id){
   text(c,"صدر من تطبيق الشفاء",cx+cw/2,y,{align:"center",px:11,color:"#888888"});
   return cv;
  }
+ /* ===== تصميم الشفاء الجديد لبطاقة الطلبية (يغلب draw القديمة) ===== */
+var _shifaIcon=new Image();
+_shifaIcon.src="icon-192.png";
+function draw(o,n,who,mode){
+  var items=Array.isArray(o.itemsDetail)?o.itemsDetail:[];
+  var arr=Number(o.arrears)||0;
+  var W=600,S=2,L=18,R=W-18,TW=R-L,G="#0f6b54",INK="#12302a",MUTE="#4b635a",LINE="#d6e4de";
+  var facH=64+(arr>0?58:0);
+  var H=112+12+64+10+facH+12+36+34*items.length+14+52+14+84+16;
+  var cv=document.createElement("canvas");
+  cv.width=W*S; cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  c.fillStyle="#f2f7f4"; c.fillRect(0,0,W,H);
+  c.fillStyle=G; rr(c,0,-30,W,134,24); c.fill();
+  c.fillStyle="#ffffff"; rr(c,R-64,20,64,64,16); c.fill();
+  var ok=_shifaIcon&&_shifaIcon.complete&&_shifaIcon.naturalWidth>0;
+  if(ok){ try{ c.drawImage(_shifaIcon,R-60,24,56,56); }catch(e){ ok=false; } }
+  if(!ok){ c.fillStyle=G; c.fillRect(R-38,30,12,44); c.fillRect(R-54,46,44,12); }
+  text(c,"الشفاء",R-76,46,{align:"right",px:28,bold:true,color:"#ffffff"});
+  text(c,"منصة الرعاية الصحية الذكية",R-76,72,{align:"right",px:13,color:"#d6f0e6"});
+  text(c,"طلبية دواء",L,32,{align:"left",px:13,color:"#d6f0e6"});
+  text(c,"#"+n,L,56,{align:"left",px:22,bold:true,color:"#ffffff"});
+  text(c,(fmt(o.createdAt)||"—"),L,80,{align:"left",px:12,color:"#d6f0e6"});
+  var y=124;
+  c.fillStyle="#ffffff"; rr(c,L,y,TW,64,14); c.fill();
+  c.strokeStyle=LINE; c.lineWidth=1; rr(c,L,y,TW,64,14); c.stroke();
+  c.beginPath(); c.moveTo(W/2,y+10); c.lineTo(W/2,y+54); c.stroke();
+  var clientVal=(mode==="client")?(o.patientName||"عميل"):(who||o.patientName||"عميل");
+  var pharmVal=(mode==="client")?(who||"صيدلية"):(o.pharmacyName||"صيدلية الشفاء");
+  text(c,"العميل",R-14,y+20,{align:"right",px:12,color:MUTE});
+  text(c,clientVal,R-14,y+44,{align:"right",px:17,bold:true,color:INK,maxW:W/2-40});
+  text(c,"الصيدلية",W/2-14,y+20,{align:"right",px:12,color:MUTE});
+  text(c,pharmVal,W/2-14,y+44,{align:"right",px:17,bold:true,color:INK,maxW:W/2-40});
+  y+=64+10;
+  c.fillStyle="#ffffff"; rr(c,L,y,TW,facH,14); c.fill();
+  c.strokeStyle=LINE; rr(c,L,y,TW,facH,14); c.stroke();
+  text(c,"مركز / مستشفى",R-14,y+20,{align:"right",px:12,color:MUTE});
+  text(c,(o.facilityName||"—"),R-14,y+44,{align:"right",px:17,bold:true,color:INK,maxW:TW-28});
+  if(arr>0){
+    var sy=y+62;
+    c.fillStyle="#fff1d6"; rr(c,L+10,sy,TW-20,42,10); c.fill();
+    text(c,"عليك سداد مديونية: "+num(arr)+" جنيه",R-22,sy+21,{align:"right",px:15,bold:true,color:"#7a3e00",maxW:TW-190});
+    text(c,(o.arrearsConfirmed?"مؤكدة من العميل":"بانتظار تأكيد العميل"),L+22,sy+21,{align:"left",px:12,color:"#7a3e00"});
+  }
+  y+=facH+12;
+  var cols=[224,60,130,150],heads=["الصنف","الكمية","سعر الوحدة","إجمالي الصنف"];
+  var ed=[R];
+  cols.forEach(function(w,i){ed.push(ed[i]-w);});
+  c.fillStyle=G; rr(c,L,y,TW,36,10); c.fill();
+  heads.forEach(function(h,i){text(c,h,(ed[i]+ed[i+1])/2,y+18,{align:"center",px:14,bold:true,color:"#ffffff"});});
+  y+=36;
+  var top=y,tot=0;
+  items.forEach(function(it,k){
+    var q=Number(it.qty)||0,p=Number(it.price)||0;
+    tot+=q*p;
+    c.fillStyle=k%2?"#f3f8f5":"#ffffff";
+    c.fillRect(L,y,TW,34);
+    c.strokeStyle=LINE; c.lineWidth=1;
+    c.beginPath(); c.moveTo(L,y+34); c.lineTo(R,y+34); c.stroke();
+    text(c,it.name,ed[0]-8,y+17,{align:"right",px:14,bold:true,color:INK,maxW:cols[0]-16});
+    text(c,num(q),(ed[1]+ed[2])/2,y+17,{align:"center",px:14,color:INK});
+    text(c,p>0?num(p):"—",(ed[2]+ed[3])/2,y+17,{align:"center",px:14,color:INK});
+    text(c,num(q*p),(ed[3]+ed[4])/2,y+17,{align:"center",px:14,bold:true,color:INK});
+    y+=34;
+  });
+  c.strokeStyle=LINE; c.lineWidth=1.5;
+  c.strokeRect(L,top,TW,y-top);
+  y+=14;
+  c.fillStyle=G; rr(c,L,y,TW,52,14); c.fill();
+  text(c,"إجمالي الطلبية",R-16,y+26,{align:"right",px:16,bold:true,color:"#ffffff"});
+  text(c,num(tot)+" جنيه",L+16,y+26,{align:"left",px:24,bold:true,color:"#ffffff"});
+  y+=52+14;
+  c.strokeStyle="#9db8ad"; c.lineWidth=1;
+  c.setLineDash([6,5]); c.beginPath(); c.moveTo(L,y); c.lineTo(R,y); c.stroke(); c.setLineDash([]);
+  text(c,"الشفاء — رعاية صحية ذكية",W/2,y+22,{align:"center",px:15,bold:true,color:G});
+  text(c,"naserkder123-lang.github.io/al-shifa",W/2,y+44,{align:"center",px:13,color:MUTE});
+  text(c,"الاستلام: "+(fmt(o.receivedAt)||"........"),W/2,y+66,{align:"center",px:12,color:"#6b7f77"});
+  return cv;
+}
  function toBlob(cv){return new Promise(function(res){cv.toBlob(res,"image/png");});}
  function saveBlob(b,name){
   var a=document.createElement("a");
