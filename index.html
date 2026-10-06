@@ -2990,6 +2990,7 @@ window.fbUpdateDoc = async function(collectionName,id,data){
     (collectionName==="doctorAppointments" && ((role==="patient"&&old.patientId===uid)||(role==="doctor"&&old.doctorId===uid))) ||
     (collectionName==="medicineOrders" && ((role==="patient"&&old.patientId===uid)||(role==="pharmacy"&&old.pharmacyId===uid))) ||
     (collectionName==="labOrders" && ((role==="patient"&&old.patientId===uid)||(role==="lab"&&old.labId===uid))) ||
+   (collectionName==="medicineOrders" && old.patientId===uid) ||
     (collectionName==="labResults" && role==="lab"&&old.labId===uid) || isRealAdmin();
   if(!owner) throw new Error("Unauthorized update");
   await updateDoc(doc(fbDb,collectionName,id),data);
