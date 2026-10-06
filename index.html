@@ -6093,3 +6093,38 @@ function draw(o,n,who,mode){
 #wsPharmBox2 div[style*="flex-wrap:wrap"]:has(>button.btn),#wsCliBox2 div[style*="flex-wrap:wrap"]:has(>button.btn){display:grid!important;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px!important}
 #wsPharmBox2 div[style*="flex-wrap:wrap"]>.btn,#wsCliBox2 div[style*="flex-wrap:wrap"]>.btn{width:100%;min-height:46px;font-size:14px;margin:0}
 </style>
+<script>
+(function(){
+var o=navigator.share&&navigator.share.bind(navigator);
+if(!o)return;
+navigator.share=function(d){
+  if(d&&d.files&&d.files.length){
+    d=Object.assign({},d,{title:"الشفاء",text:"https://naserkder123-lang.github.io/al-shifa/"});
+  }
+  return o(d);
+};
+})();
+(function(){
+function tidy(){
+  document.querySelectorAll("#wsPharmBox2 .row,#wsCliBox2 .row").forEach(function(card){
+    var share=card.querySelector(".ws2Share");
+    if(!share||share.getAttribute("data-moved"))return;
+    var chip=null;
+    card.querySelectorAll("span").forEach(function(s){
+      if(!chip&&s.textContent.indexOf("الاستلام")>-1&&!s.closest("button"))chip=s;
+    });
+    var wa=share.querySelector(".btn");
+    if(!chip||!wa)return;
+    var box=chip.parentNode;
+    var rcv=document.createElement("div");
+    rcv.style.cssText="text-align:center;margin:10px 12px 12px";
+    rcv.appendChild(chip);
+    box.insertBefore(wa,box.firstChild);
+    card.appendChild(rcv);
+    share.setAttribute("data-moved","1");
+    share.style.setProperty("display","none","important");
+  });
+}
+setInterval(tidy,1000);
+})();
+</script>
