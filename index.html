@@ -17,6 +17,7 @@ window.addEventListener('error',function(e){
 window.addEventListener('load',function(){
  setTimeout(function(){
   try{
+   return;
    if(sessionStorage.getItem('diagShown'))return;
    sessionStorage.setItem('diagShown','1');
    var ok=function(v){return v?'✅':'❌';};
