@@ -2928,7 +2928,7 @@ window.fbQueryWhere = async function(collectionName, field, op, value){
   if(collectionName==="accessGrants" && !(isRealAdmin() || (uid && field==="patientId" && op==="==" && value===uid) || (uid && field==="doctorUid" && op==="==" && value===uid))) throw new Error("Unauthorized access grant query");
   if(["doctorAppointments","medicineOrders","labOrders"].includes(collectionName) && !isRealAdmin()){
     const allowedOwn =
-      (field==="patientId" && value===uid && role==="patient") ||
+      (field==="patientId" && value===uid && (role==="patient"||role==="wholesale")) ||
       (field==="doctorId" && value===uid && role==="doctor") ||
       (field==="pharmacyId" && value===uid && role==="pharmacy") ||
       (field==="labId" && value===uid && role==="lab");
