@@ -6374,3 +6374,60 @@ setInterval(tidy,1000);
   },1500);
 })();
 </script>
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  async function renderPending(col,boxId,emptyMsg,withSpecialty,kind){
+    var list=document.getElementById(boxId);
+    if(!list)return false;
+    if(!(window.isRealAdmin&&window.isRealAdmin())){list.innerHTML="";return true;}
+    try{
+      var all=await window.fbGetCollection(col);
+      var p=all.filter(function(x){return x.verificationStatus==="pending";});
+      if(!p.length){list.innerHTML='<div class="notice">'+emptyMsg+'</div>';return true;}
+      list.innerHTML=p.map(function(x){
+        var id=esc(x.uid||x.id);
+        return '<div class="row"><div><b>'+esc(x.name)+'</b>'+(withSpecialty&&x.specialty?' — '+esc(x.specialty):'')+' — '+esc(x.city)+'</div><div id="lic-'+id+'" style="margin-top:6px"><button class="btn alt" onclick="viewDoctorLicense(\''+id+'\')">📄 عرض الرخصة</button></div><div><button class="btn" onclick="approve'+kind+'Verification(\''+id+'\')">قبول</button><button class="btn alt" onclick="reject'+kind+'Verification(\''+id+'\')">رفض</button></div></div>';
+      }).join("");
+    }catch(e){
+      list.innerHTML='<div class="notice">تعذّر تحميل الطلبات: '+esc(e.code||e.message)+'</div>';
+    }
+    return true;
+  }
+  async function setStatus(col,uid,v,s,sync,again){
+    if(!(window.isRealAdmin&&window.isRealAdmin()))return;
+    try{
+      await window.fbSaveDoc(col,uid,{uid:uid,verified:v,verificationStatus:s});
+      try{sync(uid,v,s);}catch(e){}
+      again();
+    }catch(e){alert("تعذّر تنفيذ العملية: "+(e.code||e.message));}
+  }
+  function syncDoctors(uid,v,s){
+    if(typeof directoryDoctors==="undefined"||!Array.isArray(directoryDoctors))return;
+    var i=directoryDoctors.findIndex(function(d){return d.uid===uid;});
+    if(i>-1){
+      directoryDoctors[i]=Object.assign({},directoryDoctors[i],{verified:v,verificationStatus:s});
+      try{localStorage.setItem("alshifaDirectoryDoctors",JSON.stringify(directoryDoctors));}catch(e){}
+    }
+    if(typeof renderDoctorsList==="function")renderDoctorsList();
+  }
+  function syncPharmacies(uid,v,s){
+    if(typeof directoryPharmacies==="undefined"||!Array.isArray(directoryPharmacies))return;
+    var i=directoryPharmacies.findIndex(function(d){return d.uid===uid;});
+    if(i>-1)directoryPharmacies[i]=Object.assign({},directoryPharmacies[i],{verified:v,verificationStatus:s});
+    if(typeof renderPharmaciesList==="function")renderPharmaciesList();
+  }
+  var rd=function(){return renderPending("doctors","adminPendingDoctorVerifications","لا يوجد أطباء بانتظار التوثيق حاليًا",true,"Doctor");};
+  window.renderPendingDoctorVerifications=rd;
+  window.approveDoctorVerification=function(uid){return setStatus("doctors",uid,true,"verified",syncDoctors,rd);};
+  window.rejectDoctorVerification=function(uid){return setStatus("doctors",uid,false,"rejected",syncDoctors,rd);};
+  var oldPh=window.renderPendingPharmacyVerifications;
+  var rp=async function(){
+    var ok=await renderPending("pharmacies","adminPendingPharmacyVerifications","لا توجد صيدليات بانتظار التوثيق حاليًا",false,"Pharmacy");
+    if(!ok&&typeof oldPh==="function")return oldPh.apply(this,arguments);
+  };
+  window.renderPendingPharmacyVerifications=rp;
+  window.approvePharmacyVerification=function(uid){return setStatus("pharmacies",uid,true,"verified",syncPharmacies,rp);};
+  window.rejectPharmacyVerification=function(uid){return setStatus("pharmacies",uid,false,"rejected",syncPharmacies,rp);};
+})();
+</script>
