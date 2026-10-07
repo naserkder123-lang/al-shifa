@@ -6216,4 +6216,46 @@ function tidy(){
 setInterval(tidy,1000);
 })();
 </script>
-https://github.com/naserkder123-lang/al-shifa/edit/main/index.html#L6090
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  window.openLabResultsManager=async function(){
+    var u=window.fbCurrentUser;
+    if(!u){alert("سجّل الدخول بحساب المعمل أولاً");return;}
+    var old=document.getElementById("labResBox");
+    if(old)old.remove();
+    var box=document.createElement("div");
+    box.id="labResBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>نتائج الفحوصات</b><button type="button" id="labResClose" class="btn">✖</button></div><div id="labResList">جاري التحميل...</div></div>';
+    document.body.appendChild(box);
+    document.getElementById("labResClose").onclick=function(){box.remove();};
+    var list=document.getElementById("labResList");
+    try{
+      var orders=await window.fbQueryWhere("labOrders","labId","==",u.uid);
+      if(!orders.length){list.textContent="لا توجد طلبات فحص بعد.";return;}
+      list.innerHTML="";
+      orders.forEach(function(o){
+        var pid=o.patientId||o.userId||o.uid||"";
+        var tests=o.tests||o.items||o.details||o.text||"";
+        var card=document.createElement("div");
+        card.style.cssText="border:1px solid #dbe6e9;border-radius:12px;padding:10px;margin-bottom:10px";
+        card.innerHTML='<div style="font-size:13px;margin-bottom:6px;white-space:pre-wrap">'+esc(tests)+'</div><div style="font-size:12px;color:#666;margin-bottom:6px">الحالة: '+esc(o.status||"جديد")+'</div><textarea rows="3" placeholder="اكتب النتيجة هنا" style="width:100%;padding:8px;border-radius:10px;border:1px solid #dbe6e9;font-family:inherit"></textarea><button type="button" class="btn full" style="margin-top:6px">إرسال النتيجة للمريض</button>';
+        var ta=card.querySelector("textarea"),bt=card.querySelector("button");
+        bt.onclick=async function(){
+          var r=ta.value.trim();
+          if(!r){alert("اكتب النتيجة أولاً");return;}
+          if(!pid){alert("لا يوجد رقم مريض في هذا الطلب");return;}
+          bt.disabled=true;
+          try{
+            await window.fbSaveDoc("labResults",o.id,{patientId:pid,labId:u.uid,orderId:o.id,tests:String(tests),result:r,createdAt:Date.now()});
+            await window.fbSaveDoc("labOrders",o.id,{status:"ready"});
+            bt.textContent="✅ تم الإرسال";
+          }catch(e){bt.disabled=false;alert("تعذّر الإرسال: "+(e.code||e.message));}
+        };
+        list.appendChild(card);
+      });
+    }catch(e){list.textContent="تعذّر التحميل: "+(e.code||e.message);}
+  };
+})();
+</script>
