@@ -6292,3 +6292,84 @@ setInterval(tidy,1000);
   setLink("manifest",url);
 })();
 </script>
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  var busy=false;
+  async function myLab(){
+    var u=window.fbCurrentUser;
+    if(!u)return null;
+    try{
+      var d=await window.fbGetDoc("labs",u.uid);
+      if(d)return d;
+    }catch(e){}
+    if(typeof directoryLabs!=="undefined"&&Array.isArray(directoryLabs)){
+      return directoryLabs.find(function(l){return l.uid===u.uid;})||null;
+    }
+    return null;
+  }
+  async function renderBox(){
+    var box=document.getElementById("labVerificationBox");
+    if(!box||busy)return;
+    busy=true;
+    try{
+      var e=await myLab();
+      var st=(e&&e.verificationStatus)||"not_submitted";
+      if(st==="verified"){box.innerHTML='<div class="notice" style="color:#2e7d32">✅ رخصتك موثقة</div>';return;}
+      if(st==="pending"){box.innerHTML='<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>';return;}
+      var rej=(st==="rejected");
+      box.innerHTML='<div class="notice">'+(rej?"❌ الصورة غير مقبولة، ارفع صورة أوضح":"ارفع صورة رخصة المعمل للتوثيق")+'</div><input type="file" id="labLicenseFile" accept="image/*" style="margin-top:8px"><button class="btn full" style="margin-top:8px" onclick="submitLabVerification()">'+(rej?"إعادة إرسال صورة الرخصة":"إرسال صورة الرخصة")+'</button>';
+    }finally{busy=false;}
+  }
+  async function renderPending(){
+    var list=document.getElementById("adminPendingLabVerifications");
+    if(!list)return;
+    if(!(window.isRealAdmin&&window.isRealAdmin())){list.innerHTML="";return;}
+    try{
+      var all=await window.fbGetCollection("labs");
+      var p=all.filter(function(l){return l.verificationStatus==="pending";});
+      if(!p.length){list.innerHTML='<div class="notice">لا يوجد معامل بانتظار التوثيق حاليًا</div>';return;}
+      list.innerHTML=p.map(function(l){
+        var id=esc(l.uid||l.id);
+        return '<div class="row"><div><b>'+esc(l.name)+'</b> — '+esc(l.city)+'</div><div id="lic-'+id+'" style="margin-top:6px"><button class="btn alt" onclick="viewLabLicense(\''+id+'\')">📄 عرض الرخصة</button></div><div><button class="btn" onclick="approveLabVerification(\''+id+'\')">قبول</button><button class="btn alt" onclick="rejectLabVerification(\''+id+'\')">رفض</button></div></div>';
+      }).join("");
+    }catch(e){
+      list.innerHTML='<div class="notice">تعذّر تحميل الطلبات: '+esc(e.code||e.message)+'</div>';
+    }
+  }
+  async function setStatus(uid,verified,status){
+    if(!(window.isRealAdmin&&window.isRealAdmin()))return;
+    try{
+      var cur=(await window.fbGetDoc("labs",uid))||{};
+      var updated=Object.assign({},cur,{uid:uid,verified:verified,verificationStatus:status});
+      await window.fbSaveDoc("labs",uid,updated);
+      if(typeof directoryLabs!=="undefined"&&Array.isArray(directoryLabs)){
+        var i=directoryLabs.findIndex(function(l){return l.uid===uid;});
+        if(i>-1)directoryLabs[i]=updated;else directoryLabs.unshift(updated);
+        localStorage.setItem("alshifaDirectoryLabs",JSON.stringify(directoryLabs));
+      }
+      if(typeof renderLabsList==="function")renderLabsList();
+      renderPending();
+    }catch(e){alert("تعذّر تنفيذ العملية: "+(e.code||e.message));}
+  }
+  window.renderLabVerificationBox=renderBox;
+  window.renderPendingLabVerifications=renderPending;
+  window.approveLabVerification=function(uid){return setStatus(uid,true,"verified");};
+  window.rejectLabVerification=function(uid){return setStatus(uid,false,"rejected");};
+  var prev=window.show;
+  if(typeof prev==="function"){
+    window.show=function(v){
+      var r=prev.apply(this,arguments);
+      try{
+        if(v==="labPanel")renderBox();
+        if(v==="adminPanel")renderPending();
+      }catch(e){}
+      return r;
+    };
+  }
+  setInterval(function(){
+    var b=document.getElementById("labVerificationBox");
+    if(b&&b.offsetParent!==null&&!b.innerHTML.trim())renderBox();
+  },1500);
+})();
+</script>
