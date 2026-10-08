@@ -6468,3 +6468,62 @@ setInterval(tidy,1000);
   }
 })();
 </script>
+<script>
+(function(){
+  function findCard(btn){
+    var n=btn.parentNode;
+    for(var i=0;i<8&&n&&n!==document.body;i++){
+      if(n.querySelector("table")&&/الصنف/.test(n.textContent))return n;
+      n=n.parentNode;
+    }
+    return null;
+  }
+  function printCard(card){
+    var clone=card.cloneNode(true);
+    var ins=card.querySelectorAll("input,textarea,select");
+    var cins=clone.querySelectorAll("input,textarea,select");
+    for(var i=0;i<cins.length;i++){
+      var s=document.createElement("span");
+      s.textContent=ins[i]?ins[i].value:"";
+      cins[i].parentNode.replaceChild(s,cins[i]);
+    }
+    clone.querySelectorAll("button").forEach(function(b){b.remove();});
+    var w=window.open("","_blank");
+    if(!w){alert("اسمح للنوافذ المنبثقة ثم أعد المحاولة");return;}
+    var d=new Date().toLocaleString("ar-EG");
+    w.document.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الشفاء — طلب</title><style>body{font-family:Tahoma,Arial,sans-serif;padding:12px;direction:rtl}*{color:#111!important;background:#fff!important;box-shadow:none!important;text-shadow:none!important}table{width:100%;border-collapse:collapse}th,td{border:1px solid #888;padding:6px;text-align:center}th{background:#eee!important}h2{text-align:center;margin:0 0 6px}.d{text-align:center;font-size:12px;margin-bottom:10px}</style></head><body><h2>الشفاء — تطبيقك</h2><div class="d">'+d+'</div>'+clone.innerHTML+'</body></html>');
+    w.document.close();
+    setTimeout(function(){try{w.focus();w.print();}catch(e){}},500);
+  }
+  function addPrint(save){
+    var par=save.parentNode;
+    if(!par||par.querySelector("[data-printbtn]"))return;
+    var card=findCard(save);
+    if(!card)return;
+    var pb=document.createElement("button");
+    pb.type="button";
+    pb.className=save.className;
+    pb.style.cssText=save.style.cssText;
+    pb.textContent="🖨️ طباعة";
+    pb.setAttribute("data-printbtn","1");
+    pb.onclick=function(){printCard(findCard(pb)||card);};
+    var kids=Array.prototype.slice.call(par.children);
+    var start=kids.indexOf(save)+1;
+    for(var i=start;i<=kids.length;i++){
+      par.insertBefore(pb,kids[i]||null);
+      var a=save.getBoundingClientRect(),b=pb.getBoundingClientRect();
+      if(b.top>a.bottom-2&&Math.abs((a.left+a.width/2)-(b.left+b.width/2))<a.width*0.3)return;
+    }
+    par.insertBefore(pb,kids[start]||null);
+  }
+  function scan(){
+    document.querySelectorAll("button").forEach(function(b){
+      if(b.hasAttribute("data-printbtn"))return;
+      if(b.offsetParent===null)return;
+      if((b.textContent||"").indexOf("حفظ الأسعار")===-1)return;
+      try{addPrint(b);}catch(e){}
+    });
+  }
+  setInterval(scan,1500);
+})();
+</script>
