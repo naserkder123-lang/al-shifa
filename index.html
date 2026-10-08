@@ -6527,3 +6527,48 @@ setInterval(tidy,1000);
   setInterval(scan,1500);
 })();
 </script>
+
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  var last=0,busy=false;
+  function ts(x){try{if(!x)return 0;if(typeof x.toMillis==="function")return x.toMillis();var d=new Date(x);return isNaN(d.getTime())?0:d.getTime();}catch(e){return 0;}}
+  function fmt(x){var t=ts(x);if(!t)return "";try{return new Date(t).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});}catch(e){return new Date(t).toLocaleString();}}
+  async function load(){
+    var box=document.getElementById("patientLabResults");
+    var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+    if(!box||busy||!u||!p||p.role!=="patient"||!window.fbQueryWhere)return;
+    busy=true;last=Date.now();
+    try{
+      var rows=await window.fbQueryWhere("labResults","patientId","==",u.uid);
+      rows.sort(function(a,b){return Math.max(ts(b.releasedAt),ts(b.createdAt))-Math.max(ts(a.releasedAt),ts(a.createdAt));});
+      var html='<div class="lrDone">';
+      if(!rows.length)html+='<div class="notice">لا توجد نتائج منشورة لك بعد.</div>';
+      rows.forEach(function(r){
+        html+='<div style="border:1px solid #dbe6e9;border-radius:12px;padding:10px;margin-bottom:10px;background:rgba(127,127,127,.08)">'
+          +'<div style="font-weight:bold;margin-bottom:4px">🔬 '+esc(r.labName||"المعمل")+'</div>'
+          +'<div style="font-size:12px;opacity:.7;margin-bottom:6px">'+esc(fmt(r.releasedAt||r.createdAt))+'</div>'
+          +(r.testSummary?'<div style="font-size:13px;margin-bottom:6px;white-space:pre-wrap">الفحوصات: '+esc(r.testSummary)+'</div>':'')
+          +'<div style="font-size:14px;white-space:pre-wrap">'+esc(r.resultText||"")+'</div>'
+          +'</div>';
+      });
+      html+='</div>';
+      box.innerHTML=html;
+    }catch(e){
+      box.innerHTML='<div class="lrDone"><div class="notice">تعذّر تحميل النتائج: '+esc(e.code||e.message)+'</div></div>';
+    }finally{busy=false;}
+  }
+  var prev=window.show;
+  if(typeof prev==="function"){
+    window.show=function(v){
+      var r=prev.apply(this,arguments);
+      try{if(v==="health")setTimeout(load,700);}catch(e){}
+      return r;
+    };
+  }
+  setInterval(function(){
+    var b=document.getElementById("patientLabResults");
+    if(b&&b.offsetParent!==null&&!b.querySelector(".lrDone")&&Date.now()-last>3000)load();
+  },1500);
+})();
+</script>
