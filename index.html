@@ -6431,3 +6431,40 @@ setInterval(tidy,1000);
   window.rejectPharmacyVerification=function(uid){return setStatus("pharmacies",uid,false,"rejected",syncPharmacies,rp);};
 })();
 </script>
+<script>
+(function(){
+  var done=false;
+  async function repair(){
+    if(done)return;
+    if(!(window.isRealAdmin&&window.isRealAdmin())||!window.fbGetCollection||!window.fbGetDoc||!window.fbSaveDoc)return;
+    done=true;
+    var cols=["doctors","pharmacies","labs"];
+    var fields=["name","specialty","city","location"];
+    var fixed=0;
+    for(var c=0;c<cols.length;c++){
+      try{
+        var rows=await window.fbGetCollection(cols[c]);
+        for(var i=0;i<rows.length;i++){
+          var r=rows[i],uid=r.uid||r.id;
+          if(!uid||r.name)continue;
+          var u=await window.fbGetDoc("users",uid);
+          if(!u||!u.name)continue;
+          var patch={uid:uid};
+          fields.forEach(function(f){if(!r[f]&&u[f])patch[f]=u[f];});
+          await window.fbSaveDoc(cols[c],uid,patch);
+          fixed++;
+        }
+      }catch(e){}
+    }
+    if(fixed)alert("تم إكمال بيانات "+fixed+" من الأطباء والصيدليات والمعامل. أعد فتح التطبيق.");
+  }
+  var prev=window.show;
+  if(typeof prev==="function"){
+    window.show=function(v){
+      var r=prev.apply(this,arguments);
+      try{if(v==="adminPanel")setTimeout(repair,1000);}catch(e){}
+      return r;
+    };
+  }
+})();
+</script>
