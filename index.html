@@ -6778,3 +6778,115 @@ setInterval(tidy,1000);
   setInterval(addBtns,1500);
 })();
 </script>
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function toEn(s){return String(s==null?"":s).replace(/[٠-٩]/g,function(d){return String(d.charCodeAt(0)-1632);}).replace(/[۰-۹]/g,function(d){return String(d.charCodeAt(0)-1776);});}
+  var STD=[
+    {g:"الدم",n:"الهيموجلوبين (Hb)",u:"g/dL",r:"ذكور 13–17 / إناث 12–15",t:"num"},
+    {g:"الدم",n:"كريات الدم البيضاء (WBC)",u:"×10³/µL",r:"4 – 11",lo:4,hi:11,t:"num"},
+    {g:"الدم",n:"الصفائح الدموية (Platelets)",u:"×10³/µL",r:"150 – 450",lo:150,hi:450,t:"num"},
+    {g:"الدم",n:"سرعة الترسيب (ESR)",u:"mm/hr",r:"0 – 20",lo:0,hi:20,t:"num"},
+    {g:"الدم",n:"فيلم الدم للملاريا (BF)",u:"",r:"سالب",t:"pn"},
+    {g:"الدم",n:"فصيلة الدم",u:"",r:"",t:"bg"},
+    {g:"الكيمياء",n:"سكر الدم (Glucose)",u:"mg/dL",r:"صائم 70–100 / عشوائي أقل من 140",t:"num"},
+    {g:"الكيمياء",n:"الكرياتينين (Creatinine)",u:"mg/dL",r:"0.6 – 1.3",lo:0.6,hi:1.3,t:"num"},
+    {g:"الكيمياء",n:"اليوريا (Urea)",u:"mg/dL",r:"15 – 45",lo:15,hi:45,t:"num"},
+    {g:"الكيمياء",n:"إنزيم الكبد (ALT)",u:"U/L",r:"حتى 40",lo:0,hi:40,t:"num"},
+    {g:"المصليات",n:"التيفوئيد (Widal)",u:"",r:"أقل من 1/80",t:"txt"},
+    {g:"المصليات",n:"جرثومة المعدة (H. pylori)",u:"",r:"سالب",t:"pn"},
+    {g:"المصليات",n:"التهاب الكبد B (HBsAg)",u:"",r:"سالب",t:"pn"},
+    {g:"البول والبراز",n:"فحص البول العام",u:"",r:"",t:"txt"},
+    {g:"البول والبراز",n:"فحص البراز العام",u:"",r:"",t:"txt"}
+  ];
+  var IN="width:100%;padding:10px;border-radius:10px;border:1px solid #dbe6e9;font-family:inherit;font-size:14px;margin:4px 0 8px;background:#fff;color:#111";
+  var IN2=IN+";width:auto;flex:1;min-width:0";
+  var INR="width:100%;padding:8px;border-radius:10px;border:1px solid #dbe6e9;font-family:inherit;font-size:14px;margin:0;background:#fff;color:#111";
+  var FL={normal:"طبيعي",high:"مرتفع",low:"منخفض",pos:"إيجابي",neg:"سلبي"};
+  function opts(arr){return arr.map(function(o){return '<option value="'+esc(o)+'">'+(o||"—")+'</option>';}).join("");}
+  function stdRow(t,i){
+    var ctl;
+    if(t.t==="pn")ctl='<select class="sfV" style="'+INR+'">'+opts(["","سالب","إيجابي (+)","إيجابي (++)","إيجابي (+++)"])+'</select>';
+    else if(t.t==="bg")ctl='<select class="sfV" style="'+INR+'">'+opts(["","A+","A-","B+","B-","AB+","AB-","O+","O-"])+'</select>';
+    else ctl='<input class="sfV" '+(t.t==="num"?'inputmode="decimal" ':'')+'style="'+INR+'">';
+    return '<div class="sfT" data-i="'+i+'" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid #e3ecea;padding:6px 0"><div style="flex:1.5;min-width:0"><div style="font-weight:bold;font-size:13px">'+esc(t.n)+'</div><div style="font-size:11px;color:#666">'+esc([t.u,t.r].filter(Boolean).join(" · "))+'</div></div><div style="flex:1;min-width:0">'+ctl+'</div></div>';
+  }
+  function xrow(){
+    return '<div class="lfT" style="border:1px solid #dbe6e9;border-radius:12px;padding:8px;margin-bottom:8px">'
+      +'<input class="lfN" placeholder="اسم الفحص" style="'+IN+'">'
+      +'<div style="display:flex;gap:6px"><input class="lfR" placeholder="النتيجة" style="'+IN2+'"><input class="lfU" placeholder="الوحدة" style="'+IN2+'"></div>'
+      +'<input class="lfG" placeholder="المدى الطبيعي" style="'+IN+'">'
+      +'<select class="lfF" style="'+IN+'"><option value="">— الحالة —</option><option value="normal">طبيعي</option><option value="high">مرتفع</option><option value="low">منخفض</option><option value="pos">إيجابي</option><option value="neg">سلبي</option></select></div>';
+  }
+  window.publishLabResult=function(orderId,patientId,testSummary){
+    var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+    if(!u){alert("سجّل الدخول أولاً");return;}
+    var old=document.getElementById("sfBox");
+    if(old)old.remove();
+    var ts=String(testSummary||"");
+    var h="",gh="";
+    STD.forEach(function(t,i){
+      if(t.g!==gh){gh=t.g;h+='<div style="font-weight:bold;color:#0e6b52;margin:12px 0 2px">'+esc(gh)+'</div>';}
+      h+=stdRow(t,i);
+    });
+    var box=document.createElement("div");
+    box.id="sfBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>🧪 نموذج نتيجة الفحوصات</b><button type="button" class="btn" id="sfClose">✖</button></div>'
+      +'<div id="sfPat" style="font-size:13px;margin-bottom:4px"></div>'
+      +(ts?'<div style="font-size:12px;color:#666;margin-bottom:4px">المطلوب: '+esc(ts)+'</div>':'')
+      +'<div style="font-size:11px;color:#888;margin-bottom:4px">اكتب النتيجة في الفحوصات المطلوبة فقط، والفارغة لا تُنشر.</div>'
+      +h
+      +'<div style="font-weight:bold;color:#0e6b52;margin:14px 0 6px">فحوصات أخرى</div><div id="sfExtra"></div>'
+      +'<button type="button" class="btn full" id="sfAdd" style="margin-bottom:8px">➕ فحص آخر</button>'
+      +'<textarea id="sfNotes" rows="2" placeholder="ملاحظات (اختياري)" style="'+IN+'"></textarea>'
+      +'<div style="position:sticky;bottom:0;background:#fff;padding-top:8px"><button type="button" class="btn full" id="sfSave">✅ نشر النتيجة للمريض</button></div></div>';
+    document.body.appendChild(box);
+    document.getElementById("sfClose").onclick=function(){box.remove();};
+    document.getElementById("sfAdd").onclick=function(){document.getElementById("sfExtra").insertAdjacentHTML("beforeend",xrow());};
+    try{
+      window.fbGetDoc("users",patientId).then(function(d){
+        var el=document.getElementById("sfPat");
+        if(el&&d&&d.name)el.textContent="المريض: "+d.name;
+      }).catch(function(){});
+    }catch(e){}
+    document.getElementById("sfSave").onclick=async function(){
+      var btn=this;
+      var items=[];
+      box.querySelectorAll(".sfT").forEach(function(el){
+        var t=STD[Number(el.getAttribute("data-i"))];
+        var v=el.querySelector(".sfV").value.trim();
+        if(!v)return;
+        var flag="";
+        if(t.t==="pn")flag=(v==="سالب")?"neg":"pos";
+        else if(t.t==="num"&&(t.lo!=null||t.hi!=null)){
+          var x=parseFloat(toEn(v).replace(/[٫,،]/g,"."));
+          if(!isNaN(x))flag=(t.lo!=null&&x<t.lo)?"low":((t.hi!=null&&x>t.hi)?"high":"normal");
+        }
+        items.push({name:t.n,result:v,unit:t.u,range:t.r,flag:flag});
+      });
+      box.querySelectorAll(".lfT").forEach(function(el){
+        var n=el.querySelector(".lfN").value.trim(),r=el.querySelector(".lfR").value.trim();
+        if(!n&&!r)return;
+        items.push({name:n||"—",result:r,unit:el.querySelector(".lfU").value.trim(),range:el.querySelector(".lfG").value.trim(),flag:el.querySelector(".lfF").value});
+      });
+      var notes=document.getElementById("sfNotes").value.trim();
+      if(!items.length){alert("اكتب نتيجة فحص واحد على الأقل");return;}
+      if(!confirm("سيتم نشر النتيجة للمريض. هل راجعت القيم؟"))return;
+      var text=items.map(function(i){return "• "+i.name+": "+i.result+(i.unit?" "+i.unit:"")+(i.range?" (الطبيعي: "+i.range+")":"")+(i.flag?" — "+FL[i.flag]:"");}).join("\n")+(notes?"\n\nملاحظات: "+notes:"");
+      btn.disabled=true;
+      try{
+        await window.fbAddDoc("labResults",{labId:u.uid,patientId:patientId,labName:(p&&p.name)||"المعمل",labOrderId:orderId,testSummary:ts||(items.length+" فحوصات"),resultText:text,items:items,notes:notes,status:"released",releasedAt:new Date().toISOString()});
+        await window.fbUpdateDoc("labOrders",orderId,{status:"released",resultPublishedAt:window.fbServerTimestamp()});
+        box.remove();
+        alert("تم ربط النتيجة بالمريض ونشرها بأمان ✅");
+        try{if(typeof loadLabOrders==="function")loadLabOrders();}catch(e){}
+      }catch(e){
+        btn.disabled=false;
+        alert("تعذّر النشر: "+(e.code||e.message));
+      }
+    };
+  };
+})();
+</script>
