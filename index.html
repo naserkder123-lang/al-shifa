@@ -7145,3 +7145,19 @@ setInterval(tidy,1000);
   };
 })();
 </script>
+<script>
+(function(){
+  var P=CanvasRenderingContext2D.prototype;
+  if(P.__ltrFix)return;
+  P.__ltrFix=true;
+  var ft=P.fillText;
+  P.fillText=function(t,x,y,mw){
+    var prev=this.direction;
+    try{
+      if(!/[\u0600-\u06FF]/.test(String(t)))this.direction="ltr";
+      if(mw===undefined)return ft.call(this,t,x,y);
+      return ft.call(this,t,x,y,mw);
+    }finally{this.direction=prev;}
+  };
+})();
+</script>
