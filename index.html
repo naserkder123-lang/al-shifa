@@ -6890,3 +6890,258 @@ setInterval(tidy,1000);
   };
 })();
 </script>
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function p2(n){return (n<10?"0":"")+n;}
+  function ts(x){try{if(!x)return 0;if(typeof x.toMillis==="function")return x.toMillis();var d=new Date(x);return isNaN(d.getTime())?0:d.getTime();}catch(e){return 0;}}
+  function fmtDate(d){return d.getFullYear()+"/"+p2(d.getMonth()+1)+"/"+p2(d.getDate());}
+  function fmtTime(d){var h=d.getHours(),ap=h>=12?"م":"ص";h=h%12||12;return h+":"+p2(d.getMinutes())+" "+ap;}
+  function phoneOf(d){
+    var n=String((d&&(d.phone||d.phoneNumber))||"").replace(/\D/g,"");
+    if(!n)return "";
+    if(n.indexOf("249")===0)return n;
+    if(n.charAt(0)==="0")return "249"+n.slice(1);
+    if(n.length===9)return "249"+n;
+    return n;
+  }
+  var F="Tahoma,Arial,sans-serif";
+  var FLG={normal:["طبيعي","#2e7d32","#e6f4ea"],high:["مرتفع","#c62828","#fdeaea"],low:["منخفض","#ef6c00","#fff1e0"],pos:["إيجابي","#c62828","#fdeaea"],neg:["سلبي","#2e7d32","#e6f4ea"]};
+  function loadLogo(){return new Promise(function(res){var i=new Image();i.onload=function(){res(i);};i.onerror=function(){res(null);};i.src="apple-touch-icon.png";});}
+  function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function wrap(ctx,text,maxW){
+    var out=[];
+    String(text==null?"":text).split("\n").forEach(function(par){
+      var words=par.split(/\s+/).filter(Boolean),cur="";
+      if(!words.length){out.push("");return;}
+      words.forEach(function(w){
+        var t=cur?cur+" "+w:w;
+        if(!cur||ctx.measureText(t).width<=maxW)cur=t;
+        else{out.push(cur);cur=w;}
+      });
+      if(cur)out.push(cur);
+    });
+    return out;
+  }
+  function draw(ctx,d,logo){
+    var W=1080,M=36,H=ctx.canvas.height,y=250;
+    ctx.direction="rtl";ctx.textBaseline="middle";
+    ctx.fillStyle="#f4f9fb";ctx.fillRect(0,0,W,H);
+    var g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,"#0e6b52");g.addColorStop(1,"#0b4f9e");
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W,0);ctx.lineTo(W,200);ctx.quadraticCurveTo(W/2,250,0,200);ctx.closePath();ctx.fill();
+    var lx=M;
+    if(logo){ctx.save();rr(ctx,M,34,120,120,26);ctx.clip();ctx.drawImage(logo,M,34,120,120);ctx.restore();lx=M+140;}
+    ctx.fillStyle="#fff";ctx.textAlign="left";
+    ctx.font="bold 44px "+F;ctx.fillText("منصة الشفاء",lx,70);
+    ctx.font="26px "+F;ctx.fillText("صحتك .. أولويتنا",lx,118);
+    ctx.textAlign="right";
+    ctx.font="bold 56px "+F;ctx.fillText("نتيجة فحص معملي",W-M,74);
+    ctx.font="30px "+F;ctx.fillText(d.labName||"المعمل",W-M,130,520);
+    ctx.fillStyle="#fff";rr(ctx,M,y,W-2*M,300,28);ctx.fill();
+    ctx.strokeStyle="#cfe3dc";ctx.lineWidth=2;ctx.stroke();
+    function field(label,val,xr,yy,mw){
+      ctx.textAlign="right";ctx.fillStyle="#5a7a86";ctx.font="24px "+F;ctx.fillText(label,xr,yy);
+      ctx.fillStyle="#12324a";ctx.font="bold 32px "+F;ctx.fillText(val||"—",xr,yy+40,mw);
+    }
+    field("اسم المريض:",d.patientName,W-M-30,y+45,450);
+    field("اسم المعمل:",d.labName,W-M-30,y+145,450);
+    field("رقم الطلب:",d.orderNo,W-M-30,y+245,450);
+    field("تاريخ الفحص:",d.date,W/2-10,y+45,470);
+    field("وقت الفحص:",d.time,W/2-10,y+145,470);
+    ctx.strokeStyle="#dfeaee";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2+10,y+25);ctx.lineTo(W/2+10,y+275);ctx.stroke();
+    y=590;
+    ctx.fillStyle="#0e6b52";rr(ctx,W-M-320,y,320,64,32);ctx.fill();
+    ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 32px "+F;ctx.fillText("نتائج التحاليل",W-M-160,y+33);
+    y+=90;
+    var items=d.items||[];
+    if(items.length){
+      var TW=W-2*M;
+      var cols=[["التحليل",.33],["النتيجة",.19],["الوحدة",.13],["المدى الطبيعي",.21],["الحالة",.14]];
+      var xs=[],xr=W-M;
+      cols.forEach(function(c){var w=TW*c[1];xs.push({r:xr,w:w});xr-=w;});
+      ctx.fillStyle="#0b4f9e";rr(ctx,M,y,TW,64,16);ctx.fill();
+      ctx.fillStyle="#fff";ctx.font="bold 26px "+F;ctx.textAlign="center";
+      cols.forEach(function(c,i){ctx.fillText(c[0],xs[i].r-xs[i].w/2,y+33);});
+      y+=64;
+      items.forEach(function(it,ri){
+        var f=FLG[it.flag];
+        var cells=[it.name||"—",it.result||"—",it.unit||"—",it.range||"—"];
+        var lines=cells.map(function(t,i){ctx.font=(i<2?"bold ":"")+"26px "+F;return wrap(ctx,t,xs[i].w-20).slice(0,4);});
+        var n=Math.max.apply(null,lines.map(function(l){return l.length;}));
+        var h=Math.max(72,n*36+28);
+        ctx.fillStyle=ri%2?"#f2f8fb":"#ffffff";ctx.fillRect(M,y,TW,h);
+        ctx.strokeStyle="#e1ecef";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(M,y+h);ctx.lineTo(M+TW,y+h);ctx.stroke();
+        lines.forEach(function(ls,i){
+          ctx.font=(i<2?"bold ":"")+"26px "+F;
+          ctx.fillStyle=(i===1&&f&&it.flag!=="normal"&&it.flag!=="neg")?f[1]:"#12324a";
+          ctx.textAlign="center";
+          var top=y+h/2-(ls.length-1)*18;
+          ls.forEach(function(t,k){ctx.fillText(t,xs[i].r-xs[i].w/2,top+k*36,xs[i].w-12);});
+        });
+        var cx=xs[4].r-xs[4].w/2;
+        if(f){
+          var pw=Math.min(xs[4].w-16,130);
+          ctx.fillStyle=f[2];rr(ctx,cx-pw/2,y+h/2-24,pw,48,24);ctx.fill();
+          ctx.fillStyle=f[1];ctx.font="bold 24px "+F;ctx.textAlign="center";ctx.fillText(f[0],cx,y+h/2+1);
+        }else{
+          ctx.fillStyle="#9aa8ae";ctx.font="26px "+F;ctx.textAlign="center";ctx.fillText("—",cx,y+h/2);
+        }
+        y+=h;
+      });
+    }else{
+      ctx.font="28px "+F;
+      var raw=(d.testSummary?d.testSummary+"\n":"")+(d.resultText||"");
+      var tl=wrap(ctx,raw,W-2*M-60).slice(0,40);
+      var bh=tl.length*42+50;
+      ctx.fillStyle="#fff";rr(ctx,M,y,W-2*M,bh,20);ctx.fill();
+      ctx.strokeStyle="#cfe3dc";ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle="#12324a";ctx.textAlign="right";ctx.font="28px "+F;
+      tl.forEach(function(t,k){ctx.fillText(t,W-M-30,y+40+k*42);});
+      y+=bh;
+    }
+    y+=30;
+    var bad=items.filter(function(i){return i.flag==="high"||i.flag==="low"||i.flag==="pos";}).length;
+    if(bad){
+      ctx.fillStyle="#fdeaea";rr(ctx,M,y,W-2*M,96,20);ctx.fill();
+      ctx.fillStyle="#b71c1c";ctx.font="bold 28px "+F;ctx.textAlign="right";
+      ctx.fillText("تنبيه: توجد "+bad+" نتيجة خارج المدى الطبيعي — يُرجى مراجعة الطبيب",W-M-24,y+48,W-2*M-48);
+      y+=96+20;
+    }
+    if(d.notes){
+      ctx.font="26px "+F;
+      var nl=wrap(ctx,d.notes,W-2*M-60).slice(0,8);
+      var nh=nl.length*38+90;
+      ctx.fillStyle="#eaf5ef";rr(ctx,M,y,W-2*M,nh,20);ctx.fill();
+      ctx.fillStyle="#0e6b52";ctx.font="bold 28px "+F;ctx.textAlign="right";ctx.fillText("ملاحظات المعمل",W-M-24,y+36);
+      ctx.fillStyle="#12324a";ctx.font="26px "+F;
+      nl.forEach(function(t,k){ctx.fillText(t,W-M-24,y+80+k*38);});
+      y+=nh+20;
+    }
+    ctx.fillStyle="#6b8794";ctx.font="22px "+F;ctx.textAlign="center";
+    ctx.fillText("هذه النتيجة صادرة عن المعمل ولا تغني عن استشارة الطبيب",W/2,y+30);
+    y+=70;
+    var g2=ctx.createLinearGradient(0,0,W,0);g2.addColorStop(0,"#0e6b52");g2.addColorStop(1,"#0b4f9e");
+    ctx.fillStyle=g2;ctx.fillRect(0,y,W,150);
+    ctx.fillStyle="#fff";ctx.textAlign="center";
+    ctx.font="bold 34px "+F;ctx.fillText("معًا .. نحو مجتمع أكثر صحة",W/2,y+55);
+    ctx.font="24px "+F;ctx.fillText("naserkder123-lang.github.io/al-shifa",W/2,y+105);
+    return y+150;
+  }
+  async function makeBlob(d){
+    var logo=await loadLogo();
+    var c=document.createElement("canvas");c.width=1080;c.height=6000;
+    var h=draw(c.getContext("2d"),d,logo);
+    var c2=document.createElement("canvas");c2.width=1080;c2.height=Math.ceil(h);
+    draw(c2.getContext("2d"),d,logo);
+    return new Promise(function(res){c2.toBlob(res,"image/png");});
+  }
+  async function dataFor(r){
+    var o=null,u=null;
+    try{o=await window.fbGetDoc("labOrders",r.labOrderId);}catch(e){}
+    try{u=await window.fbGetDoc("users",r.patientId);}catch(e){}
+    var dt=new Date(ts(r.releasedAt)||ts(r.createdAt)||Date.now());
+    return {d:{labName:r.labName||"المعمل",patientName:(o&&o.patientName)||(u&&u.name)||"",orderNo:String(r.labOrderId||"").slice(0,8).toUpperCase(),date:fmtDate(dt),time:fmtTime(dt),items:Array.isArray(r.items)?r.items:[],notes:r.notes||"",testSummary:r.testSummary||"",resultText:r.resultText||""},phone:phoneOf(u)};
+  }
+  async function sendBlob(blob,name,phone,how){
+    var file=new File([blob],name,{type:"image/png"});
+    if(how!=="save"&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],title:"نتيجة تحليل — الشفاء",text:"نتيجة تحليل من تطبيق الشفاء\nhttps://naserkder123-lang.github.io/al-shifa/"});
+        return;
+      }catch(e){if(e&&e.name==="AbortError")return;}
+    }
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){a.remove();},500);
+    if(how!=="save"){
+      window.open("https://wa.me/"+phone+"?text="+encodeURIComponent("نتيجة تحليلك من تطبيق الشفاء (الصورة محفوظة في الهاتف وسأرفقها)\nhttps://naserkder123-lang.github.io/al-shifa/"),"_blank");
+      alert("تم حفظ الصورة في هاتفك. أرفقها في المحادثة.");
+    }
+  }
+  async function openSheet(r){
+    var old=document.getElementById("rsBox");
+    if(old)old.remove();
+    var box=document.createElement("div");
+    box.id="rsBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>📤 إرسال النتيجة للمريض</b><button type="button" class="btn" id="rsClose">✖</button></div><div id="rsInfo" style="font-size:13px;margin-bottom:8px">جاري تجهيز الصورة...</div><img id="rsImg" style="width:100%;border:1px solid #dbe6e9;border-radius:12px;display:none"><div id="rsBtns" style="display:none;margin-top:10px"></div></div>';
+    document.body.appendChild(box);
+    document.getElementById("rsClose").onclick=function(){box.remove();};
+    try{
+      var x=await dataFor(r);
+      var blob=await makeBlob(x.d);
+      var img=document.getElementById("rsImg");
+      if(!img)return;
+      img.src=URL.createObjectURL(blob);
+      img.style.display="block";
+      document.getElementById("rsInfo").innerHTML='المريض: <b>'+esc(x.d.patientName||"—")+'</b>'+(x.phone?' — <span dir="ltr">'+esc(x.phone)+'</span>':"");
+      var b=document.getElementById("rsBtns");
+      b.style.display="block";
+      b.innerHTML='<button type="button" class="btn full" id="rsWa">📤 إرسال للمريض عبر واتساب (صورة)</button><button type="button" class="btn full alt" id="rsTx" style="margin-top:8px">💬 رسالة نصية للمريض</button><button type="button" class="btn full alt" id="rsSv" style="margin-top:8px">💾 حفظ الصورة في الهاتف</button>';
+      var name="alshifa-result-"+(x.d.orderNo||Date.now())+".png";
+      document.getElementById("rsWa").onclick=function(){sendBlob(blob,name,x.phone,"share");};
+      document.getElementById("rsSv").onclick=function(){sendBlob(blob,name,x.phone,"save");};
+      document.getElementById("rsTx").onclick=function(){
+        window.open("https://wa.me/"+x.phone+"?text="+encodeURIComponent("نتيجة تحليلك من "+(r.labName||"المعمل")+"\n\n"+(r.resultText||r.testSummary||"")+"\n\nhttps://naserkder123-lang.github.io/al-shifa/"),"_blank");
+      };
+    }catch(e){
+      var inf=document.getElementById("rsInfo");
+      if(inf)inf.textContent="تعذّر تجهيز الصورة: "+(e.message||e);
+    }
+  }
+  var pend=null;
+  var oldPub=window.publishLabResult;
+  window.publishLabResult=function(orderId,patientId,testSummary){
+    pend={orderId:orderId};
+    return typeof oldPub==="function"?oldPub.apply(this,arguments):undefined;
+  };
+  var _alert=window.alert;
+  async function afterPublish(p){
+    try{
+      var u=window.fbCurrentUser;
+      var rows=await window.fbQueryWhere("labResults","labId","==",u.uid);
+      rows=rows.filter(function(r){return r.labOrderId===p.orderId;});
+      rows.sort(function(a,b){return Math.max(ts(b.releasedAt),ts(b.createdAt))-Math.max(ts(a.releasedAt),ts(a.createdAt));});
+      if(rows.length){openSheet(rows[0]);return;}
+    }catch(e){}
+    _alert.call(window,"تم ربط النتيجة بالمريض ونشرها بأمان ✅");
+  }
+  window.alert=function(m){
+    if(pend&&typeof m==="string"&&m.indexOf("تم ربط النتيجة بالمريض")===0){
+      var p=pend;pend=null;
+      afterPublish(p);
+      return;
+    }
+    return _alert.apply(window,arguments);
+  };
+  window.openLabResultsManager=async function(){
+    var u=window.fbCurrentUser;
+    if(!u){alert("سجّل الدخول بحساب المعمل أولاً");return;}
+    var old=document.getElementById("labResBox");
+    if(old)old.remove();
+    var box=document.createElement("div");
+    box.id="labResBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>النتائج التي أصدرتها</b><button type="button" id="labResClose" class="btn">✖</button></div><div id="labResList">جاري التحميل...</div></div>';
+    document.body.appendChild(box);
+    document.getElementById("labResClose").onclick=function(){box.remove();};
+    var list=document.getElementById("labResList");
+    try{
+      var rows=await window.fbQueryWhere("labResults","labId","==",u.uid);
+      rows.sort(function(a,b){return Math.max(ts(b.releasedAt),ts(b.createdAt))-Math.max(ts(a.releasedAt),ts(a.createdAt));});
+      if(!rows.length){list.textContent="لم تُصدر أي نتيجة بعد.";return;}
+      list.innerHTML=rows.map(function(r,i){
+        var t=Math.max(ts(r.releasedAt),ts(r.createdAt));
+        var d="";
+        try{d=t?new Date(t).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"}):"";}catch(e){}
+        return '<div style="border:1px solid #dbe6e9;border-radius:12px;padding:10px;margin-bottom:10px"><div style="font-size:12px;color:#666;margin-bottom:4px">'+esc(d)+'</div><div style="font-size:13px;margin-bottom:6px;white-space:pre-wrap">'+esc(r.testSummary||r.tests||"")+'</div><div style="font-size:14px;white-space:pre-wrap">'+esc(r.resultText||r.result||"")+'</div><button type="button" class="btn full" data-i="'+i+'" style="margin-top:8px">📤 إرسال للمريض (صورة)</button></div>';
+      }).join("");
+      list.querySelectorAll("[data-i]").forEach(function(b){
+        b.onclick=function(){openSheet(rows[Number(b.getAttribute("data-i"))]);};
+      });
+    }catch(e){list.textContent="تعذّر التحميل: "+(e.code||e.message);}
+  };
+})();
+</script>
