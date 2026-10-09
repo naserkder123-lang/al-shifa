@@ -6745,3 +6745,36 @@ setInterval(tidy,1000);
   },1500);
 })();
 </script>
+<script>
+(function(){
+  function buildText(card){
+    var lines=[];
+    Array.prototype.forEach.call(card.children,function(ch){
+      if(ch.hasAttribute&&ch.hasAttribute("data-wabtn"))return;
+      var t=(ch.innerText||ch.textContent||"").trim();
+      if(t)lines.push(t);
+    });
+    return "نتيجة تحليل من تطبيق الشفاء\n\n"+lines.join("\n")+"\n\nhttps://naserkder123-lang.github.io/al-shifa/";
+  }
+  function addBtns(){
+    var box=document.getElementById("patientLabResults");
+    if(!box||box.offsetParent===null)return;
+    var wrap=box.querySelector(".lrDone");
+    if(!wrap)return;
+    Array.prototype.forEach.call(wrap.children,function(card){
+      if(card.classList.contains("notice")||card.querySelector("[data-wabtn]"))return;
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="btn";
+      b.setAttribute("data-wabtn","1");
+      b.style.cssText="margin-top:8px;width:100%";
+      b.textContent="📤 مشاركة عبر واتساب";
+      b.onclick=function(){
+        window.open("https://wa.me/?text="+encodeURIComponent(buildText(card)),"_blank");
+      };
+      card.appendChild(b);
+    });
+  }
+  setInterval(addBtns,1500);
+})();
+</script>
