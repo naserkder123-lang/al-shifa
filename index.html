@@ -7002,7 +7002,7 @@ setInterval(tidy,1000);
     }
     y+=30;
     var bad=items.filter(function(i){return i.flag==="high"||i.flag==="low"||i.flag==="pos";}).length;
-    if(bad){
+    if(false){
       ctx.fillStyle="#fdeaea";rr(ctx,M,y,W-2*M,96,20);ctx.fill();
       ctx.fillStyle="#b71c1c";ctx.font="bold 28px "+F;ctx.textAlign="right";
       ctx.fillText("تنبيه: توجد "+bad+" نتيجة خارج المدى الطبيعي — يُرجى مراجعة الطبيب",W-M-24,y+48,W-2*M-48);
