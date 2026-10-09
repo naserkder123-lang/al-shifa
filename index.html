@@ -7325,3 +7325,48 @@ setInterval(tidy,1000);
   },1500);
 })();
 </script>
+<script>
+(function(){
+  async function delAcc(){
+    var u=window.fbCurrentUser;
+    if(!u){alert("سجّل الدخول أولاً");return;}
+    if(typeof u.delete!=="function"){alert("هذه النسخة لا تدعم حذف الحساب من التطبيق");return;}
+    var warn="سيتم حذف حسابك نهائيًا ولا يمكن التراجع.\nيمكنك بعدها التسجيل من جديد بنفس الرقم.";
+    if(window.isRealAdmin&&window.isRealAdmin())warn="⚠️ هذا حساب مدير! بحذفه تفقد صلاحيات الإدارة.\n\n"+warn;
+    if(!confirm(warn))return;
+    var w=prompt("للتأكيد اكتب كلمة: حذف");
+    if(!w||w.trim()!=="حذف"){alert("لم يتم الحذف");return;}
+    try{
+      await u.delete();
+      alert("تم حذف حسابك نهائيًا ✅");
+      location.reload();
+    }catch(e){
+      if(e&&e.code==="auth/requires-recent-login")alert("لأمان الحساب: اخرج منه ثم ادخل من جديد، واضغط حذف حسابي فورًا بعد الدخول.");
+      else alert("تعذّر الحذف: "+((e&&(e.code||e.message))||e));
+    }
+  }
+  function addLink(){
+    if(!window.fbCurrentUser)return;
+    var els=document.querySelectorAll("a,button");
+    for(var i=0;i<els.length;i++){
+      var e=els[i];
+      if(e.offsetParent===null)continue;
+      var t=(e.textContent||"").trim();
+      if(t.indexOf("سياسة الخصوصية")===-1||t.length>30)continue;
+      var holder=e.parentNode;
+      if(!holder||holder.querySelector("[data-delacc]"))continue;
+      var d=document.createElement("div");
+      d.setAttribute("data-delacc","1");
+      d.style.cssText="text-align:center;margin:10px 0";
+      var b=document.createElement("button");
+      b.type="button";
+      b.style.cssText="background:none;border:none;color:#b00020;text-decoration:underline;font-size:13px;cursor:pointer";
+      b.textContent="🗑️ حذف حسابي نهائيًا";
+      b.onclick=delAcc;
+      d.appendChild(b);
+      e.insertAdjacentElement("afterend",d);
+    }
+  }
+  setInterval(addLink,1500);
+})();
+</script> 
