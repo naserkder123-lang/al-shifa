@@ -7681,3 +7681,72 @@ setInterval(tidy,1000);
   },true);
 })();
 </script>
+<script>
+(function(){
+  function ts(x){try{if(!x)return 0;if(typeof x.toMillis==="function")return x.toMillis();var d=new Date(x);return isNaN(d.getTime())?0:d.getTime();}catch(e){return 0;}}
+  async function delDoc(col,id){
+    if(typeof window.fbDeleteDoc==="function"){await window.fbDeleteDoc(col,id);return;}
+    var tok=await window.fbCurrentUser.getIdToken();
+    var r=await fetch("https://firestore.googleapis.com/v1/projects/al-shifa-6b8d7/databases/(default)/documents/"+col+"/"+encodeURIComponent(id),{method:"DELETE",headers:{Authorization:"Bearer "+tok}});
+    if(!r.ok)throw new Error(String(r.status));
+  }
+  async function pool(list,n){
+    var i=0;
+    async function w(){
+      while(i<list.length){
+        var r=list[i++];
+        try{await delDoc("notifications",r.id);}catch(e){}
+      }
+    }
+    var ws=[];
+    for(var k=0;k<n;k++)ws.push(w());
+    await Promise.all(ws);
+  }
+  async function fastClear(btn){
+    var u=window.fbCurrentUser;
+    if(!u)return;
+    if(!confirm("سيتم حذف كل إشعاراتك دفعة واحدة. هل أنت متأكد؟"))return;
+    btn.disabled=true;
+    btn.textContent="جاري الحذف...";
+    try{
+      var rows=await window.fbQueryWhere("notifications","userId","==",u.uid);
+      var total=rows.length,done=0,i=0;
+      async function w(){
+        while(i<rows.length){
+          var r=rows[i++];
+          try{await delDoc("notifications",r.id);}catch(e){}
+          done++;
+          btn.textContent="جاري الحذف... "+done+" / "+total;
+        }
+      }
+      var ws=[];
+      for(var k=0;k<15;k++)ws.push(w());
+      await Promise.all(ws);
+      btn.textContent="تم الحذف ✅";
+      var list=document.getElementById("ntList2");
+      if(list)list.textContent="لا توجد إشعارات.";
+      var b=document.querySelector(".ntBadge");
+      if(b)b.style.display="none";
+    }catch(e){
+      btn.textContent="تعذّر الحذف: "+(e.code||e.message);
+      btn.disabled=false;
+    }
+  }
+  setInterval(function(){
+    var b=document.getElementById("ntClear");
+    if(b&&!b.__fast){b.__fast=1;b.onclick=function(){fastClear(b);};}
+  },300);
+  async function trim(){
+    var u=window.fbCurrentUser;
+    if(!u||document.visibilityState==="hidden"||!window.fbQueryWhere)return;
+    try{
+      var rows=await window.fbQueryWhere("notifications","userId","==",u.uid);
+      if(rows.length<=25)return;
+      rows.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);});
+      await pool(rows.slice(25),8);
+    }catch(e){}
+  }
+  setTimeout(trim,20000);
+  setInterval(trim,300000);
+})();
+</script>
