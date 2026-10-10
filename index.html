@@ -7576,3 +7576,108 @@ setInterval(tidy,1000);
   },true);
 })();
 </script>
+ <script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function ts(x){try{if(!x)return 0;if(typeof x.toMillis==="function")return x.toMillis();var d=new Date(x);return isNaN(d.getTime())?0:d.getTime();}catch(e){return 0;}}
+  function when(x){var t=ts(x);if(!t)return "";try{return new Date(t).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});}catch(e){return new Date(t).toLocaleString();}}
+  function hash(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
+  var recent={};
+  function wrapSave(){
+    if(typeof window.fbSaveDoc==="function"&&!window.fbSaveDoc.__dd){
+      var o=window.fbSaveDoc;
+      var w=async function(col,id,data){
+        if(col==="notifications"&&data&&data.title&&data.userId&&String(id).indexOf("nt_")===0){
+          var k=data.userId+"|"+data.title+"|"+data.body;
+          var now=Date.now();
+          if(recent[k]&&now-recent[k]<30000)return;
+          recent[k]=now;
+          id="nt_"+hash(k)+"_"+Math.floor(now/60000);
+        }
+        return o.call(this,col,id,data);
+      };
+      w.__dd=1;
+      window.fbSaveDoc=w;
+    }
+  }
+  setInterval(wrapSave,500);
+  async function delDoc(col,id){
+    if(typeof window.fbDeleteDoc==="function"){await window.fbDeleteDoc(col,id);return;}
+    var u=window.fbCurrentUser;
+    var tok=await u.getIdToken();
+    var r=await fetch("https://firestore.googleapis.com/v1/projects/al-shifa-6b8d7/databases/(default)/documents/"+col+"/"+encodeURIComponent(id),{method:"DELETE",headers:{Authorization:"Bearer "+tok}});
+    if(!r.ok)throw new Error(String(r.status));
+  }
+  async function openPanel(){
+    var u=window.fbCurrentUser;
+    if(!u){alert("سجّل الدخول لعرض الإشعارات");return;}
+    var o1=document.getElementById("ntBox");
+    if(o1)o1.remove();
+    var o2=document.getElementById("ntBox2");
+    if(o2)o2.remove();
+    var box=document.createElement("div");
+    box.id="ntBox2";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>🔔 الإشعارات</b><button type="button" class="btn" id="ntClose2">✖</button></div><div id="ntList2">جاري التحميل...</div></div>';
+    document.body.appendChild(box);
+    document.getElementById("ntClose2").onclick=function(){box.remove();};
+    var list=document.getElementById("ntList2");
+    try{
+      var rows=await window.fbQueryWhere("notifications","userId","==",u.uid);
+      rows.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);});
+      if(!rows.length){list.textContent="لا توجد إشعارات.";return;}
+      var groups=[],map={};
+      rows.forEach(function(r){
+        var k=(r.title||"")+"|"+(r.body||"");
+        var g=map[k];
+        if(!g){g={r:r,n:0,unread:false};map[k]=g;groups.push(g);}
+        g.n++;
+        if(!r.read)g.unread=true;
+      });
+      var html='<button type="button" class="btn full alt" id="ntClear" style="margin-bottom:10px">🗑️ مسح كل الإشعارات ('+rows.length+')</button>';
+      html+=groups.slice(0,40).map(function(g){
+        var r=g.r;
+        return '<div style="border:1px solid #dbe6e9;border-radius:12px;padding:10px;margin-bottom:8px;'+(g.unread?'border-right:5px solid #0e6b52;background:#f2faf6':'')+'"><div style="font-weight:bold">'+esc(r.title)+(g.n>1?' <span style="color:#0e6b52">×'+g.n+'</span>':'')+'</div><div style="font-size:13px;margin-top:3px">'+esc(r.body)+'</div><div style="font-size:11px;color:#777;margin-top:4px">'+esc(when(r.createdAt))+'</div></div>';
+      }).join("");
+      list.innerHTML=html;
+      document.getElementById("ntClear").onclick=async function(){
+        if(!confirm("سيتم حذف كل إشعاراتك. هل أنت متأكد؟"))return;
+        var btn=this;
+        btn.disabled=true;
+        var n=0;
+        for(var i=0;i<rows.length;i++){
+          try{await delDoc("notifications",rows[i].id);n++;}catch(e){}
+          btn.textContent="جاري الحذف... "+(i+1)+" / "+rows.length;
+        }
+        list.textContent="تم حذف "+n+" إشعار ✅";
+        var b=document.querySelector(".ntBadge");
+        if(b)b.style.display="none";
+      };
+      rows.filter(function(r){return !r.read;}).forEach(function(r){
+        try{window.fbSaveDoc("notifications",r.id,{read:true}).catch(function(){});}catch(e){}
+      });
+      var bd=document.querySelector(".ntBadge");
+      if(bd)bd.style.display="none";
+    }catch(e){list.textContent="تعذّر التحميل: "+(e.code||e.message);}
+  }
+  window.addEventListener("click",function(e){
+    var t=e.target;
+    var toast=t&&t.closest?t.closest("#ntToast"):null;
+    if(toast){
+      e.preventDefault();e.stopImmediatePropagation();
+      toast.style.display="none";
+      openPanel();
+      return;
+    }
+    var els=document.querySelectorAll(".headerBtns button,header button,#ntFloat");
+    for(var i=0;i<els.length;i++){
+      var b=els[i];
+      if((b.textContent||"").indexOf("🔔")>-1&&b.contains(t)){
+        e.preventDefault();e.stopImmediatePropagation();
+        openPanel();
+        return;
+      }
+    }
+  },true);
+})();
+</script>
