@@ -7753,3 +7753,114 @@ setInterval(tidy,1000);
 <style>
 [data-delacc]{display:none!important}
 </style>
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  var COL={doctor:"doctors",pharmacy:"pharmacies",lab:"labs"};
+  var NAME={doctor:"طبيب",pharmacy:"صيدلية",lab:"معمل"};
+  var shown={};
+  function phoneOf(d){
+    var n=String((d&&(d.phone||d.phoneNumber))||"").replace(/\D/g,"");
+    if(!n)return "";
+    if(n.indexOf("249")===0)return n;
+    if(n.charAt(0)==="0")return "249"+n.slice(1);
+    if(n.length===9)return "249"+n;
+    return n;
+  }
+  function compress(file,max,q){
+    return new Promise(function(res,rej){
+      var fr=new FileReader();
+      fr.onerror=function(){rej(new Error("تعذّر قراءة الصورة"));};
+      fr.onload=function(){
+        var im=new Image();
+        im.onerror=function(){rej(new Error("الملف ليس صورة"));};
+        im.onload=function(){
+          var w=im.width,h=im.height;
+          if(w>max||h>max){var k=Math.min(max/w,max/h);w=Math.round(w*k);h=Math.round(h*k);}
+          var c=document.createElement("canvas");
+          c.width=w;c.height=h;
+          c.getContext("2d").drawImage(im,0,0,w,h);
+          res(c.toDataURL("image/jpeg",q));
+        };
+        im.src=fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  async function admins(){
+    try{return await window.fbQueryWhere("users","role","==","admin");}catch(e){return [];}
+  }
+  async function push(uid,title,body){
+    var id="nt_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+    try{await window.fbSaveDoc("notifications",id,{userId:uid,title:title,body:body,read:false,createdAt:new Date().toISOString()});}catch(e){}
+  }
+  async function submit(role,file){
+    var u=window.fbCurrentUser,p=window.fbCurrentProfile||{};
+    var img=await compress(file,800,0.6);
+    if(img.length>780000)img=await compress(file,600,0.5);
+    await window.fbSaveDoc("licenseSubmissions",u.uid,{image:img,role:role,uid:u.uid,submittedAt:new Date().toISOString()});
+    var entry={uid:u.uid,name:p.name||"",city:p.city||"",location:p.location||"",phone:p.phone||"",verified:false,verificationStatus:"pending"};
+    if(role==="doctor")entry.specialty=p.specialty||"";
+    await window.fbSaveDoc(COL[role],u.uid,entry);
+    var ad=await admins();
+    ad.forEach(function(a){push(a.id,"📄 طلب توثيق جديد","طلب توثيق رخصة "+NAME[role]+": "+(p.name||""));});
+    return ad;
+  }
+  function done(box,role,ad){
+    var p=window.fbCurrentProfile||{};
+    var ph="";
+    for(var i=0;i<ad.length;i++){var n=phoneOf(ad[i]);if(n){ph=n;break;}}
+    var txt="طلب توثيق رخصة "+NAME[role]+" جديد: "+(p.name||"")+" "+(p.phone||"");
+    box.firstChild.innerHTML='<b>✅ وصلت رخصتك</b><div style="font-size:13px;color:#555;margin:8px 0 12px;line-height:1.7">سيراجعها المدير قريبًا، وسيصلك إشعار بعد التوثيق.</div>'
+      +(ph?'<button type="button" class="btn full" id="lgWa">📲 أبلغ الإدارة عبر واتساب (اختياري)</button>':'')
+      +'<button type="button" class="btn full alt" id="lgOk" style="margin-top:8px">حسنًا</button>';
+    var w=document.getElementById("lgWa");
+    if(w)w.onclick=function(){window.open("https://wa.me/"+ph+"?text="+encodeURIComponent(txt),"_blank");};
+    document.getElementById("lgOk").onclick=function(){box.remove();};
+  }
+  function modal(role,mode){
+    var old=document.getElementById("lgBox");
+    if(old)old.remove();
+    var box=document.createElement("div");
+    box.id="lgBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    var head=mode==="rejected"?"❌ الصورة السابقة غير مقبولة، أرسل صورة أوضح":"📄 أرسل رخصة "+NAME[role]+" لتفعيل حسابك";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:16px;max-width:560px;margin:0 auto">'
+      +'<b style="font-size:16px">'+head+'</b>'
+      +'<div style="font-size:13px;color:#555;margin:8px 0 12px;line-height:1.7">يراجع المدير صورة الرخصة، وبعد التوثيق يظهر حسابك للمرضى. صوّر الرخصة بوضوح وفي ضوء جيد.</div>'
+      +'<input type="file" id="lgFile" accept="image/*" style="width:100%;margin-bottom:10px">'
+      +'<div id="lgMsg" style="font-size:13px;margin-bottom:8px"></div>'
+      +'<button type="button" class="btn full" id="lgSend">📤 إرسال الرخصة</button>'
+      +'<button type="button" class="btn full alt" id="lgLater" style="margin-top:8px">لاحقًا</button></div>';
+    document.body.appendChild(box);
+    document.getElementById("lgLater").onclick=function(){box.remove();};
+    document.getElementById("lgSend").onclick=async function(){
+      var f=document.getElementById("lgFile").files[0];
+      var msg=document.getElementById("lgMsg");
+      if(!f){msg.textContent="اختر صورة الرخصة أولاً";return;}
+      var btn=this;
+      btn.disabled=true;
+      msg.textContent="جاري الإرسال...";
+      try{
+        var ad=await submit(role,f);
+        done(box,role,ad);
+      }catch(e){
+        btn.disabled=false;
+        msg.textContent="تعذّر الإرسال: "+(e.code||e.message||e);
+      }
+    };
+  }
+  async function check(){
+    var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+    if(!u||!p||!COL[p.role]||shown[u.uid]||!window.fbGetDoc)return;
+    shown[u.uid]=true;
+    var d=null;
+    try{d=await window.fbGetDoc(COL[p.role],u.uid);}catch(e){shown[u.uid]=false;return;}
+    if(d&&d.verified===true)return;
+    var st=(d&&d.verificationStatus)||"not_submitted";
+    if(st==="pending"||st==="verified")return;
+    modal(p.role,st==="rejected"?"rejected":"new");
+  }
+  setInterval(check,3000);
+})();
+</script>
