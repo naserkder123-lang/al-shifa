@@ -7370,3 +7370,209 @@ setInterval(tidy,1000);
   setInterval(addLink,1500);
 })();
 </script> 
+<style>
+[style*="color:#c62828"]{color:#b26a00!important}
+[style*="color:#ef6c00"]{color:#b26a00!important}
+</style>
+<script>
+(function(){
+  var P=CanvasRenderingContext2D.prototype;
+  if(P.__calm)return;
+  P.__calm=true;
+  var d=Object.getOwnPropertyDescriptor(P,"fillStyle");
+  if(!d||!d.set)return;
+  var map={"#c62828":"#b26a00","#fdeaea":"#fff4e0","#ef6c00":"#b26a00","#fff1e0":"#fff4e0"};
+  Object.defineProperty(P,"fillStyle",{get:d.get,set:function(v){d.set.call(this,(typeof v==="string"&&map[v.toLowerCase()])||v);},configurable:true,enumerable:d.enumerable});
+})();
+</script>
+
+<script>
+(function(){
+  function hideSelf(el){if(el&&el.style.display!=="none")el.style.display="none";}
+  function sweep(){
+    var p=document.getElementById("pharmacyPanel");
+    if(p){
+      p.querySelectorAll("button").forEach(function(b){
+        var t=b.textContent||"";
+        if(t.indexOf("مريض بوصفة طبية")>-1||t.indexOf("عميل جملة أدوية")>-1){
+          var g=b.closest(".grid")||b.parentNode;
+          var h=g.previousElementSibling;
+          hideSelf(g);
+          if(h&&/استقبال طلب جديد/.test(h.textContent||""))hideSelf(h);
+        }
+      });
+    }
+    document.querySelectorAll("a,button,div,span,p").forEach(function(e){
+      var t=(e.textContent||"").trim();
+      if(t.length<40&&t.indexOf("مشكلة في الوصول")===0)hideSelf(e);
+    });
+  }
+  setInterval(sweep,1000);
+})();
+</script>
+
+<script>
+(function(){
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function ts(x){try{if(!x)return 0;if(typeof x.toMillis==="function")return x.toMillis();var d=new Date(x);return isNaN(d.getTime())?0:d.getTime();}catch(e){return 0;}}
+  function when(x){var t=ts(x);if(!t)return "";try{return new Date(t).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});}catch(e){return new Date(t).toLocaleString();}}
+  var ST={pending:"قيد الانتظار",confirmed:"مؤكد",accepted:"مقبول",rejected:"مرفوض",preparing:"قيد التجهيز",ready:"جاهز",completed:"مكتمل",cancelled:"ملغى",processing:"قيد التحليل",sample_collected:"تم سحب العينة"};
+  var cur="",seen={},first=true,busy=false;
+  async function push(uid,title,body){
+    var me=window.fbCurrentUser&&window.fbCurrentUser.uid;
+    if(!uid||uid===me||!window.fbSaveDoc)return;
+    var id="nt_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+    try{await window.fbSaveDoc("notifications",id,{userId:uid,title:title,body:body,read:false,createdAt:new Date().toISOString()});}catch(e){}
+  }
+  function onAdd(col,d){
+    if(!d)return;
+    if(col==="labResults"&&d.patientId)push(d.patientId,"🧪 نتيجة تحليلك جاهزة","أصدر "+(d.labName||"المعمل")+" نتيجة تحليلك. افتح ملفك الصحي لعرضها.");
+    else if(col==="labOrders"&&d.labId)push(d.labId,"🔬 طلب فحص جديد","وصلك طلب فحص من "+(d.patientName||"مريض"));
+    else if(col==="doctorAppointments"&&d.doctorId)push(d.doctorId,"📅 حجز جديد","حجز جديد من "+(d.patientName||"مريض")+(d.date?" بتاريخ "+d.date:"")+(d.time?" "+d.time:""));
+    else if(col==="medicineOrders"&&d.pharmacyId)push(d.pharmacyId,"💊 طلب جديد","وصلك طلب جديد من "+(d.patientName||"عميل"));
+  }
+  async function onUpd(col,id,data){
+    var s=data&&data.status;
+    if(!s)return;
+    if(col==="labOrders"&&s==="released")return;
+    var fn;
+    if(col==="doctorAppointments")fn=(typeof appointmentStatusAr==="function")?appointmentStatusAr:null;
+    else if(col==="medicineOrders")fn=(typeof orderStatusAr==="function")?orderStatusAr:null;
+    else if(col==="labOrders")fn=(typeof labStatusAr==="function")?labStatusAr:null;
+    else return;
+    var label=fn?fn(s):(ST[s]||s);
+    var d=null;
+    try{d=await window.fbGetDoc(col,id);}catch(e){}
+    if(!d||!d.patientId)return;
+    var t={doctorAppointments:"📅 موعدك",medicineOrders:"💊 طلب الدواء",labOrders:"🔬 طلب الفحص"}[col];
+    var who=col==="doctorAppointments"?(d.doctorName||"الطبيب"):(col==="medicineOrders"?(d.pharmacyName||"الصيدلية"):(d.labName||"المعمل"));
+    push(d.patientId,t+": "+label,"تحديث من "+who);
+  }
+  function wrapDb(){
+    if(typeof window.fbAddDoc==="function"&&!window.fbAddDoc.__nt){
+      var oa=window.fbAddDoc;
+      var wa=async function(col,data){
+        var r=await oa.apply(this,arguments);
+        try{onAdd(col,data);}catch(e){}
+        return r;
+      };
+      wa.__nt=1;
+      window.fbAddDoc=wa;
+    }
+    if(typeof window.fbUpdateDoc==="function"&&!window.fbUpdateDoc.__nt){
+      var ou=window.fbUpdateDoc;
+      var wu=async function(col,id,data){
+        var r=await ou.apply(this,arguments);
+        try{onUpd(col,id,data);}catch(e){}
+        return r;
+      };
+      wu.__nt=1;
+      window.fbUpdateDoc=wu;
+    }
+  }
+  setInterval(wrapDb,500);
+  function bellEl(){
+    var els=document.querySelectorAll(".headerBtns button,header button");
+    for(var i=0;i<els.length;i++){if((els[i].textContent||"").indexOf("🔔")>-1)return els[i];}
+    return null;
+  }
+  function mkFloat(){
+    var f=document.createElement("button");
+    f.id="ntFloat";f.type="button";f.className="btn";
+    f.style.cssText="position:fixed;bottom:84px;right:12px;z-index:9998;border-radius:50%;width:46px;height:46px;padding:0";
+    f.textContent="🔔";
+    document.body.appendChild(f);
+  }
+  function setBadge(n){
+    var b=bellEl()||document.getElementById("ntFloat");
+    if(!b)return;
+    if(getComputedStyle(b).position==="static")b.style.position="relative";
+    var s=b.querySelector(".ntBadge");
+    if(!s){
+      s=document.createElement("span");
+      s.className="ntBadge";
+      s.style.cssText="position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#d32f2f;color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px;display:none";
+      b.appendChild(s);
+    }
+    s.textContent=n>9?"9+":String(n);
+    s.style.display=n>0?"block":"none";
+  }
+  function toast(msg){
+    var t=document.getElementById("ntToast");
+    if(!t){
+      t=document.createElement("div");
+      t.id="ntToast";
+      t.style.cssText="position:fixed;top:10px;left:10px;right:10px;z-index:100000;background:#0e6b52;color:#fff;padding:12px 14px;border-radius:12px;font-weight:bold;box-shadow:0 4px 14px rgba(0,0,0,.3);direction:rtl;cursor:pointer";
+      document.body.appendChild(t);
+      t.onclick=function(){t.style.display="none";openPanel();};
+    }
+    t.textContent="🔔 "+msg;
+    t.style.display="block";
+    clearTimeout(t._h);
+    t._h=setTimeout(function(){t.style.display="none";},6000);
+  }
+  async function openPanel(){
+    var u=window.fbCurrentUser;
+    if(!u){alert("سجّل الدخول لعرض الإشعارات");return;}
+    var old=document.getElementById("ntBox");
+    if(old)old.remove();
+    var box=document.createElement("div");
+    box.id="ntBox";
+    box.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:99999;overflow:auto;padding:14px;direction:rtl";
+    box.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:14px;max-width:560px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>🔔 الإشعارات</b><button type="button" class="btn" id="ntClose">✖</button></div><div id="ntList">جاري التحميل...</div></div>';
+    document.body.appendChild(box);
+    document.getElementById("ntClose").onclick=function(){box.remove();};
+    var list=document.getElementById("ntList");
+    try{
+      var rows=await window.fbQueryWhere("notifications","userId","==",u.uid);
+      rows.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);});
+      rows=rows.slice(0,50);
+      if(!rows.length){list.textContent="لا توجد إشعارات.";setBadge(0);return;}
+      list.innerHTML=rows.map(function(r){
+        return '<div style="border:1px solid #dbe6e9;border-radius:12px;padding:10px;margin-bottom:8px;'+(r.read?'':'border-right:5px solid #0e6b52;background:#f2faf6')+'"><div style="font-weight:bold">'+esc(r.title)+'</div><div style="font-size:13px;margin-top:3px">'+esc(r.body)+'</div><div style="font-size:11px;color:#777;margin-top:4px">'+esc(when(r.createdAt))+'</div></div>';
+      }).join("");
+      setBadge(0);
+      rows.filter(function(r){return !r.read;}).forEach(function(r){
+        try{window.fbSaveDoc("notifications",r.id,{read:true}).catch(function(){});}catch(e){}
+      });
+    }catch(e){list.textContent="تعذّر التحميل: "+(e.code||e.message);}
+  }
+  async function poll(){
+    var u=window.fbCurrentUser;
+    if(!u||!window.fbQueryWhere||busy)return;
+    if(document.visibilityState==="hidden")return;
+    busy=true;
+    try{
+      var rows=await window.fbQueryWhere("notifications","userId","==",u.uid);
+      var unread=rows.filter(function(r){return !r.read;});
+      setBadge(unread.length);
+      var fresh=unread.filter(function(r){return !seen[r.id];});
+      unread.forEach(function(r){seen[r.id]=1;});
+      if(!first&&fresh.length){
+        toast(fresh[0].title+(fresh.length>1?" (+"+(fresh.length-1)+")":""));
+        try{if(navigator.vibrate)navigator.vibrate(200);}catch(e){}
+      }
+      first=false;
+    }catch(e){}
+    busy=false;
+  }
+  setInterval(function(){
+    var u=window.fbCurrentUser;
+    var id=u?u.uid:"";
+    if(id!==cur){cur=id;seen={};first=true;if(id)setTimeout(poll,1500);else setBadge(0);}
+    var b=bellEl(),f=document.getElementById("ntFloat");
+    if(id&&!b&&!f)mkFloat();
+    if(b&&f)f.remove();
+  },3000);
+  setInterval(poll,120000);
+  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")poll();});
+  document.addEventListener("click",function(e){
+    var b=bellEl(),f=document.getElementById("ntFloat");
+    if((b&&b.contains(e.target))||(f&&f.contains(e.target))){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openPanel();
+    }
+  },true);
+})();
+</script>
