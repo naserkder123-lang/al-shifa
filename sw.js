@@ -1,4 +1,4 @@
-const CACHE="alshifa-v18";
+const CACHE="alshifa-v19";
 self.addEventListener("install",function(e){self.skipWaiting();});
 self.addEventListener("activate",function(e){
  e.waitUntil((async function(){
