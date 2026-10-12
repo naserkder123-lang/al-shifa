@@ -7864,3 +7864,269 @@ setInterval(tidy,1000);
   setInterval(check,3000);
 })();
 </script>
+ <script>
+(function(){
+ var FONT="Tahoma,Arial,sans-serif";
+ var LOGO=null;
+ (function(){
+  var im=new Image();
+  im.onload=function(){LOGO=im;};
+  im.onerror=function(){
+   var i2=new Image();
+   i2.onload=function(){LOGO=i2;};
+   i2.src="icon-192.png";
+  };
+  im.src="icon-192-2.png";
+ })();
+ function rr(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+ }
+ function grad(c,x,y,w,h,a,b){
+  var g=c.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,a);
+  g.addColorStop(1,b);
+  return g;
+ }
+ function fit(c,s,maxW,px,bold){
+  s=String(s==null?"":s);
+  while(px>10){
+   c.font=(bold?"bold ":"")+px+"px "+FONT;
+   if(c.measureText(s).width<=maxW)return s;
+   px--;
+  }
+  c.font=(bold?"bold ":"")+px+"px "+FONT;
+  while(s.length>1&&c.measureText(s+"…").width>maxW)s=s.slice(0,-1);
+  return s+"…";
+ }
+ function text(c,s,x,y,o){
+  o=o||{};
+  c.fillStyle=o.color||"#1b2a26";
+  c.textAlign=o.align||"right";
+  c.textBaseline="middle";
+  var t=String(s==null?"":s);
+  if(o.maxW)t=fit(c,t,o.maxW,o.px||15,o.bold);
+  else c.font=(o.bold?"bold ":"")+(o.px||15)+"px "+FONT;
+  c.fillText(t,x,y);
+ }
+ function pair(c,label,value,xr,y,maxW){
+  c.font="bold 15px "+FONT;
+  var lw=c.measureText(label).width;
+  text(c,label,xr,y,{px:15,bold:true,color:"#0e6b52"});
+  text(c,value,xr-lw-6,y,{px:15,maxW:maxW-lw-6});
+ }
+ function wrap(c,s,maxW,px,maxLines){
+  c.font=px+"px "+FONT;
+  var words=String(s).split(/\s+/),lines=[],cur="";
+  words.forEach(function(w){
+   var t=cur?cur+" "+w:w;
+   if(c.measureText(t).width>maxW&&cur){lines.push(cur);cur=w;}
+   else cur=t;
+  });
+  if(cur)lines.push(cur);
+  if(lines.length>maxLines){lines=lines.slice(0,maxLines);lines[maxLines-1]+="…";}
+  return lines;
+ }
+ function parse(card){
+  var raw=(card.innerText||"").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu,"");
+  raw=raw.replace(/مشاركة عبر واتساب|مشاركة كصورة مروّسة|حفظ كصورة في الهاتف/g,"");
+  var parts,head;
+  if(raw.indexOf("•")>-1){
+   parts=raw.split("•");
+   head=parts.shift();
+  }else{
+   var ls=raw.split(/\n+/);
+   head=ls.filter(function(l){return !/\(\s*الطبيعي/.test(l);}).join("\n");
+   parts=ls.filter(function(l){return /\(\s*الطبيعي/.test(l);});
+  }
+  var hl=head.split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+  var d={lab:hl[0]||"المعمل",date:"",tests:"",rows:[],notes:""};
+  hl.forEach(function(l,i){
+   if(!d.date&&i>0&&/[0-9٠-٩]{1,4}\s*[\/\-]\s*[0-9٠-٩]{1,2}/.test(l))d.date=l;
+   else if(/^الفحوصات/.test(l))d.tests=l.replace(/^الفحوصات\s*:?\s*/,"");
+   else if(/^ملاحظات/.test(l))d.notes=l.replace(/^ملاحظات\s*:?\s*/,"");
+  });
+  parts.forEach(function(p){
+   p=String(p);
+   var k=p.search(/(^|\n)\s*ملاحظات\s*:/);
+   if(k>=0){
+    d.notes=p.slice(k).replace(/^\s*ملاحظات\s*:\s*/,"").replace(/\s+/g," ").trim();
+    p=p.slice(0,k);
+   }
+   p=p.replace(/\s+/g," ").trim();
+   if(!p)return;
+   var m=p.match(/^(.+?)\s*:\s*(.+?)\s*\(\s*الطبيعي\s*:\s*(.+?)\s*\)\s*(?:[—–\-]+\s*(.+))?$/);
+   if(m){d.rows.push({n:m[1],v:m[2],r:m[3],s:(m[4]||"").trim()});return;}
+   var m2=p.match(/^(.+?)\s*:\s*(.+)$/);
+   if(m2)d.rows.push({n:m2[1],v:m2[2],r:"",s:""});
+   else d.rows.push({n:p,v:"",r:"",s:""});
+  });
+  return d;
+ }
+ function draw(d,patient){
+  var tc=document.createElement("canvas").getContext("2d");
+  tc.direction="rtl";
+  var W=640,S=2,cx=10,cw=W-20,R=cx+cw-16,L=cx+16,TW=R-L;
+  var nl=d.notes?wrap(tc,d.notes,TW-24,14,5):[];
+  var notesH=nl.length?nl.length*22+40:0;
+  var H=448+38*d.rows.length+notesH;
+  var cv=document.createElement("canvas");
+  cv.width=W*S;
+  cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  c.fillStyle="#e9f0ed";
+  c.fillRect(0,0,W,H);
+  var cy=8,ch=H-22;
+  c.fillStyle="#0a4f3d";
+  rr(c,cx,cy+5,cw,ch,16);
+  c.fill();
+  c.fillStyle="#ffffff";
+  rr(c,cx,cy,cw,ch,16);
+  c.fill();
+  c.save();
+  rr(c,cx,cy,cw,ch,16);
+  c.clip();
+  c.fillStyle=grad(c,cx,cy,cw,84,"#12a382","#0b6b57");
+  c.fillRect(cx,cy,cw,84);
+  c.restore();
+  c.lineWidth=2;
+  c.strokeStyle="#0e6b52";
+  rr(c,cx,cy,cw,ch,16);
+  c.stroke();
+  if(LOGO){
+   c.fillStyle="#ffffff";
+   rr(c,R-60,cy+12,60,60,12);
+   c.fill();
+   c.drawImage(LOGO,R-56,cy+16,52,52);
+  }
+  text(c,"الشفاء",R-72,cy+34,{px:28,bold:true,color:"#ffffff"});
+  text(c,"تقرير نتيجة تحليل مخبري",R-72,cy+62,{px:14,color:"#e8fff6"});
+  var y=cy+84+16;
+  c.fillStyle="#eef6f3";
+  rr(c,L,y,TW,4*28+16,12);
+  c.fill();
+  y+=8;
+  [["المعمل:",d.lab],["المريض:",patient||"—"],["التاريخ:",d.date||"—"],["الفحوصات:",d.tests||"—"]].forEach(function(p){
+   pair(c,p[0],p[1],R-10,y+14,TW-20);
+   y+=28;
+  });
+  y+=8+12;
+  var cols=[220,140,150,78],heads=["الفحص","النتيجة","المدى الطبيعي","الحالة"];
+  var ed=[R];
+  cols.forEach(function(w,i){ed.push(ed[i]-w);});
+  var top=y;
+  c.fillStyle=grad(c,L,y,TW,34,"#4f7fe8","#2f5bd1");
+  c.fillRect(L,y,TW,34);
+  heads.forEach(function(h,i){text(c,h,(ed[i]+ed[i+1])/2,y+17,{align:"center",px:14,bold:true,color:"#ffffff"});});
+  y+=34;
+  d.rows.forEach(function(r,k){
+   c.fillStyle=k%2?"#ffffff":"#f3f6fb";
+   c.fillRect(L,y,TW,38);
+   c.strokeStyle="#d0d7e2";
+   c.lineWidth=1;
+   c.beginPath();
+   c.moveTo(L,y+38);
+   c.lineTo(R,y+38);
+   c.stroke();
+   text(c,r.n,ed[0]-8,y+19,{align:"right",px:13,maxW:cols[0]-14});
+   text(c,r.v,(ed[1]+ed[2])/2,y+19,{align:"center",px:13,bold:true,maxW:cols[1]-10});
+   text(c,r.r||"—",(ed[2]+ed[3])/2,y+19,{align:"center",px:12,color:"#555555",maxW:cols[2]-10});
+   var ok=/طبيعي|سالب/.test(r.s);
+   text(c,r.s||"—",(ed[3]+ed[4])/2,y+19,{align:"center",px:13,bold:true,color:r.s?(ok?"#1e8e5a":"#b26a00"):"#888888",maxW:cols[3]-8});
+   y+=38;
+  });
+  c.strokeStyle="#2f5bd1";
+  c.lineWidth=2;
+  c.strokeRect(L,top,TW,y-top);
+  y+=16;
+  if(nl.length){
+   c.fillStyle="#fff8e6";
+   rr(c,L,y,TW,nl.length*22+28,10);
+   c.fill();
+   c.strokeStyle="#e2c27a";
+   c.lineWidth=1;
+   rr(c,L,y,TW,nl.length*22+28,10);
+   c.stroke();
+   text(c,"ملاحظات المعمل:",R-10,y+16,{px:13,bold:true,color:"#8a5b00"});
+   nl.forEach(function(l,i){text(c,l,R-10,y+38+i*22,{px:14});});
+   y+=nl.length*22+28+12;
+  }
+  c.strokeStyle="#9bbfb2";
+  c.lineWidth=1;
+  text(c,"ختم المعمل",R-60,y+10,{align:"center",px:13,color:"#555555"});
+  rr(c,R-130,y+22,140,48,8);
+  c.stroke();
+  text(c,"توقيع الفني: ..............................",L+10,y+46,{align:"left",px:13,color:"#555555"});
+  y+=76;
+  c.setLineDash([5,4]);
+  c.beginPath();
+  c.moveTo(L,y);
+  c.lineTo(R,y);
+  c.stroke();
+  c.setLineDash([]);
+  text(c,"صدرت هذه النتيجة عبر تطبيق الشفاء ولا تغني عن استشارة الطبيب.",cx+cw/2,y+18,{align:"center",px:11,color:"#777777"});
+  text(c,"naserkder123-lang.github.io/al-shifa",cx+cw/2,y+38,{align:"center",px:11,color:"#0e6b52"});
+  return cv;
+ }
+ function save(b,name){
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},4000);
+ }
+ async function act(card,how){
+  try{
+   var d=parse(card);
+   if(!d.rows.length){alert("تعذر قراءة نتائج التحليل من هذه البطاقة.");return;}
+   var p=(window.fbCurrentProfile&&window.fbCurrentProfile.name)||"";
+   var cv=draw(d,p);
+   var blob=await new Promise(function(res){cv.toBlob(res,"image/png");});
+   var name="alshifa-lab-result.png";
+   if(how==="save"){save(blob,name);return;}
+   var file=new File([blob],name,{type:"image/png"});
+   var msg="نتيجة تحليل من تطبيق الشفاء\nhttps://naserkder123-lang.github.io/al-shifa/";
+   if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"نتيجة تحليل",text:msg});}
+    catch(e){if(!e||e.name!=="AbortError")throw e;}
+   }else{
+    save(blob,name);
+    window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+    alert("تم حفظ الصورة في هاتفك. أرفقها في المحادثة.");
+   }
+  }catch(e){alert("تعذر إنشاء الصورة: "+(e.code||e.message));}
+ }
+ function addBtns(){
+  Array.prototype.forEach.call(document.querySelectorAll("button"),function(b){
+   if((b.textContent||"").indexOf("مشاركة عبر واتساب")<0||b.dataset.lr)return;
+   if(b.closest&&(b.closest("#wsPharmBox2")||b.closest("#wsCliBox2")))return;
+   b.dataset.lr="1";
+   var card=b.closest(".row")||b.closest(".card")||b.parentNode;
+   function mk(label,how){
+    var n=b.cloneNode(false);
+    n.removeAttribute("onclick");
+    n.removeAttribute("id");
+    n.removeAttribute("data-lr");
+    n.type="button";
+    n.textContent=label;
+    n.style.marginTop="8px";
+    n.onclick=function(){act(card,how);};
+    return n;
+   }
+   var b2=mk("📄 مشاركة كصورة مروّسة","share");
+   var b3=mk("💾 حفظ كصورة في الهاتف","save");
+   b.parentNode.insertBefore(b2,b.nextSibling);
+   b2.parentNode.insertBefore(b3,b2.nextSibling);
+  });
+ }
+ setInterval(addBtns,1500);
+})();
+</script>
