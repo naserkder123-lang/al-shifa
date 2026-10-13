@@ -8722,3 +8722,116 @@ setInterval(tidy,1000);
  },1500);
 })();
 </script>
+   <script>
+(function(){
+ var COL={doctor:"doctors",pharmacy:"pharmacies",lab:"labs"};
+ var LBL={doctor:"طبيب",pharmacy:"صيدلية",lab:"معمل"};
+
+ /* ===== 1) قائمتا المعامل والصيدليات ===== */
+ var SELS=[["labOrderLab","lab"],["orderPharmacy","pharmacy"]];
+ var uc={t:0,arr:null};
+ async function users(){
+  if(uc.arr&&Date.now()-uc.t<60000)return uc.arr;
+  var a=await window.fbGetCollection("users");
+  uc={t:Date.now(),arr:a||[]};
+  return uc.arr;
+ }
+ setInterval(async function(){
+  if(!window.fbGetCollection||!window.fbCurrentUser)return;
+  for(var i=0;i<SELS.length;i++){
+   var sel=document.getElementById(SELS[i][0]);
+   if(!sel||sel.tagName!=="SELECT")continue;
+   var sig=Array.prototype.map.call(sel.options,function(o){return o.value;}).join(",");
+   if(sel.dataset.sig===sig)continue;
+   try{
+    var role=SELS[i][1],set={};
+    (await users()).forEach(function(u){var id=u.uid||u.id;if(id&&u.role===role)set[id]=1;});
+    Array.prototype.slice.call(sel.options).forEach(function(o){if(!o.value||!set[o.value])o.remove();});
+    if(!sel.options.length){
+     var p=document.createElement("option");
+     p.value="";
+     p.textContent="لا توجد خيارات متاحة حالياً";
+     sel.appendChild(p);
+    }
+    sel.dataset.sig=Array.prototype.map.call(sel.options,function(o){return o.value;}).join(",");
+   }catch(e){}
+  }
+ },1500);
+
+ /* ===== 2) نافذة طلب الرخصة ===== */
+ async function status(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||!COL[p.role])return {s:"unknown",why:"لا يوجد حساب مهني"};
+  var k=u.uid,info=[],verified=false,pending=false;
+  try{if(localStorage.getItem("alshifaVerified_"+k)==="1")return {s:"verified",why:"محفوظ"};}catch(e){}
+  function chk(d,src){
+   if(!d){info.push(src+": لا شيء");return;}
+   var v=d.verified===true||d.verificationStatus==="verified";
+   var pd=d.verificationStatus==="pending";
+   info.push(src+": verified="+d.verified+" status="+(d.verificationStatus||"-"));
+   if(v)verified=true;
+   if(pd)pending=true;
+  }
+  try{chk(await window.fbGetDoc(COL[p.role],k),"doc");}catch(e){info.push("doc: خطأ");}
+  if(!verified){
+   try{
+    var arr=(window.fbGetCollection?await window.fbGetCollection(COL[p.role]):[])||[];
+    var m=arr.filter(function(x){return x.uid===k||x.id===k;});
+    m.forEach(function(x){chk(x,"list");});
+    if(!m.length)info.push("list: لا شيء");
+   }catch(e){info.push("list: خطأ");}
+  }
+  if(!verified&&!pending){
+   try{
+    var ls=await window.fbGetDoc("licenseSubmissions",k);
+    if(ls&&ls.image){pending=true;info.push("رخصة: مرسلة");}
+    else info.push("رخصة: لم تُرسل");
+   }catch(e){info.push("رخصة: خطأ");}
+  }
+  if(verified){try{localStorage.setItem("alshifaVerified_"+k,"1");}catch(e){}}
+  return {s:verified?"verified":(pending?"pending":"none"),why:info.join(" | ")};
+ }
+ function findPrompt(){
+  var bs=document.querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){
+   var b=bs[i];
+   if((b.textContent||"").indexOf("لاحق")<0)continue;
+   var r=b,root=null;
+   for(var j=0;j<10&&r.parentNode;j++){
+    r=r.parentNode;
+    if(r===document.body)break;
+    if(window.getComputedStyle(r).position==="fixed"){root=r;break;}
+   }
+   if(!root)continue;
+   var t=root.textContent||"";
+   if(t.indexOf("رخصة")>-1&&t.indexOf("لتفعيل")>-1)return {btn:b,root:root};
+  }
+  return null;
+ }
+ var busy=false;
+ setInterval(async function(){
+  if(busy)return;
+  var f=findPrompt();
+  if(!f||f.root.dataset.lc2)return;
+  busy=true;
+  try{
+   var st=await status();
+   f.root.dataset.lc2="1";
+   if(st.s==="verified"||st.s==="pending"){
+    try{f.btn.click();}catch(e){}
+    f.root.style.setProperty("display","none","important");
+   }else{
+    var role=window.fbCurrentProfile&&window.fbCurrentProfile.role;
+    var w=document.createTreeWalker(f.root,NodeFilter.SHOW_TEXT,null),t;
+    while((t=w.nextNode())){
+     if(t.nodeValue.indexOf("رخصة صيدلية")>-1)t.nodeValue=t.nodeValue.replace(/رخصة صيدلية/g,"رخصة "+(LBL[role]||"المهنة"));
+    }
+    var d=document.createElement("div");
+    d.style.cssText="font-size:11px;color:#888;margin-top:8px;direction:ltr;text-align:left;word-break:break-all";
+    d.textContent="تشخيص: "+st.why;
+    f.btn.parentNode.appendChild(d);
+   }
+  }finally{busy=false;}
+ },1000);
+})();
+</script>
