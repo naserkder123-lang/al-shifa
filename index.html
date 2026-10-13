@@ -8451,3 +8451,66 @@ setInterval(tidy,1000);
  setInterval(tick,500);
 })();
 </script>
+<script>
+(function(){
+ var COL={doctor:"doctors",pharmacy:"pharmacies",lab:"labs"};
+ var LBL={doctor:"طبيب",pharmacy:"صيدلية",lab:"معمل"};
+ var okCache={},lastCheck={},busy=false;
+ async function isVerified(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile;
+  if(!u||!p||!COL[p.role])return null;
+  var k=u.uid;
+  try{if(localStorage.getItem("alshifaVerified_"+k)==="1")return true;}catch(e){}
+  if(okCache[k]===true)return true;
+  if(lastCheck[k]&&Date.now()-lastCheck[k]<30000)return okCache[k]===false?false:null;
+  lastCheck[k]=Date.now();
+  if(!window.fbGetDoc)return null;
+  try{
+   var d=await window.fbGetDoc(COL[p.role],k);
+   var v=!!(d&&(d.verified===true||d.verificationStatus==="verified"));
+   okCache[k]=v;
+   if(v){try{localStorage.setItem("alshifaVerified_"+k,"1");}catch(e){}}
+   return v;
+  }catch(e){return null;}
+ }
+ function findPrompt(){
+  var bs=document.querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){
+   var b=bs[i];
+   if((b.textContent||"").indexOf("لاحق")<0)continue;
+   var r=b,root=null;
+   for(var j=0;j<10&&r.parentNode;j++){
+    r=r.parentNode;
+    if(r===document.body)break;
+    var cs=window.getComputedStyle(r);
+    if(cs.position==="fixed"){root=r;break;}
+   }
+   if(!root)continue;
+   var t=root.textContent||"";
+   if(t.indexOf("رخصة")>-1&&t.indexOf("لتفعيل")>-1)return {btn:b,root:root};
+  }
+  return null;
+ }
+ setInterval(async function(){
+  if(busy)return;
+  var f=findPrompt();
+  if(!f||f.root.dataset.lcDone)return;
+  busy=true;
+  try{
+   var v=await isVerified();
+   if(v===true){
+    f.root.dataset.lcDone="1";
+    try{f.btn.click();}catch(e){}
+    f.root.style.setProperty("display","none","important");
+   }else if(v===false&&!f.root.dataset.lcFix){
+    f.root.dataset.lcFix="1";
+    var role=window.fbCurrentProfile&&window.fbCurrentProfile.role;
+    var w=document.createTreeWalker(f.root,NodeFilter.SHOW_TEXT,null),t;
+    while((t=w.nextNode())){
+     if(t.nodeValue.indexOf("رخصة صيدلية")>-1)t.nodeValue=t.nodeValue.replace(/رخصة صيدلية/g,"رخصة "+(LBL[role]||"المهنة"));
+    }
+   }
+  }finally{busy=false;}
+ },1000);
+})();
+</script>
