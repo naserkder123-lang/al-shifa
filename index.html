@@ -8964,3 +8964,147 @@ setInterval(tidy,1000);
  },1500);
 })();
 </script>
+<script>
+(function(){
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ function fmt(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});
+ }
+ function isImg(s){return typeof s==="string"&&(s.indexOf("data:image")===0||/^https?:\/\/.+(\.(png|jpe?g|webp|gif)|firebasestorage)/i.test(s));}
+ function findImg(v,d){
+  if(v==null||d>3)return null;
+  if(isImg(v))return v;
+  if(Array.isArray(v)){
+   for(var i=0;i<v.length;i++){var r=findImg(v[i],d+1);if(r)return r;}
+   return null;
+  }
+  if(typeof v==="object"){
+   for(var k in v){var r2=findImg(v[k],d+1);if(r2)return r2;}
+  }
+  return null;
+ }
+ function viewer(src){
+  var o=document.createElement("div");
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100005;display:flex;align-items:center;justify-content:center;padding:8px";
+  o.innerHTML='<img src="'+src+'" style="max-width:100%;max-height:94vh;object-fit:contain;border-radius:8px">';
+  o.onclick=function(){o.remove();};
+  document.body.appendChild(o);
+ }
+ var ST={pending:["جديد","#b26a00"],accepted:["مقبول","#2f5bd1"],sample_collected:["تم سحب العينة","#2f5bd1"],processing:["قيد التحليل","#6b46c1"],result_ready:["النتيجة جاهزة","#1e8e5a"],released:["تم إصدار النتيجة","#1e8e5a"],rejected:["مرفوض","#c0392b"],cancelled:["ملغي","#777777"]};
+ var TH="width:34%;background:#eef6f3;color:#1b2a26;text-align:right;padding:7px 9px;border:1px solid #cfe0d9;font-weight:600";
+ var TD="background:#ffffff;color:#1b2a26;padding:7px 9px;border:1px solid #cfe0d9";
+ var TBL="width:calc(100% - 28px);margin:0 14px;border-collapse:collapse;box-shadow:none;border-radius:0;background:#ffffff";
+ function row(k,v,color){
+  if(v==null||v==="")return "";
+  return '<tr><th style="'+TH+'">'+k+'</th><td style="'+TD+(color?';color:'+color+';font-weight:bold':'')+'">'+v+'</td></tr>';
+ }
+ function sect(t){return '<div style="margin:14px 14px 6px;color:#0e6b52;font-weight:bold;border-bottom:1px solid #b9d6cc;padding-bottom:3px">'+t+'</div>';}
+ function testsOf(o){
+  var keys=["testsList","tests","labTests"];
+  for(var i=0;i<keys.length;i++){
+   var v=o[keys[i]];
+   if(Array.isArray(v)&&v.length){
+    return v.map(function(x){return typeof x==="string"?x:((x&&(x.name||x.title))||JSON.stringify(x));});
+   }
+   if(typeof v==="string"&&v.trim())return v.split("\n").map(function(x){return x.trim();}).filter(Boolean);
+  }
+  return [];
+ }
+ function paper(o,n){
+  var p=window.fbCurrentProfile||{};
+  var st=ST[o.status]||[o.status||"—","#555555"];
+  var img=(o.referralImage&&isImg(o.referralImage))?o.referralImage:findImg(o,0);
+  var tests=testsOf(o);
+  var d=document.createElement("div");
+  d.style.cssText="background:#ffffff;color:#1b2a26;border:2px solid #0e6b52;border-radius:16px;overflow:hidden;margin-bottom:18px;padding-bottom:14px;box-shadow:0 6px 0 #0a4f3d,0 12px 20px rgba(0,0,0,.25);direction:rtl;font-size:14px;line-height:1.7";
+  var tHtml;
+  if(tests.length){
+   tHtml='<table style="'+TBL+'"><tr><th style="'+TH+';width:14%;text-align:center">#</th><th style="'+TH+';width:86%">الفحص</th></tr>'
+    +tests.map(function(t,i){return '<tr><td style="'+TD+';text-align:center;font-weight:bold">'+(i+1)+'</td><td style="'+TD+'">'+esc(t)+'</td></tr>';}).join("")
+    +'</table>';
+  }else if(o.testsSummary){
+   tHtml='<div style="padding:0 14px">'+esc(o.testsSummary)+'<div style="font-size:12px;color:#b26a00;margin-top:4px">أسماء الفحوصات غير محفوظة في هذا الطلب (طلب قديم).</div></div>';
+  }else{
+   tHtml='<div style="padding:0 14px;color:#888888;font-size:13px">لا توجد فحوصات مسجلة.</div>';
+  }
+  d.innerHTML=
+   '<div style="background:linear-gradient(135deg,#12a382,#0b6b57);color:#ffffff;padding:12px 14px;display:flex;align-items:center;gap:12px">'
+   +'<div style="width:54px;height:54px;border-radius:12px;background:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img class="lh3logo" src="icon-192-2.png" style="width:48px;height:48px;object-fit:contain"></div>'
+   +'<div><div style="font-size:24px;font-weight:bold">الشفاء</div><div style="font-size:12px;opacity:.9">منصة الرعاية الصحية الذكية</div></div></div>'
+   +'<div style="text-align:center;font-weight:bold;color:#0e6b52;font-size:17px;margin:12px 0 4px">ورقة طلب فحص معملي</div>'
+   +'<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 14px;font-size:12px;color:#555555"><span>رقم الطلب: '+n+'</span><span>تاريخ التسجيل: '+esc(fmt(o.createdAt)||"—")+'</span></div>'
+   +sect("بيانات الطلب")
+   +'<table style="'+TBL+'">'
+   +row("المريض",esc(o.patientName||"مريض"))
+   +row("هاتف المريض",esc(o.patientPhone))
+   +row("المعمل",esc(o.labName||p.name))
+   +row("الحالة",esc(st[0]),st[1])
+   +row("ملاحظات",esc(o.notes||o.note))
+   +'</table>'
+   +sect("الفحوصات المطلوبة")
+   +tHtml
+   +sect("صورة التحويل المرفقة")
+   +'<div class="lh3box" style="padding:0 14px"></div>'
+   +'<div style="margin:16px 14px 0;padding-top:8px;border-top:1px dashed #9bbfb2;font-size:11px;color:#666666;text-align:center">صدرت هذه الورقة من تطبيق الشفاء ولا تغني عن الفحص الطبي.<br><br>توقيع الفني: ............................</div>';
+  var lg=d.querySelector(".lh3logo");
+  lg.onerror=function(){
+   lg.onerror=function(){lg.parentNode.style.display="none";};
+   lg.src="icon-192.png";
+  };
+  var box=d.querySelector(".lh3box");
+  if(img){
+   var im=document.createElement("img");
+   im.src=img;
+   im.style.cssText="width:140px;height:140px;object-fit:cover;border-radius:10px;border:1px solid #bbbbbb;cursor:pointer";
+   im.onclick=function(){viewer(img);};
+   box.appendChild(im);
+  }else{
+   box.innerHTML='<div style="color:#888888;font-size:13px">لا توجد صورة مرفقة.</div>';
+  }
+  return d;
+ }
+ async function load(box){
+  box.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+   var u=window.fbCurrentUser;
+   var rows=await window.fbQueryWhere("labOrders","labId","==",u.uid);
+   rows.sort(function(a,b){return String(a.createdAt||"").localeCompare(String(b.createdAt||""));});
+   var num={};
+   rows.forEach(function(x,i){num[x.id]=i+1;});
+   var show=rows.slice().reverse().slice(0,30);
+   box.innerHTML="";
+   if(!show.length){box.innerHTML='<div class="notice">لا توجد طلبات.</div>';return;}
+   show.forEach(function(o){box.appendChild(paper(o,num[o.id]));});
+  }catch(e){
+   box.innerHTML='<div class="notice">تعذر التحميل: '+esc(e.code||e.message)+'</div>';
+  }
+ }
+ setInterval(function(){
+  var p=window.fbCurrentProfile;
+  if(!p||p.role!=="lab"||!window.fbCurrentUser)return;
+  var old=document.getElementById("dt_labOrdersList");
+  if(old)old.style.display="none";
+  var list=document.getElementById("labOrdersList");
+  if(!list||document.getElementById("dt2_lab"))return;
+  var wrap=document.createElement("div");
+  wrap.id="dt2_lab";
+  wrap.style.cssText="margin:8px 0 12px";
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="btn full";
+  b.textContent="🔎 تفاصيل طلبات الفحص";
+  var box=document.createElement("div");
+  box.style.cssText="margin-top:10px;display:none";
+  b.onclick=function(){
+   if(box.style.display==="none"){box.style.display="block";load(box);}
+   else box.style.display="none";
+  };
+  wrap.appendChild(b);
+  wrap.appendChild(box);
+  list.parentNode.insertBefore(wrap,list);
+ },1500);
+})();
+</script>
