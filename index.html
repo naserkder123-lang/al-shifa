@@ -8835,3 +8835,132 @@ setInterval(tidy,1000);
  },1000);
 })();
 </script>
+ <script>
+(function(){
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ function fmt(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});
+ }
+ function dayAr(s){
+  if(!s)return "";
+  var x=new Date(String(s).slice(0,10)+"T00:00:00");
+  if(isNaN(x.getTime()))return String(s);
+  return x.toLocaleDateString("ar-EG",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ }
+ function isImg(s){return typeof s==="string"&&(s.indexOf("data:image")===0||/^https?:\/\/.+(\.(png|jpe?g|webp|gif)|firebasestorage)/i.test(s));}
+ function findImg(v,d){
+  if(v==null||d>3)return null;
+  if(isImg(v))return v;
+  if(Array.isArray(v)){
+   for(var i=0;i<v.length;i++){var r=findImg(v[i],d+1);if(r)return r;}
+   return null;
+  }
+  if(typeof v==="object"){
+   for(var k in v){var r2=findImg(v[k],d+1);if(r2)return r2;}
+  }
+  return null;
+ }
+ function viewer(src){
+  var o=document.createElement("div");
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100005;display:flex;align-items:center;justify-content:center;padding:8px";
+  o.innerHTML='<img src="'+src+'" style="max-width:100%;max-height:94vh;object-fit:contain;border-radius:8px">';
+  o.onclick=function(){o.remove();};
+  document.body.appendChild(o);
+ }
+ var ST={pending:["بانتظار التأكيد","#b26a00"],confirmed:["مؤكد","#1e8e5a"],rejected:["مرفوض","#c0392b"],cancelled:["ملغي","#777777"],completed:["مكتمل","#2f5bd1"]};
+ var TH="width:34%;background:#eef6f3;color:#1b2a26;text-align:right;padding:7px 9px;border:1px solid #cfe0d9;font-weight:600";
+ var TD="background:#ffffff;color:#1b2a26;padding:7px 9px;border:1px solid #cfe0d9";
+ function row(k,v,color){
+  if(v==null||v==="")return "";
+  return '<tr><th style="'+TH+'">'+k+'</th><td style="'+TD+(color?';color:'+color+';font-weight:bold':'')+'">'+v+'</td></tr>';
+ }
+ function sect(t){return '<div style="margin:14px 14px 6px;color:#0e6b52;font-weight:bold;border-bottom:1px solid #b9d6cc;padding-bottom:3px">'+t+'</div>';}
+ function paper(o,n){
+  var p=window.fbCurrentProfile||{};
+  var st=ST[o.status]||[o.status||"—","#555555"];
+  var img=(o.prescriptionImage&&isImg(o.prescriptionImage))?o.prescriptionImage:findImg(o,0);
+  var d=document.createElement("div");
+  d.style.cssText="background:#ffffff;color:#1b2a26;border:2px solid #0e6b52;border-radius:16px;overflow:hidden;margin-bottom:18px;padding-bottom:14px;box-shadow:0 6px 0 #0a4f3d,0 12px 20px rgba(0,0,0,.25);direction:rtl;font-size:14px;line-height:1.7";
+  d.innerHTML=
+   '<div style="background:linear-gradient(135deg,#12a382,#0b6b57);color:#ffffff;padding:12px 14px;display:flex;align-items:center;gap:12px">'
+   +'<div style="width:54px;height:54px;border-radius:12px;background:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img class="lh2logo" src="icon-192-2.png" style="width:48px;height:48px;object-fit:contain"></div>'
+   +'<div><div style="font-size:24px;font-weight:bold">الشفاء</div><div style="font-size:12px;opacity:.9">منصة الرعاية الصحية الذكية</div></div></div>'
+   +'<div style="text-align:center;font-weight:bold;color:#0e6b52;font-size:17px;margin:12px 0 4px">ورقة حجز موعد</div>'
+   +'<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 14px;font-size:12px;color:#555555"><span>رقم الحجز: '+n+'</span><span>تاريخ التسجيل: '+esc(fmt(o.createdAt)||"—")+'</span></div>'
+   +sect("بيانات الحجز")
+   +'<table style="width:calc(100% - 28px);margin:0 14px;border-collapse:collapse;box-shadow:none;border-radius:0;background:#ffffff">'
+   +row("المريض",esc(o.patientName||"مريض"))
+   +row("هاتف المريض",esc(o.patientPhone))
+   +row("الطبيب",esc(o.doctorName||p.name))
+   +row("التخصص",esc(o.specialty))
+   +row("تاريخ الموعد",esc(dayAr(o.date)))
+   +row("الوقت",esc(o.time))
+   +row("الحالة",esc(st[0]),st[1])
+   +row("هاتف الطبيب",esc(o.doctorPhone))
+   +row("ملاحظات",esc(o.notes||o.note||o.complaint))
+   +'</table>'
+   +sect("الروشتة المرفقة")
+   +'<div class="lh2box" style="padding:0 14px"></div>'
+   +'<div style="margin:16px 14px 0;padding-top:8px;border-top:1px dashed #9bbfb2;font-size:11px;color:#666666;text-align:center">صدرت هذه الورقة من تطبيق الشفاء ولا تغني عن الفحص الطبي.<br><br>توقيع الطبيب: ............................</div>';
+  var lg=d.querySelector(".lh2logo");
+  lg.onerror=function(){
+   lg.onerror=function(){lg.parentNode.style.display="none";};
+   lg.src="icon-192.png";
+  };
+  var box=d.querySelector(".lh2box");
+  if(img){
+   var im=document.createElement("img");
+   im.src=img;
+   im.style.cssText="width:140px;height:140px;object-fit:cover;border-radius:10px;border:1px solid #bbbbbb;cursor:pointer";
+   im.onclick=function(){viewer(img);};
+   box.appendChild(im);
+  }else{
+   box.innerHTML='<div style="color:#888888;font-size:13px">لا توجد صورة مرفقة.</div>';
+  }
+  return d;
+ }
+ async function load(box){
+  box.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+   var u=window.fbCurrentUser;
+   var rows=await window.fbQueryWhere("doctorAppointments","doctorId","==",u.uid);
+   rows.sort(function(a,b){return String(a.createdAt||a.dateTime||"").localeCompare(String(b.createdAt||b.dateTime||""));});
+   var num={};
+   rows.forEach(function(x,i){num[x.id]=i+1;});
+   var show=rows.slice().reverse().slice(0,30);
+   box.innerHTML="";
+   if(!show.length){box.innerHTML='<div class="notice">لا توجد حجوزات.</div>';return;}
+   show.forEach(function(o){box.appendChild(paper(o,num[o.id]));});
+  }catch(e){
+   box.innerHTML='<div class="notice">تعذر التحميل: '+esc(e.code||e.message)+'</div>';
+  }
+ }
+ setInterval(function(){
+  var p=window.fbCurrentProfile;
+  if(!p||p.role!=="doctor"||!window.fbCurrentUser)return;
+  var old=document.getElementById("dt_doctorAppointmentsList");
+  if(old)old.style.display="none";
+  var list=document.getElementById("doctorAppointmentsList");
+  if(!list||document.getElementById("dt2_doctor"))return;
+  var wrap=document.createElement("div");
+  wrap.id="dt2_doctor";
+  wrap.style.cssText="margin:8px 0 12px";
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="btn full";
+  b.textContent="🔎 تفاصيل الحجوزات";
+  var box=document.createElement("div");
+  box.style.cssText="margin-top:10px;display:none";
+  b.onclick=function(){
+   if(box.style.display==="none"){box.style.display="block";load(box);}
+   else box.style.display="none";
+  };
+  wrap.appendChild(b);
+  wrap.appendChild(box);
+  list.parentNode.insertBefore(wrap,list);
+ },1500);
+})();
+</script>
