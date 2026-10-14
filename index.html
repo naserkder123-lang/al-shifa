@@ -10609,3 +10609,664 @@ setInterval(tidy,1000);
  },1500);
 })();
 </script>
+   <script>
+(function(){
+ var FONT="Tahoma,Arial,sans-serif";
+ var LAB={title:"#0e4a9e",tag:"#3fa535",line:"#1f6fb2",pill:["#0a4a96","#0b6fb8"],head:["#0b5cad","#3cc08a"],fill:"#f6fbfa",stroke:"#bfe0d7",lab:"#123a7a",leaf:"#7fd36a",rowA:"#f6fafc",grid:"#d6e6ee",dot:"#8fa8b8",bgTop:"#f1fafa",w:["rgba(76,174,58,.20)","rgba(31,111,178,.16)","rgba(76,174,58,.12)","rgba(76,174,58,.22)","rgba(31,111,178,.18)"],sub:"#e6f3ff"};
+ var PHM={title:"#8a4b00",tag:"#0e7a5f",line:"#b26a00",pill:["#a66b00","#e2a53a"],head:["#a66b00","#e2a53a"],fill:"#fffaf0",stroke:"#f0d9a8",lab:"#7a4a00",leaf:"#e8c56a",rowA:"#fffaf2",grid:"#ecdcb8",dot:"#c7ad7a",bgTop:"#fffaf0",w:["rgba(226,165,58,.22)","rgba(14,122,95,.14)","rgba(226,165,58,.14)","rgba(226,165,58,.24)","rgba(14,122,95,.16)"],sub:"#fff3d6"};
+ function $(i){return document.getElementById(i);}
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+ function dig(s){return String(s==null?"":s).replace(/[٠-٩]/g,function(d){return String(d.charCodeAt(0)-1632);});}
+ function fmt(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"});
+ }
+ function dstr(v){
+  if(!v)return "";
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.toLocaleDateString("ar-EG",{year:"numeric",month:"numeric",day:"numeric"});
+ }
+ function loadLogo(){
+  return new Promise(function(res){
+   var done=false;
+   function fin(i){if(!done){done=true;res(i||null);}}
+   var a=new Image();
+   a.onload=function(){fin(a);};
+   a.onerror=function(){
+    var b=new Image();
+    b.onload=function(){fin(b);};
+    b.onerror=function(){fin(null);};
+    b.src="icon-192.png";
+   };
+   a.src="icon-192-2.png";
+   setTimeout(function(){fin(null);},2500);
+  });
+ }
+ function rr(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+ }
+ function fit(c,s,maxW,px,bold){
+  s=String(s==null?"":s);
+  while(px>10){
+   c.font=(bold?"bold ":"")+px+"px "+FONT;
+   if(c.measureText(s).width<=maxW)return s;
+   px--;
+  }
+  c.font=(bold?"bold ":"")+px+"px "+FONT;
+  while(s.length>1&&c.measureText(s+"…").width>maxW)s=s.slice(0,-1);
+  return s+"…";
+ }
+ function text(c,s,x,y,o){
+  o=o||{};
+  c.fillStyle=o.color||"#1b2a26";
+  c.textAlign=o.align||"right";
+  c.textBaseline="middle";
+  var t=String(s==null?"":s);
+  if(o.maxW)t=fit(c,t,o.maxW,o.px||15,o.bold);
+  else c.font=(o.bold?"bold ":"")+(o.px||15)+"px "+FONT;
+  c.fillText(t,x,y);
+ }
+ function field(c,label,val,xr,xl,y,th){
+  c.font="bold 14px "+FONT;
+  var lw=c.measureText(label).width;
+  text(c,label,xr,y,{px:14,bold:true,color:th.lab});
+  var vx=xr-lw-8;
+  c.save();
+  c.setLineDash([2,3]);
+  c.strokeStyle=th.dot;
+  c.lineWidth=1;
+  c.beginPath();
+  c.moveTo(vx,y+11);
+  c.lineTo(xl,y+11);
+  c.stroke();
+  c.restore();
+  if(val)text(c,val,vx,y,{px:14,maxW:vx-xl});
+ }
+ function wrapTxt(c,s,maxW,px,maxLines){
+  c.font=px+"px "+FONT;
+  var out=[];
+  String(s).split(/\n/).forEach(function(par){
+   var words=par.split(/\s+/).filter(Boolean),cur="";
+   if(!words.length){out.push("");return;}
+   words.forEach(function(w){
+    var t=cur?cur+" "+w:w;
+    if(c.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}
+    else cur=t;
+   });
+   out.push(cur);
+  });
+  if(out.length>maxLines){out=out.slice(0,maxLines);out[maxLines-1]+="…";}
+  return out;
+ }
+ function frameT(c,W,cfg,logo,th){
+  var H=cfg.H;
+  var bg=c.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,th.bgTop);
+  bg.addColorStop(1,"#ffffff");
+  c.fillStyle=bg;
+  c.fillRect(0,0,W,H);
+  c.fillStyle=th.w[0];
+  c.beginPath();c.moveTo(W,0);c.lineTo(610,0);c.bezierCurveTo(690,40,740,90,W,150);c.closePath();c.fill();
+  c.fillStyle=th.w[1];
+  c.beginPath();c.moveTo(W,0);c.lineTo(700,0);c.bezierCurveTo(740,50,770,80,W,95);c.closePath();c.fill();
+  c.fillStyle=th.w[2];
+  c.beginPath();c.moveTo(0,0);c.lineTo(120,0);c.bezierCurveTo(70,30,30,60,0,110);c.closePath();c.fill();
+  c.fillStyle=th.w[3];
+  c.beginPath();c.moveTo(0,H);c.lineTo(0,H-95);c.bezierCurveTo(120,H-70,230,H-40,330,H);c.closePath();c.fill();
+  c.fillStyle=th.w[4];
+  c.beginPath();c.moveTo(W,H);c.lineTo(W,H-85);c.bezierCurveTo(690,H-60,600,H-35,520,H);c.closePath();c.fill();
+  if(logo){
+   c.fillStyle="#ffffff";
+   rr(c,30,22,112,112,22);
+   c.fill();
+   c.strokeStyle=th.line;
+   c.lineWidth=3;
+   rr(c,30,22,112,112,22);
+   c.stroke();
+   c.drawImage(logo,38,30,96,96);
+  }
+  text(c,cfg.title,400,62,{align:"center",px:36,bold:true,color:th.title,maxW:430});
+  text(c,cfg.tagline,400,102,{align:"center",px:19,bold:true,color:th.tag});
+  text(c,cfg.icons[0],648,78,{align:"center",px:54});
+  text(c,cfg.icons[1],722,72,{align:"center",px:60});
+  c.strokeStyle=th.tag;
+  c.lineWidth=2.5;
+  c.beginPath();
+  c.moveTo(250,136);c.lineTo(305,136);c.lineTo(313,122);c.lineTo(321,148);c.lineTo(329,132);c.lineTo(336,136);c.lineTo(372,136);
+  c.moveTo(428,136);c.lineTo(464,136);c.lineTo(471,132);c.lineTo(479,148);c.lineTo(487,122);c.lineTo(495,136);c.lineTo(550,136);
+  c.stroke();
+  var cx=400,cy=134,s=13;
+  c.beginPath();
+  c.moveTo(cx,cy+s*0.9);
+  c.bezierCurveTo(cx-s*1.8,cy-s*0.2,cx-s*0.9,cy-s*1.3,cx,cy-s*0.4);
+  c.bezierCurveTo(cx+s*0.9,cy-s*1.3,cx+s*1.8,cy-s*0.2,cx,cy+s*0.9);
+  c.stroke();
+  c.fillStyle=th.fill;
+  rr(c,25,170,750,140,14);
+  c.fill();
+  c.strokeStyle=th.stroke;
+  c.lineWidth=1.5;
+  rr(c,25,170,750,140,14);
+  c.stroke();
+  c.beginPath();c.moveTo(400,182);c.lineTo(400,298);c.stroke();
+  for(var i=0;i<4;i++){
+   var y=192+i*32;
+   field(c,cfg.right[i][0],cfg.right[i][1],762,418,y,th);
+   field(c,cfg.left[i][0],cfg.left[i][1],386,42,y,th);
+  }
+  c.fillStyle=th.leaf;
+  [[190,350,-0.6],[610,350,0.6]].forEach(function(l){
+   c.save();c.translate(l[0],l[1]);c.rotate(l[2]);
+   c.beginPath();c.ellipse(0,0,28,12,0,0,Math.PI*2);c.fill();
+   c.restore();
+  });
+  var pg=c.createLinearGradient(210,0,590,0);
+  pg.addColorStop(0,th.pill[0]);
+  pg.addColorStop(1,th.pill[1]);
+  c.fillStyle=pg;
+  rr(c,210,325,380,50,25);
+  c.fill();
+  text(c,cfg.pill,400,343,{align:"center",px:22,bold:true,color:"#ffffff",maxW:340});
+  text(c,cfg.sub,400,364,{align:"center",px:12,color:th.sub,maxW:340});
+ }
+ function tailT(c,end,cfg,th){
+  text(c,cfg.stamp,705,end+13,{align:"center",px:13,color:"#555555"});
+  c.strokeStyle=th.stroke;
+  c.lineWidth=1;
+  rr(c,635,end+33,140,40,8);
+  c.stroke();
+  text(c,cfg.sig+": ..............................",40,end+53,{align:"left",px:13,color:"#555555"});
+  c.strokeStyle=th.line;
+  c.lineWidth=1.5;
+  c.beginPath();c.moveTo(60,end+101);c.lineTo(250,end+101);c.moveTo(550,end+101);c.lineTo(740,end+101);c.stroke();
+  text(c,"الشفاء ... صحتك أمانة",400,end+101,{align:"center",px:22,bold:true,color:th.lab});
+  text(c,cfg.small,400,end+123,{align:"center",px:11,color:"#777777"});
+ }
+ function notesBox(c,y0,boxH,nl,title,th){
+  c.fillStyle=th.fill;
+  rr(c,25,y0,750,boxH,12);
+  c.fill();
+  c.strokeStyle=th.stroke;
+  c.lineWidth=1.5;
+  rr(c,25,y0,750,boxH,12);
+  c.stroke();
+  text(c,title,760,y0+17,{px:14,bold:true,color:th.tag});
+  if(nl.length){
+   nl.forEach(function(l,i){text(c,l,760,y0+42+i*22,{px:14});});
+  }else{
+   c.save();
+   c.setLineDash([2,3]);
+   c.strokeStyle=th.dot;
+   c.lineWidth=1;
+   [45,65,85].forEach(function(o){c.beginPath();c.moveTo(42,y0+o);c.lineTo(758,y0+o);c.stroke();});
+   c.restore();
+  }
+ }
+ function blobOf(cv){return new Promise(function(res){cv.toBlob(res,"image/png");});}
+ function saveBlob(b,name){
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},4000);
+ }
+ async function shareImg(cv,name,msg){
+  try{
+   var blob=await blobOf(cv);
+   var file=new File([blob],name,{type:"image/png"});
+   if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"الشفاء",text:msg});}
+    catch(e){if(!e||e.name!=="AbortError")throw e;}
+   }else{
+    saveBlob(blob,name);
+    window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+    alert("تم حفظ الصورة في هاتفك. أرفقها في المحادثة.");
+   }
+  }catch(e){alert("تعذر الإرسال: "+(e.message||e.code));}
+ }
+ var MSG="من تطبيق الشفاء\nhttps://naserkder123-lang.github.io/al-shifa/";
+ function barEl(getCv,name){
+  var bar=document.createElement("div");
+  bar.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px";
+  function mk(label,fn){
+   var b=document.createElement("button");
+   b.type="button";
+   b.className="btn";
+   b.style.flex="1";
+   b.textContent=label;
+   b.onclick=fn;
+   bar.appendChild(b);
+  }
+  mk("📤 إرسال عبر واتساب",async function(){
+   try{shareImg(await getCv(),name,MSG);}catch(e){alert("تعذر إنشاء الصورة: "+(e.message||e.code));}
+  });
+  mk("💾 حفظ الصورة في الهاتف",async function(){
+   try{saveBlob(await blobOf(await getCv()),name);}catch(e){alert("تعذر الحفظ: "+(e.message||e.code));}
+  });
+  return bar;
+ }
+ function cardEl(cv,name){
+  var d=document.createElement("div");
+  d.style.cssText="margin-bottom:16px";
+  var img=document.createElement("img");
+  img.src=cv.toDataURL("image/png");
+  img.style.cssText="width:100%;display:block;border-radius:12px;border:1px solid #cfd8d4";
+  d.appendChild(img);
+  d.appendChild(barEl(function(){return cv;},name));
+  return d;
+ }
+ function isImg(s){return typeof s==="string"&&(s.indexOf("data:image")===0||/^https?:\/\/.+(\.(png|jpe?g|webp|gif)|firebasestorage)/i.test(s));}
+ function findImg(v,d){
+  if(v==null||d>3)return null;
+  if(isImg(v))return v;
+  if(Array.isArray(v)){
+   for(var i=0;i<v.length;i++){var r=findImg(v[i],d+1);if(r)return r;}
+   return null;
+  }
+  if(typeof v==="object"){
+   for(var k in v){var r2=findImg(v[k],d+1);if(r2)return r2;}
+  }
+  return null;
+ }
+ function viewer(src){
+  var o=document.createElement("div");
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100008;display:flex;align-items:center;justify-content:center;padding:8px";
+  o.innerHTML='<img src="'+src+'" style="max-width:100%;max-height:94vh;object-fit:contain;border-radius:8px">';
+  o.onclick=function(){o.remove();};
+  document.body.appendChild(o);
+ }
+ function thumb(src,label){
+  var w=document.createElement("div");
+  w.style.cssText="margin-top:8px;font-size:12px;color:#777";
+  var im=document.createElement("img");
+  im.src=src;
+  im.style.cssText="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #bbb;cursor:pointer;display:block;margin-top:4px";
+  im.onclick=function(){viewer(src);};
+  w.textContent=label;
+  w.appendChild(im);
+  return w;
+ }
+ function toLines(o,keys){
+  for(var i=0;i<keys.length;i++){
+   var v=o[keys[i]];
+   if(Array.isArray(v)&&v.length)return v.map(function(x){return typeof x==="string"?x:((x&&(x.name||x.title))||"");});
+   if(typeof v==="string"&&v.trim())return v.split("\n").map(function(x){return x.trim();}).filter(Boolean);
+  }
+  return [];
+ }
+ function addPanel(list,id,label,loader){
+  var wrap=document.createElement("div");
+  wrap.id=id;
+  wrap.style.cssText="margin:8px 0 12px";
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="btn full";
+  b.textContent=label;
+  var box=document.createElement("div");
+  box.style.cssText="margin-top:10px;display:none";
+  b.onclick=function(){
+   if(box.style.display==="none"){box.style.display="block";loader(box);}
+   else box.style.display="none";
+  };
+  wrap.appendChild(b);
+  wrap.appendChild(box);
+  list.parentNode.insertBefore(wrap,list);
+ }
+
+ /* ===== ورقة طلب الفحص بترويسة المعمل ===== */
+ var CBC=[["WBC Count","4000 - 10000"],["RBC Count","4.5 - 6.0"],["Hemoglobin","14 - 18"],["Hematocrit","40 - 50"],["MCV","82 - 98"],["MCH","27 - 31"],["MCHC","32 - 36"],["RDW-CV","11 - 16"],["Platelets","140,000 - 450,000"],["Neutrophils","40 - 75"],["Lymphocytes","15 - 45"],["Monocytes","2 - 12"],["Eosinophils","2 - 6"],["Basophils","0 - 1"],["Bands","0 - 3"]];
+ var CBCRE=/\bcbc\b|صورة\s*(?:ال)?دم|تعداد\s*(?:ال)?دم/i;
+ var KNOWN=[
+  [/hbsag|hepatitis|التهاب\s*الكبد/i,"التهاب الكبد B (HBsAg)","سالب"],
+  [/\bhb\b|hemoglobin|هيموجلوبين/i,"الهيموجلوبين (Hb)","ذكور 13–17 / إناث 12–15"],
+  [/\bwbc\b|كريات\s*(?:الدم\s*)?البيضاء|كريات\s*بيضاء/i,"كريات الدم البيضاء (WBC)","4 - 11"],
+  [/platelet|صفائح/i,"الصفائح الدموية (Platelets)","150 - 450"],
+  [/\besr\b|ترسيب/i,"سرعة الترسيب (ESR)","0 - 20"],
+  [/\bbf\b|ملاريا|malaria/i,"فيلم الدم للملاريا (BF)","سالب"],
+  [/فصيلة|blood\s*group|\babo\b/i,"فصيلة الدم",""],
+  [/glucose|سكر|sugar|\brbs\b|\bfbs\b/i,"سكر الدم (Glucose)","صائم 70–100 / عشوائي أقل من 140"],
+  [/creatinine|كرياتينين/i,"الكرياتينين (Creatinine)","0.6 - 1.3"],
+  [/urea|يوريا/i,"اليوريا (Urea)","15 - 45"],
+  [/\balt\b|sgpt|(?:إ|ا)نزيم\s*الكبد/i,"إنزيم الكبد (ALT)","حتى 40"],
+  [/widal|تيفوئيد|تايفويد/i,"التيفوئيد (Widal)","أقل من 1/80"],
+  [/pylori|جرثومة/i,"جرثومة المعدة (H. pylori)","سالب"],
+  [/بول|urine/i,"فحص البول العام",""],
+  [/براز|stool/i,"فحص البراز العام",""]
+ ];
+ function expandTests(list){
+  var out=[],seen={};
+  list.forEach(function(t){
+   var s=String(t);
+   if(CBCRE.test(s)){
+    if(!seen.cbc){seen.cbc=1;CBC.forEach(function(r){out.push({n:r[0],r:r[1],v:"",s:""});});}
+    return;
+   }
+   for(var i=0;i<KNOWN.length;i++){
+    if(KNOWN[i][0].test(s)){
+     var k=KNOWN[i][1];
+     if(!seen[k]){seen[k]=1;out.push({n:k,r:KNOWN[i][2],v:"",s:""});}
+     return;
+    }
+   }
+   out.push({n:s,r:"",v:"",s:""});
+  });
+  return out;
+ }
+ var LST={pending:"جديد",accepted:"مقبول",sample_collected:"تم سحب العينة",processing:"قيد التحليل",result_ready:"النتيجة جاهزة",released:"تم إصدار النتيجة",rejected:"مرفوض",cancelled:"ملغي"};
+ function drawLab(d,logo,minRows){
+  var items=d.items.slice();
+  while(items.length<minRows)items.push({n:"",r:"",v:"",s:""});
+  var th=LAB,L=items.length,W=800,S=2,top=395,hh=46;
+  var rh=Math.min(32,Math.max(22,448/L));
+  var bottom=top+hh+L*rh;
+  var tc=document.createElement("canvas").getContext("2d");
+  tc.direction="rtl";
+  var nl=d.notes?wrapTxt(tc,d.notes,716,14,6):[];
+  var boxH=Math.max(92,nl.length*22+40);
+  var end=bottom+16+boxH;
+  var H=Math.round(end+134);
+  var cv=document.createElement("canvas");
+  cv.width=W*S;
+  cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  frameT(c,W,{H:H,title:d.lab,tagline:"خدمات مخبرية دقيقة ... لصحة أفضل",icons:["🧪","🔬"],
+   right:[["رقم العينة:",d.sample],["نوع الفحص:",d.test],["اسم المختبر:",d.lab],["التواصل:",d.phone]],
+   left:[["اسم المريض:",d.patient],["تاريخ الفحص:",d.date],["الجنس:",""],["العمر:",""]],
+   pill:d.title,sub:d.sub},logo,th);
+  var ed=[25,305,515,775];
+  c.save();
+  rr(c,25,top,750,bottom-top,10);
+  c.clip();
+  var tg=c.createLinearGradient(25,0,775,0);
+  tg.addColorStop(0,th.head[0]);
+  tg.addColorStop(1,th.head[1]);
+  c.fillStyle=tg;
+  c.fillRect(25,top,750,hh);
+  [["اسم الفحص","Test Name"],["النتيجة","Result"],["المدى المرجعي","Reference Range"]].forEach(function(h,i){
+   var mx=(ed[i]+ed[i+1])/2;
+   text(c,h[0],mx,top+16,{align:"center",px:15,bold:true,color:"#ffffff"});
+   text(c,h[1],mx,top+34,{align:"center",px:11,color:"#eef8ff"});
+  });
+  items.forEach(function(it,k){
+   var ry=top+hh+k*rh,mid=ry+rh/2;
+   c.fillStyle=(k%2)?"#ffffff":th.rowA;
+   c.fillRect(25,ry,750,rh);
+   if(it.n){
+    if(/[\u0600-\u06FF]/.test(it.n))text(c,it.n,ed[1]-10,mid,{align:"right",px:13,bold:true,maxW:ed[1]-ed[0]-20});
+    else text(c,it.n,ed[0]+10,mid,{align:"left",px:13,bold:true,maxW:ed[1]-ed[0]-20});
+   }
+   if(it.v)text(c,it.v,(ed[1]+ed[2])/2,mid,{align:"center",px:13,bold:true,maxW:ed[2]-ed[1]-12});
+   if(it.r)text(c,it.r,(ed[2]+ed[3])/2,mid,{align:"center",px:12,color:"#444444",maxW:ed[3]-ed[2]-12});
+   c.strokeStyle=th.grid;
+   c.lineWidth=1;
+   c.beginPath();c.moveTo(25,ry+rh);c.lineTo(775,ry+rh);c.stroke();
+  });
+  c.strokeStyle=th.grid;
+  [305,515].forEach(function(x){c.beginPath();c.moveTo(x,top+hh);c.lineTo(x,bottom);c.stroke();});
+  c.restore();
+  c.strokeStyle=th.line;
+  c.lineWidth=2;
+  rr(c,25,top,750,bottom-top,10);
+  c.stroke();
+  notesBox(c,bottom+16,boxH,nl,"ملاحظات وتفسير النتائج:",th);
+  tailT(c,end,{stamp:"ختم المعمل",sig:"توقيع الفني",small:"صدرت من تطبيق الشفاء — naserkder123-lang.github.io/al-shifa"},th);
+  return cv;
+ }
+ async function loadLab(box){
+  box.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+   var u=window.fbCurrentUser,p=window.fbCurrentProfile||{};
+   var rows=await window.fbQueryWhere("labOrders","labId","==",u.uid);
+   rows.sort(function(a,b){return String(a.createdAt||"").localeCompare(String(b.createdAt||""));});
+   var nums={};
+   rows.forEach(function(x,i){nums[x.id]=i+1;});
+   var show=rows.slice().reverse().slice(0,12);
+   box.innerHTML="";
+   if(!show.length){box.innerHTML='<div class="notice">لا توجد طلبات.</div>';return;}
+   var logo=await loadLogo();
+   show.forEach(function(o){
+    var n=nums[o.id];
+    var tests=toLines(o,["testsList","tests","labTests"]);
+    var items=tests.length?expandTests(tests):(o.testsSummary?[{n:String(o.testsSummary),r:"",v:"",s:""}]:[]);
+    var notes="الحالة: "+(LST[o.status]||o.status||"—");
+    var pn=o.notes||o.note;
+    if(pn)notes+="\nملاحظات المريض: "+pn;
+    if(!tests.length&&o.testsSummary)notes+="\nأسماء الفحوصات غير محفوظة في هذا الطلب (طلب قديم).";
+    var cv=drawLab({lab:p.name||"معمل",phone:p.phone||"",sample:"",test:tests.length?tests.join("، "):(o.testsSummary||""),
+     patient:o.patientName||"",date:dstr(o.createdAt),notes:notes,items:items,title:"طلب فحوصات معملية",sub:"Lab Request  •  Order No. "+n},logo,8);
+    var card=cardEl(cv,"alshifa-lab-order-"+n+".png");
+    var img=findImg(o,0);
+    if(img)card.appendChild(thumb(img,"صورة التحويل المرفقة:"));
+    box.appendChild(card);
+   });
+  }catch(e){
+   box.innerHTML='<div class="notice">تعذر التحميل: '+esc(e.code||e.message)+'</div>';
+  }
+ }
+
+ /* ===== ورقة الصيدلية الموحدة (طلب دواء وجملة) ===== */
+ var RXS={pending:"جديد",accepted:"مقبول",preparing:"قيد التجهيز",ready:"جاهز",completed:"مكتمل",cancelled:"ملغي",rejected:"مرفوض"};
+ var phCache={};
+ async function pharmInfo(id){
+  if(phCache[id])return phCache[id];
+  var p=window.fbCurrentProfile||{},r={name:"",phone:""};
+  try{
+   var d=await window.fbGetDoc("pharmacies",id);
+   if(d){r.name=d.name||"";r.phone=d.phone||"";}
+  }catch(e){}
+  if(!r.name&&p.role==="pharmacy"){r.name=p.name||"";r.phone=r.phone||p.phone||"";}
+  if(!r.name)r.name="صيدلية";
+  phCache[id]=r;
+  return r;
+ }
+ function drawPharm(o,n,mode,ph,logo){
+  var th=PHM,ws=(mode==="ws"),W=800,S=2,top=395,hh=46;
+  var rows=[];
+  if(ws){
+   (Array.isArray(o.itemsDetail)?o.itemsDetail:[]).forEach(function(it,i){
+    var q=Number(it.qty)||0,p=Number(it.price)||0;
+    rows.push([String(i+1),it.name||"",dig(String(q)),p>0?p.toLocaleString("ar"):"—",(q*p).toLocaleString("ar")]);
+   });
+  }else{
+   toLines(o,["items","itemsList","medicines"]).forEach(function(t,i){rows.push([String(i+1),t]);});
+  }
+  var total=0;
+  if(ws)(Array.isArray(o.itemsDetail)?o.itemsDetail:[]).forEach(function(it){total+=(Number(it.qty)||0)*(Number(it.price)||0);});
+  var arr=Number(o.arrears)||0;
+  var minRows=ws?10:12,L=Math.max(rows.length,minRows);
+  var rh=Math.min(34,Math.max(24,(ws?380:440)/L));
+  var bottom=top+hh+L*rh;
+  var end,tc=document.createElement("canvas").getContext("2d");
+  tc.direction="rtl";
+  var nl=[],boxH=92;
+  if(ws){
+   end=bottom+14+40+(arr>0?44:0)+16;
+  }else{
+   var pn=o.notes||o.note||"";
+   nl=pn?wrapTxt(tc,pn,716,14,6):[];
+   boxH=Math.max(92,nl.length*22+40);
+   end=bottom+16+boxH;
+  }
+  var H=Math.round(end+134);
+  var cv=document.createElement("canvas");
+  cv.width=W*S;
+  cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  var img=findImg(o,0);
+  frameT(c,W,{H:H,title:ph.name,tagline:"دواء موثوق ... وخدمة تصلك",icons:["💊","⚕️"],
+   right:[["رقم الطلب:",String(n)],["نوع الطلب:",ws?"طلب جملة":"طلب أدوية"],["اسم الصيدلية:",ph.name],["التواصل:",ph.phone]],
+   left:ws
+    ?[["اسم العميل:",o.patientName||"عميل جملة"],["تاريخ الطلب:",dstr(o.createdAt)],["المركز/المستشفى:",o.facilityName||""],["تاريخ الاستلام:",dstr(o.receivedAt)]]
+    :[["اسم المريض:",o.patientName||"مريض"],["تاريخ الطلب:",dstr(o.createdAt)],["الحالة:",RXS[o.status]||o.status||""],["الروشتة:",img?"مرفقة":"—"]],
+   pill:ws?"ورقة طلب جملة":"ورقة طلب أدوية",sub:ws?"Wholesale Order":"Medicine Order"},logo,th);
+  var e=ws?[775,735,505,415,245,25]:[775,715,25];
+  var heads=ws?[["#","No."],["الصنف","Item"],["الكمية","Qty"],["سعر الوحدة","Unit Price"],["إجمالي الصنف","Total"]]:[["#","No."],["الدواء","Medicine"]];
+  c.save();
+  rr(c,25,top,750,bottom-top,10);
+  c.clip();
+  var tg=c.createLinearGradient(25,0,775,0);
+  tg.addColorStop(0,th.head[0]);
+  tg.addColorStop(1,th.head[1]);
+  c.fillStyle=tg;
+  c.fillRect(25,top,750,hh);
+  heads.forEach(function(h,i){
+   var mx=(e[i]+e[i+1])/2;
+   text(c,h[0],mx,top+16,{align:"center",px:15,bold:true,color:"#ffffff"});
+   text(c,h[1],mx,top+34,{align:"center",px:11,color:"#fff8e6"});
+  });
+  for(var k=0;k<L;k++){
+   var ry=top+hh+k*rh,mid=ry+rh/2,cells=rows[k];
+   c.fillStyle=(k%2)?"#ffffff":th.rowA;
+   c.fillRect(25,ry,750,rh);
+   if(cells){
+    cells.forEach(function(t,ci){
+     if(ci===1)text(c,t,e[1]-10,mid,{align:"right",px:14,bold:true,maxW:e[1]-e[2]-20});
+     else text(c,t,(e[ci]+e[ci+1])/2,mid,{align:"center",px:13,bold:(ci===cells.length-1&&ws),maxW:e[ci]-e[ci+1]-8});
+    });
+   }
+   c.strokeStyle=th.grid;
+   c.lineWidth=1;
+   c.beginPath();c.moveTo(25,ry+rh);c.lineTo(775,ry+rh);c.stroke();
+  }
+  c.strokeStyle=th.grid;
+  for(var j=1;j<e.length-1;j++){c.beginPath();c.moveTo(e[j],top+hh);c.lineTo(e[j],bottom);c.stroke();}
+  c.restore();
+  c.strokeStyle=th.line;
+  c.lineWidth=2;
+  rr(c,25,top,750,bottom-top,10);
+  c.stroke();
+  if(ws){
+   var y=bottom+14;
+   var pg=c.createLinearGradient(25,0,775,0);
+   pg.addColorStop(0,th.pill[0]);
+   pg.addColorStop(1,th.pill[1]);
+   c.fillStyle=pg;
+   rr(c,25,y,750,40,12);
+   c.fill();
+   text(c,"الإجمالي: "+total.toLocaleString("ar")+" جنيه",400,y+20,{align:"center",px:18,bold:true,color:"#ffffff"});
+   y+=40;
+   if(arr>0){
+    y+=10;
+    c.save();
+    c.setLineDash([6,4]);
+    c.strokeStyle="#c0392b";
+    c.lineWidth=1.5;
+    rr(c,25,y,750,34,10);
+    c.stroke();
+    c.restore();
+    text(c,"⚠️ عليك مديونية: "+arr.toLocaleString("ar")+" جنيه — "+(o.arrearsConfirmed?"✅ مؤكدة من العميل":"⏳ بانتظار تأكيد العميل"),400,y+17,{align:"center",px:14,bold:true,color:"#c0392b",maxW:730});
+   }
+  }else{
+   notesBox(c,bottom+16,boxH,nl,"ملاحظات الصيدلي:",th);
+  }
+  tailT(c,end,{stamp:"ختم الصيدلية",sig:"توقيع الصيدلي",small:"صدرت من تطبيق الشفاء — naserkder123-lang.github.io/al-shifa"},th);
+  return cv;
+ }
+ async function loadRx(box){
+  box.innerHTML='<div class="notice">جاري التحميل...</div>';
+  try{
+   var u=window.fbCurrentUser;
+   var rows=await window.fbQueryWhere("medicineOrders","pharmacyId","==",u.uid);
+   rows=rows.filter(function(x){return x.orderType!=="wholesale";});
+   rows.sort(function(a,b){return String(a.createdAt||"").localeCompare(String(b.createdAt||""));});
+   var nums={};
+   rows.forEach(function(x,i){nums[x.id]=i+1;});
+   var show=rows.slice().reverse().slice(0,12);
+   box.innerHTML="";
+   if(!show.length){box.innerHTML='<div class="notice">لا توجد طلبات.</div>';return;}
+   var logo=await loadLogo();
+   var ph=await pharmInfo(u.uid);
+   show.forEach(function(o){
+    var n=nums[o.id];
+    var card=cardEl(drawPharm(o,n,"rx",ph,logo),"alshifa-rx-order-"+n+".png");
+    var img=findImg(o,0);
+    if(img)card.appendChild(thumb(img,"الروشتة المرفقة:"));
+    box.appendChild(card);
+   });
+  }catch(e){
+   box.innerHTML='<div class="notice">تعذر التحميل: '+esc(e.code||e.message)+'</div>';
+  }
+ }
+
+ /* ===== طلب الجملة: ترويسة الصيدلية الموحدة ===== */
+ async function getOrder(id){
+  var o=await window.fbGetDoc("medicineOrders",id);
+  if(!o)throw new Error("الطلب غير موجود");
+  ["createdAt","receivedAt","arrearsConfirmedAt"].forEach(function(k){
+   var v=o[k];
+   if(v&&typeof v.toDate==="function")o[k]=v.toDate().toISOString();
+  });
+  return o;
+ }
+ function hdrHtml(sub){
+  return '<div style="width:44px;height:44px;border-radius:10px;background:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="icon-192-2.png" onerror="this.onerror=null;this.src=\'icon-192.png\'" style="width:40px;height:40px;object-fit:contain"></div>'
+   +'<div><div style="font-size:20px;font-weight:bold">الشفاء — صيدلية 💊</div><div style="font-size:12px;opacity:.95">'+sub+'</div></div>';
+ }
+ function phWs(){
+  ["wsPharmBox2","wsCliBox2"].forEach(function(bid){
+   var box=$(bid);
+   if(!box)return;
+   box.querySelectorAll(".row").forEach(function(card){
+    if(card.dataset.ph3)return;
+    var t=card.querySelector('[id^="ws2Tot_"]');
+    if(!t)return;
+    card.dataset.ph3="1";
+    var id=t.id.replace("ws2Tot_","");
+    card.style.border="2px solid #b26a00";
+    card.style.boxShadow="0 6px 0 #7a4a00,0 12px 20px rgba(0,0,0,.25)";
+    var title=card.firstElementChild;
+    if(title){
+     title.style.cssText="display:flex;align-items:center;gap:12px;padding:10px 14px;color:#ffffff;background:linear-gradient(135deg,#e2a53a,#a66b00);box-shadow:0 4px 0 #7a4a00;margin-bottom:12px;text-align:right";
+     title.innerHTML=hdrHtml("ورقة طلب جملة");
+    }
+    var old=card.querySelector(".ws2Share");
+    if(old)old.style.display="none";
+    var n=((card.textContent.match(/طلبية رقم\s*(\d+)/)||[])[1])||"";
+    var bar=barEl(async function(){
+     var o=await getOrder(id);
+     var ins=card.querySelectorAll('input[data-woid="'+id+'"]');
+     if(ins.length){
+      o.itemsDetail=Array.prototype.map.call(ins,function(i){
+       var q=parseFloat(i.getAttribute("data-q"))||0,p=parseFloat(i.value)||0;
+       return {name:i.getAttribute("data-n"),qty:q,price:p,lineTotal:q*p};
+      });
+     }
+     var ph=await pharmInfo(o.pharmacyId);
+     var logo=await loadLogo();
+     return drawPharm(o,n,"ws",ph,logo);
+    },"alshifa-wholesale-"+n+".png");
+    card.appendChild(bar);
+   });
+  });
+ }
+ setInterval(function(){
+  var p=window.fbCurrentProfile;
+  if(!p||!window.fbCurrentUser)return;
+  if(p.role==="lab"){
+   ["dt2_lab","dt_labOrdersList"].forEach(function(id){var e=$(id);if(e)e.style.display="none";});
+   var l1=$("labOrdersList");
+   if(l1&&!$("dt3_lab"))addPanel(l1,"dt3_lab","🔎 تفاصيل طلبات الفحص",loadLab);
+  }
+  if(p.role==="pharmacy"){
+   ["dt2_pharm","dt_pharmacyOrdersList"].forEach(function(id){var e=$(id);if(e)e.style.display="none";});
+   var l2=$("pharmacyOrdersList");
+   if(l2&&!$("dt3_pharm"))addPanel(l2,"dt3_pharm","🔎 تفاصيل طلبات الأدوية",loadRx);
+  }
+  phWs();
+ },1500);
+})();
+</script>
