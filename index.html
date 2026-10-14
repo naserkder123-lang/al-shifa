@@ -9396,3 +9396,673 @@ setInterval(tidy,1000);
  },1500);
 })();
 </script>
+<script>
+(function(){
+ var FONT="Tahoma,Arial,sans-serif";
+ function $(i){return document.getElementById(i);}
+ function dig(s){return String(s==null?"":s).replace(/[٠-٩]/g,function(d){return String(d.charCodeAt(0)-1632);});}
+ function loadLogo(){
+  return new Promise(function(res){
+   var done=false;
+   function fin(i){if(!done){done=true;res(i||null);}}
+   var a=new Image();
+   a.onload=function(){fin(a);};
+   a.onerror=function(){
+    var b=new Image();
+    b.onload=function(){fin(b);};
+    b.onerror=function(){fin(null);};
+    b.src="icon-192.png";
+   };
+   a.src="icon-192-2.png";
+   setTimeout(function(){fin(null);},2500);
+  });
+ }
+ function rr(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+ }
+ function fit(c,s,maxW,px,bold){
+  s=String(s==null?"":s);
+  while(px>10){
+   c.font=(bold?"bold ":"")+px+"px "+FONT;
+   if(c.measureText(s).width<=maxW)return s;
+   px--;
+  }
+  c.font=(bold?"bold ":"")+px+"px "+FONT;
+  while(s.length>1&&c.measureText(s+"…").width>maxW)s=s.slice(0,-1);
+  return s+"…";
+ }
+ function text(c,s,x,y,o){
+  o=o||{};
+  c.fillStyle=o.color||"#1b2a26";
+  c.textAlign=o.align||"right";
+  c.textBaseline="middle";
+  var t=String(s==null?"":s);
+  if(o.maxW)t=fit(c,t,o.maxW,o.px||15,o.bold);
+  else c.font=(o.bold?"bold ":"")+(o.px||15)+"px "+FONT;
+  c.fillText(t,x,y);
+ }
+ function field(c,label,val,xr,xl,y){
+  c.font="bold 14px "+FONT;
+  var lw=c.measureText(label).width;
+  text(c,label,xr,y,{px:14,bold:true,color:"#123a7a"});
+  var vx=xr-lw-8;
+  c.save();
+  c.setLineDash([2,3]);
+  c.strokeStyle="#8fa8b8";
+  c.lineWidth=1;
+  c.beginPath();
+  c.moveTo(vx,y+11);
+  c.lineTo(xl,y+11);
+  c.stroke();
+  c.restore();
+  if(val)text(c,val,vx,y,{px:14,maxW:vx-xl});
+ }
+ function wrapTxt(c,s,maxW,px,maxLines){
+  c.font=px+"px "+FONT;
+  var out=[];
+  String(s).split(/\n/).forEach(function(par){
+   var words=par.split(/\s+/).filter(Boolean),cur="";
+   if(!words.length){out.push("");return;}
+   words.forEach(function(w){
+    var t=cur?cur+" "+w:w;
+    if(c.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}
+    else cur=t;
+   });
+   out.push(cur);
+  });
+  if(out.length>maxLines){out=out.slice(0,maxLines);out[maxLines-1]+="…";}
+  return out;
+ }
+ function frame(c,W,cfg,logo){
+  var H=cfg.H;
+  var bg=c.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,"#f1fafa");
+  bg.addColorStop(1,"#ffffff");
+  c.fillStyle=bg;
+  c.fillRect(0,0,W,H);
+  c.fillStyle="rgba(76,174,58,.20)";
+  c.beginPath();c.moveTo(W,0);c.lineTo(610,0);c.bezierCurveTo(690,40,740,90,W,150);c.closePath();c.fill();
+  c.fillStyle="rgba(31,111,178,.16)";
+  c.beginPath();c.moveTo(W,0);c.lineTo(700,0);c.bezierCurveTo(740,50,770,80,W,95);c.closePath();c.fill();
+  c.fillStyle="rgba(76,174,58,.12)";
+  c.beginPath();c.moveTo(0,0);c.lineTo(120,0);c.bezierCurveTo(70,30,30,60,0,110);c.closePath();c.fill();
+  c.fillStyle="rgba(76,174,58,.22)";
+  c.beginPath();c.moveTo(0,H);c.lineTo(0,H-95);c.bezierCurveTo(120,H-70,230,H-40,330,H);c.closePath();c.fill();
+  c.fillStyle="rgba(31,111,178,.18)";
+  c.beginPath();c.moveTo(W,H);c.lineTo(W,H-85);c.bezierCurveTo(690,H-60,600,H-35,520,H);c.closePath();c.fill();
+  if(logo){
+   c.fillStyle="#ffffff";
+   rr(c,30,22,112,112,22);
+   c.fill();
+   c.strokeStyle="#1f6fb2";
+   c.lineWidth=3;
+   rr(c,30,22,112,112,22);
+   c.stroke();
+   c.drawImage(logo,38,30,96,96);
+  }
+  text(c,cfg.title,400,62,{align:"center",px:36,bold:true,color:"#0e4a9e",maxW:430});
+  text(c,cfg.tagline,400,102,{align:"center",px:19,bold:true,color:"#3fa535"});
+  text(c,cfg.icons[0],648,78,{align:"center",px:54});
+  text(c,cfg.icons[1],722,72,{align:"center",px:60});
+  c.strokeStyle="#3fa535";
+  c.lineWidth=2.5;
+  c.beginPath();
+  c.moveTo(250,136);c.lineTo(305,136);c.lineTo(313,122);c.lineTo(321,148);c.lineTo(329,132);c.lineTo(336,136);c.lineTo(372,136);
+  c.moveTo(428,136);c.lineTo(464,136);c.lineTo(471,132);c.lineTo(479,148);c.lineTo(487,122);c.lineTo(495,136);c.lineTo(550,136);
+  c.stroke();
+  var cx=400,cy=134,s=13;
+  c.beginPath();
+  c.moveTo(cx,cy+s*0.9);
+  c.bezierCurveTo(cx-s*1.8,cy-s*0.2,cx-s*0.9,cy-s*1.3,cx,cy-s*0.4);
+  c.bezierCurveTo(cx+s*0.9,cy-s*1.3,cx+s*1.8,cy-s*0.2,cx,cy+s*0.9);
+  c.stroke();
+  c.fillStyle="#f6fbfa";
+  rr(c,25,170,750,140,14);
+  c.fill();
+  c.strokeStyle="#bfe0d7";
+  c.lineWidth=1.5;
+  rr(c,25,170,750,140,14);
+  c.stroke();
+  c.strokeStyle="#cfe6e0";
+  c.beginPath();c.moveTo(400,182);c.lineTo(400,298);c.stroke();
+  for(var i=0;i<4;i++){
+   var y=192+i*32;
+   field(c,cfg.right[i][0],cfg.right[i][1],762,418,y);
+   field(c,cfg.left[i][0],cfg.left[i][1],386,42,y);
+  }
+  c.fillStyle="#7fd36a";
+  [[190,350,-0.6],[610,350,0.6]].forEach(function(l){
+   c.save();c.translate(l[0],l[1]);c.rotate(l[2]);
+   c.beginPath();c.ellipse(0,0,28,12,0,0,Math.PI*2);c.fill();
+   c.restore();
+  });
+  var pg=c.createLinearGradient(210,0,590,0);
+  pg.addColorStop(0,"#0a4a96");
+  pg.addColorStop(1,"#0b6fb8");
+  c.fillStyle=pg;
+  rr(c,210,325,380,50,25);
+  c.fill();
+  text(c,cfg.pill,400,343,{align:"center",px:22,bold:true,color:"#ffffff",maxW:340});
+  text(c,cfg.sub,400,364,{align:"center",px:12,color:"#e6f3ff"});
+ }
+ function tail(c,end,cfg){
+  text(c,cfg.stamp,705,end+13,{align:"center",px:13,color:"#555555"});
+  c.strokeStyle="#9bbfb2";
+  c.lineWidth=1;
+  rr(c,635,end+33,140,40,8);
+  c.stroke();
+  text(c,cfg.sig+": ..............................",40,end+53,{align:"left",px:13,color:"#555555"});
+  c.strokeStyle="#2a7ab8";
+  c.lineWidth=1.5;
+  c.beginPath();c.moveTo(60,end+101);c.lineTo(250,end+101);c.moveTo(550,end+101);c.lineTo(740,end+101);c.stroke();
+  text(c,"الشفاء ... صحتك أمانة",400,end+101,{align:"center",px:22,bold:true,color:"#123a7a"};
+  text(c,cfg.small,400,end+123,{align:"center",px:11,color:"#777777"});
+ }
+ function num(s){var m=dig(s).replace(/[,٬]/g,"").match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):NaN;}
+ function rng(r){
+  r=dig(r).replace(/[,٬]/g,"");
+  var m=r.match(/^\s*(\d+(?:\.\d+)?)\s*[-–—]\s*(\d+(?:\.\d+)?)\s*$/);
+  if(m)return [parseFloat(m[1]),parseFloat(m[2])];
+  m=r.match(/^\s*(?:حتى|أقل من|اقل من|<)\s*(\d+(?:\.\d+)?)/);
+  if(m)return [null,parseFloat(m[1])];
+  return null;
+ }
+ function flag(it){
+  var v=num(it.v),g=rng(it.r);
+  if(isNaN(v)||!g)return 0;
+  if(g[0]!=null&&v<g[0])return -1;
+  if(v>g[1])return 1;
+  return 0;
+ }
+ function drawResult(d,logo){
+  var items=d.items.slice();
+  while(items.length<14)items.push({n:"",u:"",r:"",v:""});
+  var L=items.length,W=800,S=2,top=395,hh=46;
+  var rh=Math.min(32,Math.max(22,448/L));
+  var bottom=top+hh+L*rh;
+  var tc=document.createElement("canvas").getContext("2d");
+  tc.direction="rtl";
+  var nl=d.notes?wrapTxt(tc,d.notes,716,14,6):[];
+  var boxH=Math.max(92,nl.length*22+40);
+  var end=bottom+16+boxH;
+  var H=Math.round(end+134);
+  var cv=document.createElement("canvas");
+  cv.width=W*S;
+  cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  var age=dig(d.age);
+  frame(c,W,{H:H,title:d.lab,tagline:"خدمات مخبرية دقيقة ... لصحة أفضل",icons:["🧪","🔬"],
+   right:[["رقم العينة:",d.sample],["نوع الفحص:",d.test],["اسم المختبر:",d.lab],["التواصل:",d.phone]],
+   left:[["اسم المريض:",d.patient],["تاريخ الفحص:",d.date],["الجنس:",d.sex],["العمر:",/^\d+$/.test(age)?age+" سنة":d.age]],
+   pill:d.title,sub:"Test Results"},logo);
+  var ed=[25,305,515,775];
+  c.save();
+  rr(c,25,top,750,bottom-top,10);
+  c.clip();
+  var tg=c.createLinearGradient(25,0,775,0);
+  tg.addColorStop(0,"#0b5cad");
+  tg.addColorStop(1,"#3cc08a");
+  c.fillStyle=tg;
+  c.fillRect(25,top,750,hh);
+  [["اسم الفحص","Test Name"],["النتيجة","Result"],["المدى المرجعي","Reference Range"]].forEach(function(h,i){
+   var mx=(ed[i]+ed[i+1])/2;
+   text(c,h[0],mx,top+16,{align:"center",px:15,bold:true,color:"#ffffff"});
+   text(c,h[1],mx,top+34,{align:"center",px:11,color:"#eef8ff"});
+  });
+  items.forEach(function(it,k){
+   var ry=top+hh+k*rh,mid=ry+rh/2;
+   if(it.sec){
+    c.fillStyle="#e4f0fa";
+    c.fillRect(25,ry,750,rh);
+    var pr=String(it.h).split("|");
+    text(c,pr[0],765,mid,{px:13,bold:true,color:"#0e4a9e"});
+    if(pr[1]){
+     c.font="bold 13px "+FONT;
+     var aw=c.measureText(pr[0]).width;
+     text(c,pr[1],765-aw-10,mid,{px:12,color:"#2f5ba8"});
+    }
+   }else{
+    c.fillStyle=(k%2)?"#ffffff":"#f6fafc";
+    c.fillRect(25,ry,750,rh);
+    if(it.n){
+     if(/[\u0600-\u06FF]/.test(it.n))text(c,it.n,ed[1]-10,mid,{align:"right",px:13,bold:true,maxW:ed[1]-ed[0]-20});
+     else text(c,it.n,ed[0]+10,mid,{align:"left",px:13,bold:true,maxW:ed[1]-ed[0]-20});
+    }
+    if(it.v){
+     var fl=flag(it);
+     var col=fl?(fl>0?"#c0392b":"#1f6fb2"):"#1b2a26";
+     var vt=it.v+(it.u?" "+it.u:"")+(fl?(fl>0?" ↑":" ↓"):"");
+     text(c,vt,(ed[1]+ed[2])/2,mid,{align:"center",px:13,bold:true,color:col,maxW:ed[2]-ed[1]-12});
+    }
+    if(it.r)text(c,it.r,(ed[2]+ed[3])/2,mid,{align:"center",px:12,color:"#444444",maxW:ed[3]-ed[2]-12});
+   }
+   c.strokeStyle="#d6e6ee";
+   c.lineWidth=1;
+   c.beginPath();c.moveTo(25,ry+rh);c.lineTo(775,ry+rh);c.stroke();
+  });
+  c.strokeStyle="#d6e6ee";
+  [305,515].forEach(function(x){c.beginPath();c.moveTo(x,top+hh);c.lineTo(x,bottom);c.stroke();});
+  c.restore();
+  c.strokeStyle="#1f6fb2";
+  c.lineWidth=2;
+  rr(c,25,top,750,bottom-top,10);
+  c.stroke();
+  var y0=bottom+16;
+  c.fillStyle="#eef8f9";
+  rr(c,25,y0,750,boxH,12);
+  c.fill();
+  c.strokeStyle="#cfe6e0";
+  c.lineWidth=1.5;
+  rr(c,25,y0,750,boxH,12);
+  c.stroke();
+  text(c,"ملاحظات وتفسير النتائج:",760,y0+17,{px:14,bold:true,color:"#3fa535"});
+  if(nl.length){
+   nl.forEach(function(l,i){text(c,l,760,y0+42+i*22,{px:14});});
+  }else{
+   c.save();
+   c.setLineDash([2,3]);
+   c.strokeStyle="#8fa8b8";
+   c.lineWidth=1;
+   [45,65,85].forEach(function(o){c.beginPath();c.moveTo(42,y0+o);c.lineTo(758,y0+o);c.stroke();});
+   c.restore();
+  }
+  tail(c,end,{stamp:"ختم المعمل",sig:"توقيع الفني",small:"صدرت من تطبيق الشفاء — naserkder123-lang.github.io/al-shifa"});
+  return cv;
+ }
+ var ST={pending:["بانتظار التأكيد","#b26a00"],confirmed:["مؤكد","#1e8e5a"],rejected:["مرفوض","#c0392b"],cancelled:["ملغي","#777777"],completed:["مكتمل","#2f5bd1"]};
+ function dday(s){
+  var d=new Date(String(s||"").slice(0,10)+"T00:00:00");
+  if(isNaN(d.getTime()))return String(s||"");
+  return d.toLocaleDateString("ar-EG",{weekday:"short",day:"numeric",month:"numeric",year:"numeric"});
+ }
+ function tmin(t){
+  var m=dig(t).match(/(\d{1,2}):(\d{2})/);
+  if(!m)return 0;
+  var h=parseInt(m[1],10);
+  if(/مساء/.test(t)&&h<12)h+=12;
+  return h*60+parseInt(m[2],10);
+ }
+ function drawSchedule(rows,meta,logo,start,pageNo,pages){
+  var W=800,S=2,H=1131,top=395,hh=46,rh=28,n=16,bottom=top+hh+n*rh;
+  var cv=document.createElement("canvas");
+  cv.width=W*S;
+  cv.height=H*S;
+  var c=cv.getContext("2d");
+  c.scale(S,S);
+  c.direction="rtl";
+  frame(c,W,{H:H,title:meta.doctor,tagline:"رعاية طبية متميزة ... لصحة أفضل",icons:["🩺","👨‍⚕️"],
+   right:[["اسم الطبيب:",meta.doctor],["التخصص:",meta.spec],["التواصل:",meta.phone],["عدد الحجوزات:",String(meta.total)]],
+   left:[["تاريخ الإصدار:",meta.today],["الفترة:",meta.period],["مؤكدة:",String(meta.confirmed)],["بانتظار التأكيد:",String(meta.pending)]],
+   pill:"جدول حجوزات المرضى",sub:"Patients Appointments"},logo);
+  var e=[775,725,455,285,175,25];
+  c.save();
+  rr(c,25,top,750,bottom-top,10);
+  c.clip();
+  var tg=c.createLinearGradient(25,0,775,0);
+  tg.addColorStop(0,"#0b5cad");
+  tg.addColorStop(1,"#3cc08a");
+  c.fillStyle=tg;
+  c.fillRect(25,top,750,hh);
+  [["#","No."],["اسم المريض","Patient"],["التاريخ","Date"],["الوقت","Time"],["الحالة","Status"]].forEach(function(h,i){
+   var mx=(e[i]+e[i+1])/2;
+   text(c,h[0],mx,top+16,{align:"center",px:15,bold:true,color:"#ffffff"});
+   text(c,h[1],mx,top+34,{align:"center",px:11,color:"#eef8ff"});
+  });
+  for(var r=0;r<n;r++){
+   var ry=top+hh+r*rh,mid=ry+rh/2,it=rows[r];
+   c.fillStyle=(r%2)?"#ffffff":"#f6fafc";
+   c.fillRect(25,ry,750,rh);
+   if(it){
+    var st=ST[it.status]||[it.status||"—","#555555"];
+    text(c,String(start+r+1),(e[0]+e[1])/2,mid,{align:"center",px:13,bold:true});
+    text(c,it.patientName||"مريض",e[1]-10,mid,{align:"right",px:14,bold:true,maxW:e[1]-e[2]-20});
+    text(c,dday(it.date),(e[2]+e[3])/2,mid,{align:"center",px:13,maxW:e[2]-e[3]-10});
+    text(c,it.time||"—",(e[3]+e[4])/2,mid,{align:"center",px:13,maxW:e[3]-e[4]-8});
+    text(c,st[0],(e[4]+e[5])/2,mid,{align:"center",px:13,bold:true,color:st[1],maxW:e[4]-e[5]-8});
+   }
+   c.strokeStyle="#d6e6ee";
+   c.lineWidth=1;
+   c.beginPath();c.moveTo(25,ry+rh);c.lineTo(775,ry+rh);c.stroke();
+  }
+  c.strokeStyle="#d6e6ee";
+  [725,455,285,175].forEach(function(x){c.beginPath();c.moveTo(x,top+hh);c.lineTo(x,bottom);c.stroke();});
+  c.restore();
+  c.strokeStyle="#1f6fb2";
+  c.lineWidth=2;
+  rr(c,25,top,750,bottom-top,10);
+  c.stroke();
+  var y0=bottom+16;
+  c.fillStyle="#eef8f9";
+  rr(c,25,y0,750,92,12);
+  c.fill();
+  c.strokeStyle="#cfe6e0";
+  c.lineWidth=1.5;
+  rr(c,25,y0,750,92,12);
+  c.stroke();
+  text(c,"ملخص الحجوزات",760,y0+17,{px:14,bold:true,color:"#3fa535"});
+  text(c,"الإجمالي: "+meta.total+"   |   مؤكدة: "+meta.confirmed+"   |   بانتظار التأكيد: "+meta.pending,760,y0+48,{px:14});
+  text(c,"صفحة "+pageNo+" من "+pages,760,y0+74,{px:12,color:"#777777"});
+  tail(c,y0+92,{stamp:"ختم العيادة",sig:"توقيع الطبيب",small:"صدرت من تطبيق الشفاء — naserkder123-lang.github.io/al-shifa"});
+  return cv;
+ }
+ function css(){
+  if($("rfCss"))return;
+  var s=document.createElement("style");
+  s.id="rfCss";
+  s.textContent="#rfOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100004;overflow:auto;direction:rtl;padding:10px}"
+   +".rfbox{background:#fff;color:#1b2a26;border-radius:14px;padding:12px;max-width:560px;margin:0 auto}"
+   +".rfbox label{display:block;font-size:12px;color:#0e6b52;font-weight:bold;margin:8px 0 3px}"
+   +".rfbox input,.rfbox select,.rfbox textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid #b8c7c2;border-radius:8px;background:#fff;color:#1b2a26;font:inherit}"
+   +".rfh{display:flex;justify-content:space-between;align-items:center}"
+   +".rfh button{border:none;background:#0e6b52;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px}"
+   +".rfg{display:grid;grid-template-columns:1fr 1fr;gap:6px}"
+   +".rfsec{margin:10px 0 4px;padding:6px 8px;background:#e4f0fa;color:#0e4a9e;font-weight:bold;border-radius:8px;font-size:13px}"
+   +".rfr{margin:6px 0;padding:6px;border:1px solid #dfe8e5;border-radius:8px}"
+   +".rf2{display:flex;gap:6px;margin-top:5px}"
+   +".rf2 button{border:none;background:#f3d9d6;border-radius:8px;padding:0 10px}"
+   +"#rfPaper{position:fixed;inset:0;background:#e9eeec;z-index:100006;overflow:auto;direction:rtl;padding:10px}"
+   +"#rfPaper .bar{display:flex;gap:8px;flex-wrap:wrap;max-width:760px;margin:0 auto 8px}"
+   +"#rfPaper .bar button{flex:1;min-width:140px}"
+   +"#rfPaper img{display:block;width:100%;max-width:760px;margin:0 auto 12px;background:#fff;border:1px solid #cfd8d4}"
+   +"@media print{body>*:not(#rfPaper){display:none!important}#rfPaper{position:static!important;background:#fff!important;padding:0!important;overflow:visible!important}#rfPaper .bar{display:none!important}#rfPaper img{width:100%!important;max-width:none!important;border:none!important;margin:0!important;page-break-after:always;break-after:page}#rfPaper img:last-of-type{page-break-after:auto;break-after:auto}@page{margin:0}}";
+  document.head.appendChild(s);
+ }
+ function saveBlob(b,name){
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},4000);
+ }
+ function blobOf(cv){return new Promise(function(res){cv.toBlob(res,"image/png");});}
+ async function shareAll(cvs,base){
+  try{
+   var files=[];
+   for(var i=0;i<cvs.length;i++){
+    var b=await blobOf(cvs[i]);
+    files.push(new File([b],base+"-"+(i+1)+".png",{type:"image/png"}));
+   }
+   if(navigator.canShare&&navigator.canShare({files:files})){
+    try{await navigator.share({files:files,title:"الشفاء"});}
+    catch(e){if(!e||e.name!=="AbortError")throw e;}
+   }else{
+    files.forEach(function(f){saveBlob(f,f.name);});
+    alert("تم حفظ الصور في هاتفك. أرفقها في المحادثة.");
+   }
+  }catch(e){alert("تعذر الإرسال: "+(e.message||e.code));}
+ }
+ function showPaper(cvs,base){
+  css();
+  var old=$("rfPaper");
+  if(old)old.remove();
+  var o=document.createElement("div");
+  o.id="rfPaper";
+  var bar=document.createElement("div");
+  bar.className="bar";
+  function btn(t,fn){
+   var b=document.createElement("button");
+   b.type="button";
+   b.className="btn";
+   b.textContent=t;
+   b.onclick=fn;
+   bar.appendChild(b);
+  }
+  btn("🖨️ طباعة / حفظ PDF",function(){window.print();});
+  btn("📤 إرسال",function(){shareAll(cvs,base);});
+  btn("💾 حفظ كصورة",async function(){
+   try{for(var i=0;i<cvs.length;i++)saveBlob(await blobOf(cvs[i]),base+"-"+(i+1)+".png");}
+   catch(e){alert("تعذر الحفظ: "+(e.message||e.code));}
+  });
+  btn("✕ إغلاق",function(){o.remove();});
+  o.appendChild(bar);
+  cvs.forEach(function(cv){
+   var im=document.createElement("img");
+   im.src=cv.toDataURL("image/png");
+   o.appendChild(im);
+  });
+  document.body.appendChild(o);
+ }
+ /* ===== قوالب النتائج ===== */
+ var TPL={
+  cbc:{title:"صورة الدم الكاملة CBC",test:"CBC (صورة الدم الكاملة)",
+   notes:"MCV الطبيعي: 80 - 100 فيمتوليتر.\nإذا منخفض: نقص حديد أو أنيميا مزمنة. إذا مرتفع: نقص فيتامين B12 أو حمض الفوليك.",
+   sections:[
+    {h:"صورة الدم الكاملة|Complete Blood Picture",rows:[
+     ["WBC Count","/mm3","4000 - 10000"],["RBC Count","mil/mm3","4.5 - 6.0"],["Hemoglobin","g/dl","14 - 18"],
+     ["Hematocrit","%","40 - 50"],["MCV","FL","82 - 98"],["MCH","pg","27 - 31"],["MCHC","g/dl","32 - 36"],
+     ["RDW-CV","%","11 - 16"],["Platelets","/mm3","140,000 - 450,000"]]},
+    {h:"العد التفريقي لكريات الدم البيضاء|Differential Count",rows:[
+     ["Neutrophils","%","40 - 75"],["Lymphocytes","%","15 - 45"],["Monocytes","%","2 - 12"],
+     ["Eosinophils","%","2 - 6"],["Basophils","%","0 - 1"],["Bands","%","0 - 3"]]}
+   ]},
+  general:{title:"نتائج التحاليل",test:"تحاليل عامة",notes:"",
+   sections:[{h:"",rows:[
+    ["الهيموجلوبين (Hb)","g/dL","ذكور 13–17 / إناث 12–15"],
+    ["كريات الدم البيضاء (WBC)","×10³/µL","4 - 11"],
+    ["الصفائح الدموية (Platelets)","×10³/µL","150 - 450"],
+    ["سرعة الترسيب (ESR)","mm/hr","0 - 20"],
+    ["فيلم الدم للملاريا (BF)","","سالب"],
+    ["فصيلة الدم","",""],
+    ["سكر الدم (Glucose)","mg/dL","صائم 70–100 / عشوائي أقل من 140"],
+    ["الكرياتينين (Creatinine)","mg/dL","0.6 - 1.3"],
+    ["اليوريا (Urea)","mg/dL","15 - 45"],
+    ["إنزيم الكبد (ALT)","U/L","حتى 40"],
+    ["التيفوئيد (Widal)","","أقل من 1/80"],
+    ["جرثومة المعدة (H. pylori)","","سالب"],
+    ["التهاب الكبد B (HBsAg)","","سالب"],
+    ["فحص البول العام","",""],
+    ["فحص البراز العام","",""]
+   ]}]},
+  blank:{title:"نتائج الفحص",test:"",notes:"",sections:[{h:"",rows:[]}]}
+ };
+ var st={items:[],tpl:"cbc"};
+ function itemsOf(key){
+  var out=[];
+  TPL[key].sections.forEach(function(s){
+   if(s.h)out.push({sec:true,h:s.h});
+   s.rows.forEach(function(r){out.push({n:r[0],u:r[1],r:r[2],v:""});});
+  });
+  return out;
+ }
+ function buildRows(){
+  var box=$("rf_rows");
+  box.innerHTML="";
+  st.items.forEach(function(it){
+   var d=document.createElement("div");
+   if(it.sec){
+    d.className="rfsec";
+    d.textContent=String(it.h).replace("|"," — ");
+   }else{
+    d.className="rfr";
+    var n=document.createElement("input");
+    n.placeholder="اسم الفحص";
+    n.value=it.n;
+    n.oninput=function(){it.n=n.value;};
+    var r2=document.createElement("div");
+    r2.className="rf2";
+    var v=document.createElement("input");
+    v.placeholder=it.u?("النتيجة ("+it.u+")"):"النتيجة";
+    v.value=it.v;
+    v.oninput=function(){it.v=v.value;};
+    var rg=document.createElement("input");
+    rg.placeholder="المدى المرجعي";
+    rg.value=it.r;
+    rg.oninput=function(){it.r=rg.value;};
+    var x=document.createElement("button");
+    x.type="button";
+    x.textContent="🗑";
+    x.onclick=function(){st.items.splice(st.items.indexOf(it),1);buildRows();};
+    r2.appendChild(v);
+    r2.appendChild(rg);
+    r2.appendChild(x);
+    d.appendChild(n);
+    d.appendChild(r2);
+   }
+   box.appendChild(d);
+  });
+ }
+ function applyTpl(key){
+  st.tpl=key;
+  st.items=itemsOf(key);
+  $("rf_test").value=TPL[key].test;
+  $("rf_title").value=TPL[key].title;
+  $("rf_notes").value=TPL[key].notes||"";
+  buildRows();
+ }
+ function fld(label,id,type){
+  return '<div><label>'+label+'</label><input id="'+id+'" type="'+(type||"text")+'"></div>';
+ }
+ function openForm(){
+  css();
+  var old=$("rfOverlay");
+  if(old)old.remove();
+  var p=window.fbCurrentProfile||{};
+  var o=document.createElement("div");
+  o.id="rfOverlay";
+  o.innerHTML='<div class="rfbox">'
+   +'<div class="rfh"><b>🧾 إصدار ورقة نتيجة</b><button type="button" id="rfX">✕</button></div>'
+   +'<label>القالب</label><select id="rf_tpl"><option value="cbc">صورة الدم الكاملة CBC</option><option value="general">تحاليل عامة (الفحوصات الشائعة)</option><option value="blank">ورقة فارغة</option></select>'
+   +'<div class="rfg">'
+   +fld("رقم العينة","rf_sample")
+   +fld("اسم المريض","rf_patient")
+   +fld("تاريخ الفحص","rf_date","date")
+   +'<div><label>الجنس</label><select id="rf_sex"><option value="">—</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option></select></div>'
+   +fld("العمر","rf_age")
+   +fld("نوع الفحص","rf_test")
+   +fld("اسم المعمل","rf_lab")
+   +fld("رقم التواصل","rf_phone")
+   +'</div>'
+   +fld("عنوان القسم في الورقة","rf_title")
+   +'<div id="rf_rows"></div>'
+   +'<button type="button" class="btn full" id="rf_add" style="margin-top:8px">➕ إضافة سطر</button>'
+   +'<label>ملاحظات وتفسير النتائج</label><textarea id="rf_notes" rows="3"></textarea>'
+   +'<button type="button" class="btn full" id="rf_go" style="margin-top:10px">👁️ معاينة وإصدار الورقة</button>'
+   +'</div>';
+  document.body.appendChild(o);
+  $("rf_lab").value=p.name||"معمل الشفاء الطبي";
+  $("rf_phone").value=p.phone||"";
+  $("rf_date").value=new Date().toISOString().slice(0,10);
+  $("rfX").onclick=function(){o.remove();};
+  $("rf_tpl").onchange=function(){applyTpl($("rf_tpl").value);};
+  $("rf_add").onclick=function(){st.items.push({n:"",u:"",r:"",v:""});buildRows();};
+  $("rf_go").onclick=async function(){
+   var d={
+    lab:$("rf_lab").value.trim()||"معمل الشفاء الطبي",
+    phone:$("rf_phone").value.trim(),
+    sample:$("rf_sample").value.trim(),
+    test:$("rf_test").value.trim(),
+    patient:$("rf_patient").value.trim(),
+    date:($("rf_date").value||"").replace(/-/g,"/"),
+    sex:$("rf_sex").value,
+    age:$("rf_age").value.trim(),
+    title:$("rf_title").value.trim()||"نتائج الفحص",
+    notes:$("rf_notes").value.trim(),
+    items:st.items
+   };
+   try{
+    var logo=await loadLogo();
+    showPaper([drawResult(d,logo)],"alshifa-result");
+   }catch(e){alert("تعذر إنشاء الورقة: "+(e.message||e.code));}
+  };
+  applyTpl("cbc");
+ }
+ /* ===== جدول حجوزات الطبيب ===== */
+ async function openSchedule(){
+  var u=window.fbCurrentUser,p=window.fbCurrentProfile||{};
+  if(!u||p.role!=="doctor")return;
+  try{
+   var upcoming=confirm("موافق = الحجوزات القادمة فقط\nإلغاء = كل الحجوزات");
+   var rows=await window.fbQueryWhere("doctorAppointments","doctorId","==",u.uid);
+   var today=new Date().toISOString().slice(0,10);
+   if(upcoming)rows=rows.filter(function(x){return String(x.date||"")>=today&&x.status!=="cancelled"&&x.status!=="rejected";});
+   rows.sort(function(a,b){
+    var k=String(a.date||"").localeCompare(String(b.date||""));
+    return k!==0?k:tmin(a.time)-tmin(b.time);
+   });
+   var spec="";
+   rows.forEach(function(x){if(!spec&&x.specialty)spec=x.specialty;});
+   var meta={
+    doctor:p.name||"الطبيب",spec:spec,phone:p.phone||"",total:rows.length,
+    confirmed:rows.filter(function(x){return x.status==="confirmed";}).length,
+    pending:rows.filter(function(x){return x.status==="pending";}).length,
+    period:upcoming?"الحجوزات القادمة":"كل الحجوزات",
+    today:new Date().toLocaleDateString("ar-EG",{year:"numeric",month:"long",day:"numeric"})
+   };
+   var logo=await loadLogo();
+   var pages=Math.max(1,Math.ceil(rows.length/16)),cvs=[];
+   for(var i=0;i<pages;i++)cvs.push(drawSchedule(rows.slice(i*16,i*16+16),meta,logo,i*16,i+1,pages));
+   showPaper(cvs,"alshifa-bookings");
+  }catch(e){alert("تعذر إنشاء الجدول: "+(e.code||e.message));}
+ }
+ function addBtn(list,id,label,fn){
+  var w=document.createElement("div");
+  w.id=id;
+  w.style.cssText="margin:8px 0 12px";
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="btn full";
+  b.textContent=label;
+  b.onclick=fn;
+  w.appendChild(b);
+  list.parentNode.insertBefore(w,list);
+ }
+ setInterval(function(){
+  var p=window.fbCurrentProfile;
+  if(!p||!window.fbCurrentUser)return;
+  if(p.role==="lab"){
+   var ob=$("blankPaperWrap");
+   if(ob)ob.style.display="none";
+   var l1=$("labOrdersList");
+   if(l1&&!$("rfBtnWrap"))addBtn(l1,"rfBtnWrap","🧾 إصدار ورقة نتيجة (CBC وغيره)",openForm);
+  }
+  if(p.role==="doctor"){
+   var l2=$("doctorAppointmentsList");
+   if(l2&&!$("schedBtnWrap"))addBtn(l2,"schedBtnWrap","📋 جدول الحجوزات (ورقة مروّسة)",openSchedule);
+  }
+ },1500);
+})();
+</script>
+<script>
+(function(){
+ var shown=false;
+ function licensePrompt(){
+  var bs=document.querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){
+   if((bs[i].textContent||"").indexOf("لاحق")<0)continue;
+   var r=bs[i],root=null;
+   for(var j=0;j<10&&r.parentNode;j++){
+    r=r.parentNode;
+    if(r===document.body)break;
+    if(window.getComputedStyle(r).position==="fixed"){root=r;break;}
+   }
+   var t=root?(root.textContent||""):"";
+   if(root&&t.indexOf("رخصة")>-1&&t.indexOf("لتفعيل")>-1)return root;
+  }
+  return null;
+ }
+ setInterval(async function(){
+  var p=window.fbCurrentProfile,u=window.fbCurrentUser;
+  if(shown||!p||!u||p.role!=="pharmacy"||!licensePrompt())return;
+  shown=true;
+  var msg="تشخيص مؤقت لحساب الصيدلية:\nuid: "+String(u.uid).slice(0,10)+"...";
+  try{
+   var d=await window.fbGetDoc("pharmacies",u.uid);
+   msg+="\nدليل الصيدليات: "+(d?("موجود | verified="+d.verified+" | status="+(d.verificationStatus||"-")):"لا توجد وثيقة بهذا الرقم");
+  }catch(e){msg+="\nدليل الصيدليات: خطأ "+(e.code||e.message);}
+  try{
+   var us=await window.fbGetDoc("users",u.uid);
+   msg+="\nحسابك: role="+(us?us.role:"-");
+  }catch(e){}
+  alert(msg);
+ },1500);
+})();
+</script>
