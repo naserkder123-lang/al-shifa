@@ -3526,34 +3526,36 @@ window.submitActivation = async function(elId, role, months, price){
 </script>
 <script>
 function getMyDoctorEntry(){
-  if(!window.fbCurrentUser) return null;
-  const list=(typeof directoryDoctors!=="undefined")?directoryDoctors:[];
-  return list.find(d=>d.uid===window.fbCurrentUser.uid) || null;
+if(!window.fbCurrentUser) return null;
+const list=(typeof directoryDoctors!=="undefined" && Array.isArray(directoryDoctors)) ? directoryDoctors : [];
+return list.find(d=>d.uid===window.fbCurrentUser.uid) || null;
 }
-
+function getDoctorStatus(entry){
+if(!entry) return "not_submitted";
+if(entry.verified===true || entry.verificationStatus==="verified") return "verified";
+if(entry.verificationStatus==="pending") return "pending";
+if(entry.verificationStatus==="rejected") return "rejected";
+return "not_submitted";
+}
 function renderDoctorVerificationBox(){
   const box=document.getElementById("doctorVerificationBox");
   if(!box) return;
   const entry=getMyDoctorEntry();
-  const status=(entry && entry.verificationStatus) || "not_submitted";
+  const status=getDoctorStatus(entry);
   if(status==="verified"){
-    box.innerHTML='<div class="notice" style="color:#2e7d32">✅ رخصتك موثّقة</div>';
+    box.innerHTML='<div class="notice">✅ تم توثيق حسابك</div>';
     return;
   }
   if(status==="pending"){
-    const waText=encodeURIComponent("طلب توثيق رخصة طبيب جديد: "+(entry.name||"")+" - "+(entry.phone||""));
-    box.innerHTML=`<div class="notice">⏳ طلب التوثيق قيد المراجعة من الإدارة</div>
-      <a class="btn full" style="margin-top:8px" href="https://wa.me/249969695656?text=${waText}" target="_blank">📲 إرسال إشعار للإدارة عبر واتساب</a>`;
+    box.innerHTML='<div class="notice">⏳ طلبك قيد المراجعة من الإدارة</div>';
     return;
   }
-  const rejected=status==="rejected";
-  const msg=rejected?"❌ تم رفض الطلب. حاول رفع صورة أوضح":"🪪 حسابك غير موثّق. ارفع صورة رخصة مزاولة المهنة عشان يظهر ملفك للمرضى";
-  const btnText=rejected?"إعادة إرسال صورة الرخصة":"إرسال صورة الرخصة";
+  const msg = status==="rejected" ? "❌ تم رفض الطلب. حاول رفع صورة أوضح." : "🔒 حسابك غير موثق. ارفع صورة رخصة مزاولة المهنة عشان يظهر ملفك للمرضى";
+  const btnText = status==="rejected" ? "إعادة إرسال صورة الرخصة" : "إرسال صورة الرخصة";
   box.innerHTML=`<div class="notice">${msg}</div>
-    <input type="file" id="doctorLicenseFile" accept="image/*" style="margin-top:8px">
-    <button class="btn full" style="margin-top:8px" onclick="submitDoctorVerification()">${btnText}</button>`;
+    <input type="file" id="doctorLicenseFile" accept="image/*" style="margin-top:8px;">
+    <button class="btn full" style="margin-top:8px;" onclick="submitDoctorVerification()">${btnText}</button>`;
 }
-
 async function submitDoctorVerification(){
   const fileInput=document.getElementById("doctorLicenseFile");
   const file=fileInput && fileInput.files && fileInput.files[0];
