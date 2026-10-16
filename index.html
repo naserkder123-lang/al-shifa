@@ -9977,6 +9977,35 @@ setInterval(tidy,1000);
   };
   applyTpl("cbc");
  }
+ /* ===== معدلات حسب الجنس ===== */
+var SEX_REF={
+  "Hemoglobin":{"ذكر":"14 - 18","أنثى":"12 - 16"},
+  "RBC Count":{"ذكر":"4.5 - 6.0","أنثى":"4.1 - 5.1"}
+};
+function applySexRanges(){
+  var sx=$("rf_sex");
+  var sex=sx?sx.value:"";
+  if(!st||!st.items) return;
+  st.items.forEach(function(it){
+    var m=SEX_REF[it.n];
+    if(m && m[sex]) it.r=m[sex];
+  });
+  buildRows();
+}
+var __origOpenForm=openForm;
+openForm=function(){
+  __origOpenForm();
+  var sx=$("rf_sex");
+  if(sx) sx.onchange=applySexRanges;
+  var goBtn=$("rf_go");
+  var goOrig=goBtn.onclick;
+  goBtn.onclick=async function(e){
+    var s=$("rf_sex");
+    if(!s || !s.value){ alert("اختر جنس المريض أولاً"); return; }
+    applySexRanges();
+    return goOrig.call(this,e);
+  };
+};
  /* ===== جدول حجوزات الطبيب ===== */
  async function openSchedule(){
   var u=window.fbCurrentUser,p=window.fbCurrentProfile||{};
