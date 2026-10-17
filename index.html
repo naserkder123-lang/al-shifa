@@ -11544,24 +11544,3 @@ window.addEventListener('load', function () {
     });
   }, 1500);
 });
-</script>
-    }
-
-    window.openLogin = showChooser;
-
-    document.addEventListener('change', function (e) {
-      var s = e.target;
-      if (!s || s.tagName !== 'SELECT') return;
-      var parent = s.parentNode;
-      var old = parent.querySelector('.roleLicenseNote');
-      if (old) old.remove();
-      if (['doctor', 'pharmacy', 'lab'].indexOf(s.value) === -1) return;
-      var note = document.createElement('div');
-      note.className = 'roleLicenseNote';
-      note.style.cssText = 'margin:8px 0;padding:12px;border-radius:12px;background:#fff3cd;color:#664d03;font-size:14px;line-height:1.7;direction:rtl;text-align:right;';
-      note.textContent = '⚠️ تنبيه: بعد إنشاء الحساب ستُطلب منك صورة الرخصة المهنية لتوثيق حسابك، ولن يظهر حسابك للمرضى قبل التحقق منها.';
-      parent.insertBefore(note, s.nextSibling);
-    });
-  }, 1500);
-});
-</script>
