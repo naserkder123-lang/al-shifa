@@ -11430,4 +11430,13 @@ openForm=function(){
  setTimeout(refresh,3500);
  setInterval(refresh,60000);
 })();
+ <script>
+window.addEventListener('load', function () {
+  if (location.search.indexOf('signup') !== -1) {
+    setTimeout(function () {
+      var btn = document.querySelector('[onclick*="openSignup"], [onclick*="Register"], [onclick*="signup"]');
+      if (btn) btn.click();
+    }, 800);
+  }
+});
 </script>
