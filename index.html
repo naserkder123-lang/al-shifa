@@ -11461,33 +11461,45 @@ window.addEventListener('load', function () {
 
     var btnStyle = 'display:block;width:100%;padding:14px;margin:10px 0;border:0;border-radius:14px;font-size:16px;color:#fff;background:linear-gradient(135deg,#0b6b57,#1f8a6e);font-family:inherit;cursor:pointer;';
 
-    function findByText(text) {
+    function isVisible(el) {
+      return !!(el && el.offsetParent !== null);
+    }
+
+    function findExact(text) {
+      var els = document.querySelectorAll('label, button, a, span, div, p');
+      for (var i = 0; i < els.length; i++) {
+        if ((els[i].textContent || '').trim() === text && isVisible(els[i])) return els[i];
+      }
+      return null;
+    }
+
+    function findContains(text) {
       var els = document.querySelectorAll('button, a, span, div, p');
       var found = null;
       for (var i = 0; i < els.length; i++) {
         var t = (els[i].textContent || '').trim();
-        if (t.indexOf(text) !== -1 && t.length < text.length + 10) found = els[i];
+        if (t.indexOf(text) !== -1 && t.length < text.length + 15 && isVisible(els[i])) found = els[i];
       }
       return found;
     }
 
     function isSignupMode() {
-      var inp = document.querySelector('input[placeholder="اكتب اسمك"]');
-      return !!(inp && inp.offsetParent !== null);
+      return !!findExact('الاسم الكامل');
     }
 
     function goTo(wantSignup) {
       realOpen();
       setTimeout(function () {
-        if (isSignupMode() === wantSignup) return;
+        var signup = isSignupMode();
+        if (signup === wantSignup) return;
         if (wantSignup) {
-          var tab = findByText('إنشاء حساب جديد');
-          if (tab) tab.click();
+          var sw = findContains('إنشاء حساب');
+          if (sw) sw.click();
         } else {
-          var link = findByText('لديك حساب بالفعل');
-          if (link) link.click();
+          var lg = findContains('لديك حساب بالفعل');
+          if (lg) lg.click();
         }
-      }, 600);
+      }, 900);
     }
 
     function showChooser() {
@@ -11513,6 +11525,26 @@ window.addEventListener('load', function () {
         box.remove();
         goTo(true);
       };
+    }
+
+    window.openLogin = showChooser;
+
+    document.addEventListener('change', function (e) {
+      var s = e.target;
+      if (!s || s.tagName !== 'SELECT') return;
+      var parent = s.parentNode;
+      var old = parent.querySelector('.roleLicenseNote');
+      if (old) old.remove();
+      if (['doctor', 'pharmacy', 'lab'].indexOf(s.value) === -1) return;
+      var note = document.createElement('div');
+      note.className = 'roleLicenseNote';
+      note.style.cssText = 'margin:8px 0;padding:12px;border-radius:12px;background:#fff3cd;color:#664d03;font-size:14px;line-height:1.7;direction:rtl;text-align:right;';
+      note.textContent = '⚠️ تنبيه: بعد إنشاء الحساب ستُطلب منك صورة الرخصة المهنية لتوثيق حسابك، ولن يظهر حسابك للمرضى قبل التحقق منها.';
+      parent.insertBefore(note, s.nextSibling);
+    });
+  }, 1500);
+});
+</script>
     }
 
     window.openLogin = showChooser;
