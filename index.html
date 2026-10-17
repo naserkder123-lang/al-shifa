@@ -11453,3 +11453,63 @@ window.addEventListener('load', function () {
   }, 500);
 });
 </script>
+<script>
+(function () {
+  var origOpen = window.openLogin;
+  if (typeof origOpen !== 'function') return;
+
+  function clickLast(text) {
+    var els = document.querySelectorAll('button, a, div, span');
+    var found = null;
+    for (var i = 0; i < els.length; i++) {
+      var t = (els[i].textContent || '').trim();
+      if (t.indexOf(text) !== -1 && t.length < 60) found = els[i];
+    }
+    if (found) found.click();
+  }
+
+  var btnStyle = 'display:block;width:100%;padding:14px;margin:10px 0;border:0;border-radius:14px;font-size:16px;color:#fff;background:linear-gradient(135deg,#0b6b57,#1f8a6e);font-family:inherit;cursor:pointer;';
+
+  function showChooser() {
+    if (document.getElementById('authChooser')) return;
+    var box = document.createElement('div');
+    box.id = 'authChooser';
+    box.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+    box.innerHTML =
+      '<div style="background:#fff;width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px 18px 30px;direction:rtl;text-align:center;font-family:inherit;">' +
+      '<h3 style="margin:0 0 14px;color:#0b6b57;">مرحباً بك في الشفاء</h3>' +
+      '<button id="chooseLogin" style="' + btnStyle + '">🔐 لدي حساب - تسجيل الدخول</button>' +
+      '<button id="chooseSignup" style="' + btnStyle + '">✨ إنشاء حساب جديد</button>' +
+      '<button id="chooseClose" style="display:block;width:100%;padding:10px;margin-top:6px;border:0;background:none;color:#666;font-family:inherit;font-size:14px;cursor:pointer;">إغلاق</button>' +
+      '</div>';
+    document.body.appendChild(box);
+
+    document.getElementById('chooseClose').onclick = function () { box.remove(); };
+    document.getElementById('chooseLogin').onclick = function () {
+      box.remove();
+      origOpen();
+      setTimeout(function () { clickLast('لديك حساب'); }, 600);
+    };
+    document.getElementById('chooseSignup').onclick = function () {
+      box.remove();
+      origOpen();
+    };
+  }
+
+  window.openLogin = showChooser;
+
+  document.addEventListener('change', function (e) {
+    var s = e.target;
+    if (!s || s.tagName !== 'SELECT') return;
+    var parent = s.parentNode;
+    var old = parent.querySelector('.roleLicenseNote');
+    if (old) old.remove();
+    if (['doctor', 'pharmacy', 'lab'].indexOf(s.value) === -1) return;
+    var note = document.createElement('div');
+    note.className = 'roleLicenseNote';
+    note.style.cssText = 'margin:8px 0;padding:12px;border-radius:12px;background:#fff3cd;color:#664d03;font-size:14px;line-height:1.7;direction:rtl;text-align:right;';
+    note.textContent = '⚠️ تنبيه: بعد إنشاء الحساب ستُطلب منك صورة الرخصة المهنية لتوثيق حسابك، ولن يظهر حسابك للمرضى قبل التحقق منها.';
+    s.parentNode.insertBefore(note, s.nextSibling);
+  });
+})();
+</script>
