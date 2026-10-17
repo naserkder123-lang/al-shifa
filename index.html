@@ -11431,3 +11431,25 @@ openForm=function(){
  setInterval(refresh,60000);
 })();
  </script>
+<script>
+window.addEventListener('load', function () {
+  if (location.search.indexOf('signup') === -1) return;
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries++;
+    var els = document.querySelectorAll('button, a, div, span');
+    var found = null;
+    for (var i = 0; i < els.length; i++) {
+      var t = (els[i].textContent || '').trim();
+      if (t.indexOf('تسجيل الدخول') !== -1 && t.length < 40) {
+        found = els[i];
+      }
+    }
+    if (found) {
+      found.click();
+      clearInterval(timer);
+    }
+    if (tries > 20) clearInterval(timer);
+  }, 500);
+});
+</script>
