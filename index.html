@@ -2011,20 +2011,27 @@ function toggleLoginMode(){
   document.getElementById("loginModal").classList.add("show");
 }
  document.addEventListener("click", function(e){
-  var btn = e.target.closest ? e.target.closest("button") : null;
+  var els = document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : [e.target];
+  var btn = null;
+  for(var i=0;i<els.length;i++){
+    var b = els[i].closest ? els[i].closest("button") : null;
+    if(b){ btn = b; break; }
+  }
   if(!btn) return;
   var t = (btn.textContent || "").trim();
-  if(t.indexOf("لدي حساب") > -1){
-    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    openLogin();
-    return;
+  var isLogin = t.indexOf("لدي حساب") > -1;
+  var isSignup = t.indexOf("إنشاء حساب") > -1;
+  if(!isLogin && !isSignup) return;
+  e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+  for(var j=0;j<els.length;j++){
+    var el = els[j];
+    if(el.id === "loginModal" || el.tagName === "BUTTON") continue;
+    if(el.classList && (el.classList.contains("overlay") || el.classList.contains("modal") || el.classList.contains("sheet") || el.classList.contains("welcome"))){
+      el.style.display = "none";
+    }
   }
-  if(t.indexOf("إنشاء حساب") > -1){
-    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    openLogin();
-    toggleLoginMode();
-    return;
-  }
+  openLogin();
+  if(isSignup) toggleLoginMode();
 }, true);
 /* حقول إضافية تظهر عند إنشاء حساب حسب الدور المختار — لا تمس أي نموذج تسجيل قديم آخر */
 function renderLoginRoleExtraFields(){
