@@ -2010,6 +2010,22 @@ function toggleLoginMode(){
   document.getElementById("loginToggleBtn").textContent="ليس لديك حساب؟ أنشئ حساباً جديداً";
   document.getElementById("loginModal").classList.add("show");
 }
+ document.addEventListener("click", function(e){
+  var btn = e.target.closest ? e.target.closest("button") : null;
+  if(!btn) return;
+  var t = (btn.textContent || "").trim();
+  if(t.indexOf("لدي حساب") > -1){
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    openLogin();
+    return;
+  }
+  if(t.indexOf("إنشاء حساب") > -1){
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    openLogin();
+    toggleLoginMode();
+    return;
+  }
+}, true);
 /* حقول إضافية تظهر عند إنشاء حساب حسب الدور المختار — لا تمس أي نموذج تسجيل قديم آخر */
 function renderLoginRoleExtraFields(){
   const role=document.getElementById("loginRoleSelect").value;
