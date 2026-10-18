@@ -1999,6 +1999,17 @@ function toggleLoginMode(){
   document.getElementById("loginToggleBtn").textContent = isSignup ? "لديك حساب بالفعل؟ سجّل الدخول" : "ليس لديك حساب؟ أنشئ حسابًا جديدًا";
   if(isSignup) renderLoginRoleExtraFields(); else document.getElementById("loginRoleExtraFields").innerHTML="";
 }
+ function openLogin(){
+  loginMode="signin";
+  document.getElementById("loginStep1").style.display="";
+  document.getElementById("loginNameField").style.display="none";
+  document.getElementById("loginRoleField").style.display="none";
+  document.getElementById("loginRoleExtraFields").innerHTML="";
+  document.getElementById("loginTitle").textContent="تسجيل الدخول برقم الهاتف";
+  document.getElementById("loginSubmitBtn").textContent="✅ تسجيل الدخول";
+  document.getElementById("loginToggleBtn").textContent="ليس لديك حساب؟ أنشئ حساباً جديداً";
+  document.getElementById("loginModal").classList.add("show");
+}
 /* حقول إضافية تظهر عند إنشاء حساب حسب الدور المختار — لا تمس أي نموذج تسجيل قديم آخر */
 function renderLoginRoleExtraFields(){
   const role=document.getElementById("loginRoleSelect").value;
