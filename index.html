@@ -2000,14 +2000,14 @@ function toggleLoginMode(){
   if(isSignup) renderLoginRoleExtraFields(); else document.getElementById("loginRoleExtraFields").innerHTML="";
 }
  function openLogin(){
-  loginMode="signin";
+  loginMode="signup";
   document.getElementById("loginStep1").style.display="";
-  document.getElementById("loginNameField").style.display="none";
-  document.getElementById("loginRoleField").style.display="none";
-  document.getElementById("loginRoleExtraFields").innerHTML="";
-  document.getElementById("loginTitle").textContent="تسجيل الدخول برقم الهاتف";
-  document.getElementById("loginSubmitBtn").textContent="✅ تسجيل الدخول";
-  document.getElementById("loginToggleBtn").textContent="ليس لديك حساب؟ أنشئ حساباً جديداً";
+  document.getElementById("loginNameField").style.display="";
+  document.getElementById("loginRoleField").style.display="";
+  document.getElementById("loginTitle").textContent="إنشاء حساب جديد برقم الهاتف";
+  document.getElementById("loginSubmitBtn").textContent="✨ إنشاء حساب جديد";
+  document.getElementById("loginToggleBtn").textContent="سجل دخولك لو عندك حساب";
+  renderLoginRoleExtraFields();
   document.getElementById("loginModal").classList.add("show");
 }
 function renderLoginRoleExtraFields(){
