@@ -11511,9 +11511,6 @@ window.addEventListener('load', function () {
         goTo(true);
       };
     }
-
-    window.openLogin = showChooser;
-
     document.addEventListener('change', function (e) {
       var s = e.target;
       if (!s || s.tagName !== 'SELECT') return;
@@ -11603,8 +11600,6 @@ window.addEventListener('load', function () {
         goSignup();
       };
     }
-
-    window.openLogin = showChooser;
 
     document.addEventListener('change', function (e) {
       var s = e.target;
