@@ -10319,6 +10319,14 @@ c.fillRect(25,top,750,hh);
 c.restore();
 c.fillStyle="#064a3c";
 c.fillRect(25,top+hh,750,8);
+c.shadowColor="rgba(0,0,0,0.35)";
+c.shadowBlur=18;
+c.shadowOffsetY=8;
+c.fillStyle=tg;
+c.fillRect(25,top,750,hh);
+c.restore();
+c.fillStyle="#064a3c";
+c.fillRect(25,top+hh,750,8);
   [["اسم الفحص","Test Name"],["النتيجة","Result"],["المدى المرجعي","Reference Range"]].forEach(function(h,i){
    var mx=(ed[i]+ed[i+1])/2;
    text(c,h[0],mx,top+16,{align:"center",px:15,bold:true,color:"#ffffff"});
