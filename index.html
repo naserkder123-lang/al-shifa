@@ -9256,7 +9256,9 @@ c.fillStyle=tg;
 c.fillRect(25,top,750,hh);
 c.restore();
 c.fillStyle="#064a3c";
-c.fillRect(25,top+hh,750,8);
+c.fillRect(25,top+hh-8,750,8);
+c.fillStyle="rgba(255,255,255,0.35)";
+c.fillRect(25,top,750,4);
   var heads=[["اسم الفحص","Test Name"],["النتيجة","Result"],["المدى المرجعي","Reference Range"]];
   heads.forEach(function(h,i){
    var mx=(edges[i]+edges[i+1])/2;
