@@ -10184,7 +10184,7 @@ openForm=function(){
   return out;
  }
  function frame(c,W,cfg,logo){
-  c.fillStyle="red"; c.fillRect(0,0,W,40);
+  var H=cfg.H;
   var bg=c.createLinearGradient(0,0,0,H);
   bg.addColorStop(0,"#064a3c");
 bg.addColorStop(0.55,"#0b6b57");
